@@ -23,6 +23,19 @@ Requirements:
 
 * "winpty-agent.exe" is sourced from [winpty](https://github.com/rprichard/winpty) because we target [pywinpty](https://github.com/spyder-ide/pywinpty) version 0.5.7 for back compatibility to Windows 7 SP1. You may build and run Concerto using the latest version of pywinpty and exclude the .exe however the resulting build will only function on Windows 10.
 
+## Audio/Visual sources
+Art & sound are provided by community members for exclusive use with Concerto.
+### Visuals
+* [Arcuied by Bee Chan](https://twitter.com/Bee_Sempai/status/1345577709104205826?s=20)
+* [Sion by aBitofbaileys](https://www.pixiv.net/en/artworks/90676177)
+* [Riesbyfe by Onemi](https://www.pixiv.net/en/artworks/90219044)
+* [Kohaku by Kohakudoori](https://www.pixiv.net/en/artworks/83141238)
+* UI direction in cooperation with [Okk](https://github.com/okkdev) and [M-AS](https://twitter.com/matthewrobo)
+* Backgrounds sourced from Unsplash
+### Audio
+* Main BGM (menu_bgm) by [Tempxa](https://twitter.com/TempxaRK9)
+* Resources BGM (resource_bgm) by [softdrinks](https://twitter.com/soffdrinks)
+
 ## Development roadmap
 This is a list of priorities attached to suspected version labels.
 
