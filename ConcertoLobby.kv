@@ -1,0 +1,480 @@
+#:import webbrowser webbrowser
+#:import threading threading
+
+<MenuBtn@Button>
+    text_size: self.size
+    halign: 'left'
+    valign: 'middle'
+    size_hint_y: None
+    height: 36
+    padding_x: 50
+    background_normal: 'res/menubtn.png'
+    outline_width: 2
+    on_press: self.background_color = (255, 0, 0, 1)
+    on_release: self.background_color = (1, 1 ,1 ,1)
+
+<DummyBtn@Button>
+    text_size: self.size
+    halign: 'center'
+    valign: 'middle'
+    size_hint_y: None
+    height: 36
+    padding_x: 50
+    outline_width: 2
+    background_normal: 'res/menubtn.png'
+
+<MainScreen>:
+    name: 'Main'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        Image:
+            source: 'res/stage.png'
+        Image:
+            source: 'res/gradient.png'
+        Image:
+            source: 'res/mainmenu.png'
+        BoxLayout:
+            orientation: 'vertical'
+            GridLayout:
+                size_hint: (0.6183, 1)
+                cols: 1
+                padding: (0,50)
+                spacing: [0,10]
+                MenuBtn:
+                    text: '1. OFFLINE'
+                    on_release: app.sm.current = 'Offline'
+                MenuBtn:
+                    text: '2. ONLINE'
+                    on_release: app.sm.current = 'Online'
+                MenuBtn:
+                    text: '3. RESOURCES'
+                    on_release: app.sm.current = 'Resources'
+                MenuBtn:
+                    text: '4. OPTIONS (SOON)'
+        Image:
+            source: 'res/arc.png'
+        BoxLayout:
+            size_hint: (1, 0.1)
+            GridLayout:
+                cols: 2
+                BoxLayout:
+                    size_hint_x: 0.6183
+                    Label:
+                        text: '[ref=x]Website[/ref]'
+                        outline_width: 2
+                        markup: True
+                        on_ref_press: webbrowser.open('https://concerto.shib.live/')
+                    Label:
+                        text: '[ref=x]Toggle BGM (By Tempxa)[/ref]'
+                        outline_width: 2
+                        markup: True
+                        on_ref_press: 
+                            app.sound.toggle_cut_bgm()
+                Label:
+                    size_hint_x: 0.3817
+                    text: '[ref=x]By Bee Chan[/ref]'
+                    outline_width: 2
+                    markup: True
+                    on_ref_press: webbrowser.open('https://twitter.com/Bee_Sempai')
+
+<LobbyScreen>:
+    name: 'Lobby'
+    player_list: player_list
+    lobby_code: lobby_code
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'top'
+        Image:
+            source: 'res/bg.png'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint: (1, 0.1)
+                MenuBtn:
+                    text: 'LEAVE'
+                    on_release: 
+                        app.sm.current = 'LobbyList'
+                        root.exit()
+                        app.LobbyList.refresh()
+                Label:
+                    id: lobby_code
+                    text: 'Lobby ID: 1234'
+                    outline_width: 2
+            ScrollView:
+                size_hint: (1,0.9)
+                do_scroll_x: False
+                do_scroll_y: True
+                GridLayout:
+                    id: player_list
+                    cols: 1
+                    height: self.minimum_height
+                    size_hint_x: 1
+                    size_hint_y: None
+                    spacing: [0,5]
+                        
+<LobbyList>:
+    name: 'LobbyList'
+    lobby_code: lobby_code
+    lobby_type: lobby_type
+    lobby_view: lobby_view
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'top'
+        Image:
+            source: 'res/bg.png'
+        Image:
+            source: 'res/lowergradient.png'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.1
+                text: 'Public Lobbies'
+                outline_width: 1
+            RecycleView:
+                size_hint: (1,0.7)
+                do_scroll_x: False
+                do_scroll_y: True
+                GridLayout:
+                    size_hint: (1,0.7)
+                    id: lobby_view
+                    cols: 1
+                    height: self.minimum_height
+                    size_hint_y: None
+                    spacing: [0,5]
+            GridLayout:
+                cols: 2
+                size_hint_y: 0.2
+                GridLayout:
+                    rows: 2
+                    padding: [20,5]
+                    spacing: [0,5]
+                    GridLayout:
+                        size_hint_y: None
+                        height: 32
+                        cols: 3
+                        Label:
+                            text_size: self.size
+                            outline_width: 1
+                            text: 'Lobby ID: '
+                            halign: 'right'
+                            valign: 'middle'
+                        TextInput:
+                            id: lobby_code
+                            multiline: False
+                            foreground_color: (255, 255, 255, 1)
+                            background_color: (255, 0, 0, 0.2)
+                        Button:
+                            text: 'Join'
+                            outline_width: 1
+                            background_color: '#343B88'
+                            on_release: root.join()
+                    GridLayout:
+                        size_hint_y: None
+                        height: 32
+                        cols: 3
+                        Label:
+                            text_size: self.size
+                            text: 'Type: '
+                            halign: 'right'
+                            valign: 'middle'
+                            outline_width: 1
+                        Spinner:
+                            id: lobby_type
+                            text: 'Private'
+                            values: 'Private','Public'
+                            outline_width: 1
+                            background_color: '#343B88'
+                        Button:
+                            text: 'Create'
+                            background_color: '#343B88'
+                            outline_width: 1
+                            on_release: root.create()
+                GridLayout:
+                    rows: 2
+                    padding: [20,5]
+                    spacing: [0,5]
+                    Button:
+                        text: 'Refresh List'
+                        outline_width: 1
+                        background_color: '#343B88'
+                        size_hint_y: None
+                        height: 32
+                        halign: 'right'
+                        padding_x: 10
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                        on_release: 
+                            root.refresh()
+                    Button:
+                        text: 'Back'
+                        outline_width: 1
+                        background_color: '#343B88'
+                        size_hint_y: None
+                        height: 32
+                        halign: 'right'
+                        padding_x: 10
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                        on_release: 
+                            app.sm.current = 'Online'
+
+<OnlineScreen>:
+    name: 'Online'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        Image:
+            source: 'res/bg3.png'
+        Image:
+            source: 'res/gradient.png'
+        Image:
+            source: 'res/onlinemenu.png'
+        BoxLayout:
+            orientation: 'vertical'
+            GridLayout: 
+                size_hint_x: 0.6183
+                cols: 1
+                padding: (0,50)
+                spacing: [0,10]
+                MenuBtn:
+                    text: '1. DIRECT'
+                    on_release:
+                        root.direct()
+                MenuBtn:
+                    text: '2. LOBBY'
+                    on_release: 
+                        app.LobbyList.refresh()
+                MenuBtn:
+                    text: '3. COMING SOON'
+                MenuBtn:
+                    text: '0. BACK'
+                    on_release: app.sm.current = 'Main'
+        Image:
+            source: 'res/sion.png'
+        Label:
+            size_hint: (0.3817,0.1)
+            text: '[ref=x]By abitofBaileys[/ref]'
+            outline_width: 2
+            markup: True
+            on_ref_press: webbrowser.open('https://twitter.com/abitofBaileys')
+
+
+<ResourceScreen>:
+    name: 'Resources'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        Image:
+            source: 'res/bg4.png'
+        Image:
+            source: 'res/gradient.png'
+        Image:
+            source: 'res/resourcesmenu.png'
+        BoxLayout:
+            orientation: 'vertical'
+            GridLayout:
+                size_hint: (0.6183, 1)
+                cols: 1
+                padding: (0,50)
+                spacing: [0,10]
+                MenuBtn:
+                    text: '1. HOW TO PLAY (SOON)'
+                MenuBtn:
+                    text: '2. MIZUUMI WIKI'
+                    on_release:
+                        webbrowser.open('https://wiki.gbl.gg/w/Melty_Blood/MBAACC')
+                MenuBtn:
+                    text: '0. BACK'
+                    on_release: app.sm.current = 'Main'
+        Image:
+            source: 'res/kohaku.png'
+        Label:
+            size_hint: (0.3817,0.1)
+            text: '[ref=x]By kohakudoori[/ref]'
+            outline_width: 2
+            markup: True
+            on_ref_press: webbrowser.open('https://twitter.com/kohakudoori')
+      
+<OfflineScreen>:
+    name: 'Offline'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        Image:
+            source: 'res/bg2.png'
+        Image:
+            source: 'res/gradient.png'
+        Image:
+            source: 'res/offlinemenu.png'
+        BoxLayout:
+            orientation: 'vertical'
+            GridLayout:
+                size_hint: (0.6183, 1)
+                cols: 1
+                padding: (0,50)
+                spacing: [0,10]
+                MenuBtn:
+                    text: '1. LOCAL VS'
+                    on_release: 
+                        root.local()
+                MenuBtn:
+                    text: '2. TOURNAMENT VS'
+                    on_release: 
+                        root.tournament()
+                MenuBtn:
+                    text: '3. TRAINING MODE'
+                    on_release: 
+                        root.training()
+                MenuBtn:
+                    text: '4. REPLAY THEATER'
+                    on_release: 
+                        root.replays()
+                MenuBtn:
+                    text: '0. BACK'
+                    on_release: 
+                        app.sm.current = 'Main'
+        Image:
+            source: 'res/ries.png'
+        Label:
+            size_hint: (0.3817,0.1)
+            text: '[ref=x]Art by Onemi[/ref]'
+            outline_width: 2
+            markup: True
+            on_ref_press: webbrowser.open('https://twitter.com/OnemiESESEBEME')
+
+<DirectModal>:
+    size_hint: None,None
+    size: 400,180
+    title: 'Direct Match'
+    auto_dismiss: False
+    join_ip: join_ip
+    watch_ip: watch_ip
+    BoxLayout:
+        orientation: 'vertical'
+        TabbedPanel:
+            size_hint_y: 0.7
+            do_default_tab: False
+            TabbedPanelItem:
+                text: 'Host'
+                BoxLayout:
+                    Spinner:
+                        text: 'Versus'
+                        values: 'Versus','Training'
+                    Button:
+                        text: 'Start'
+                        on_release:
+                            root.screen.host()
+            TabbedPanelItem:
+                text: 'Join'           
+                BoxLayout:
+                    TextInput:
+                        multiline: False
+                        id: join_ip
+                    Button:
+                        text: 'Join'
+                        on_release:
+                            root.screen.join()
+            TabbedPanelItem:
+                text: 'Watch'
+                BoxLayout:
+                    TextInput:
+                        multiline: False
+                        id: watch_ip
+                    Button:
+                        text: 'Watch'
+                        on_release:
+                            root.screen.watch()
+        Button:
+            size_hint_y: 0.3
+            text: 'Close'
+            on_release: root.dismiss()
+
+<GameModal>:
+    modal_txt: modal_txt
+    close_btn: close_btn
+    size_hint: None,None
+    size: 400,150
+    auto_dismiss: False 
+    background_color: '#343B88'
+    BoxLayout:
+        padding: 20,20
+        orientation: 'vertical'
+        Label:
+            id: modal_txt
+            background_color: (0, 0, 0, 0)
+            outline_width: 1
+            text_size: self.size
+            halign: 'center'
+            valign: 'top'
+        Button:
+            id: close_btn
+            background_color: (255, 0, 0, 0.2)
+            outline_width: 1
+            on_press: 
+                self.background_color = (100, 0, 0, 0.9)
+            on_release: 
+                background_color: (255, 0, 0, 0.2)
+            size_hint: (0.5,0.45)
+            pos_hint: {'center_x': 0.5}
+
+<FrameModal>:
+    frame_txt: frame_txt
+    start_btn: start_btn
+    close_btn: close_btn
+    r_input: r_input
+    d_input: d_input
+    size_hint: None,None
+    size: 400,150
+    auto_dismiss: False
+    background_color: '#343B88'
+    GridLayout:
+        cols: 1
+        padding: 20,20
+        row_force_default: True
+        row_default_height: 32
+        spacing: [0,10]  
+        Label:
+            id: frame_txt
+            background_color: (0, 0, 0, 0)
+            outline_width: 1
+        BoxLayout:
+            Label:
+                text: 'Rollback:'
+                background_color: (0, 0, 0, 0)
+                outline_width: 1
+            TextInput
+                multiline: False
+                id: r_input
+                input_filter: 'int'
+                foreground_color: (255, 255, 255, 1)
+                background_color: (255, 0, 0, 0.2)
+            Label:
+                text: 'Delay:'
+                background_color: (0, 0, 0, 0)
+                outline_width: 1
+            TextInput
+                multiline: False
+                id: d_input
+                input_filter: 'int'
+                foreground_color: (255, 255, 255, 1)
+                background_color: (255, 0, 0, 0.2)
+        BoxLayout:
+            Button:
+                text: 'Start'
+                id: start_btn
+                background_color: (255, 0, 0, 0.2)
+                outline_width: 1
+                on_press: self.background_color = (100, 0, 0, 0.9)
+                on_release: 
+                    background_color: (255, 0, 0, 0.2)
+            Button:
+                text: 'Close'
+                id: close_btn
+                background_color: (255, 0, 0, 0.2)
+                outline_width: 1
+                on_press: self.background_color = (100, 0, 0, 0.9)
+                on_release: 
+                    background_color: (255, 0, 0, 0.2)
