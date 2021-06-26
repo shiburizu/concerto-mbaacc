@@ -51,7 +51,10 @@
                     text: '3. RESOURCES'
                     on_release: app.sm.current = 'Resources'
                 MenuBtn:
-                    text: '4. OPTIONS (SOON)'
+                    text: '4. OPTIONS'
+                    on_release: 
+                        app.OptionScreen.load()
+                        app.sm.current = 'Options'
         Image:
             source: 'res/arc.png'
         BoxLayout:
@@ -261,7 +264,6 @@
             markup: True
             on_ref_press: webbrowser.open('https://twitter.com/abitofBaileys')
 
-
 <ResourceScreen>:
     name: 'Resources'
     AnchorLayout:
@@ -281,7 +283,8 @@
                 padding: (0,50)
                 spacing: [0,10]
                 MenuBtn:
-                    text: '1. HOW TO PLAY (SOON)'
+                    text: '1. HOW TO PLAY'
+                    on_release: app.sm.current = 'HowTo'
                 MenuBtn:
                     text: '2. MIZUUMI WIKI'
                     on_release:
@@ -297,6 +300,42 @@
             outline_width: 2
             markup: True
             on_ref_press: webbrowser.open('https://twitter.com/kohakudoori')
+
+<HowtoScreen>
+    name: 'HowTo'
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'top'
+        Image:
+            source: 'res/bg.png'
+        BoxLayout:
+            orientation: 'vertical'
+            MenuBtn:
+                size_hint: (1, 0.1)
+                text: 'BACK'
+                size_hint_x: 0.5
+                on_release: 
+                    app.sm.current = 'Main'
+            TabbedPanel:
+                size_hint_y: 0.9
+                do_default_tab: False
+                background_color: (0,0,0,0)
+                TabbedPanelItem:
+                    text: 'Controls'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: doc1
+                        background_color: (0,0,0,0.5)
+                        source: 'res/controls.rst' 
+                TabbedPanelItem:
+                    text: 'Movement'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: doc2
+                        background_color: (0,0,0,0.5)
+                        source: 'res/movement.rst'
       
 <OfflineScreen>:
     name: 'Offline'
@@ -344,6 +383,112 @@
             outline_width: 2
             markup: True
             on_ref_press: webbrowser.open('https://twitter.com/OnemiESESEBEME')
+
+<OptionScreen>
+    name: 'Options'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        Image:
+            source: 'res/bg.png'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint: (1, 0.1)
+                MenuBtn:
+                    text: 'BACK'
+                    size_hint_x: 0.8
+                    on_release: 
+                        app.sm.current = 'Main'
+                Button:
+                    text: 'SAVE'
+                    size_hint_x: 0.2
+                    outline_width: 2
+                    background_color: '#343B88'
+                    on_release:
+                        root.save()
+            ScrollView:
+                size_hint: (1,0.9)
+                do_scroll_x: False
+                do_scroll_y: True
+                GridLayout:
+                    cols: 1
+                    height: self.minimum_height
+                    size_hint_y: None
+                    DummyBtn:
+                        text: 'CCCaster Options'
+                    OptionRow:
+                        Label:
+                            text: 'Player Name'
+                        TextInput:
+                            id: display_name
+                            multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Max allowed network delay'
+                        TextInput:
+                            id: max_delay
+                            multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Default rollback frames'
+                        TextInput:
+                            id: default_rollback
+                            multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Held start button in VS (seconds)'
+                        TextInput:
+                            id: held_start
+                            multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Play sound on connect'
+                        CheckBox:
+                            id: alert_connect
+                    OptionRow:
+                        Label:
+                            text: 'Show full character names'
+                        CheckBox:
+                            id: full_names
+                    OptionRow:
+                        Label:
+                            text: 'Save replays from rollback netplay'
+                        CheckBox:
+                            id: replay_rollback
+                    OptionRow:
+                        Label:
+                            text: 'Start game with high CPU priority'
+                        CheckBox:
+                            id: cpu_priority
+                    OptionRow:
+                        Label:
+                            text: 'Check for CCCaster updates'
+                        CheckBox:
+                            id: caster_updates
+                    OptionRow:
+                        Label:
+                            text: 'Versus mode win count (local/host only)'
+                        BoxLayout:
+                            Label:
+                                text: str(versus_count.value)
+                                size_hint_x: 0.2
+                            Slider:
+                                id: versus_count
+                                min: 1
+                                max: 5
+                                step: 1
+                                size_hint_x: 0.8
+
+<OptionRow@BoxLayout>
+    size_hint_x: 1
+    size_hint_y: None
+    height: 32
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'res/menubtn.png'
 
 <DirectModal>:
     size_hint: None,None
@@ -396,7 +541,7 @@
     modal_txt: modal_txt
     close_btn: close_btn
     size_hint: None,None
-    size: 400,150
+    size: 400,180
     auto_dismiss: False 
     background_color: '#343B88'
     BoxLayout:
@@ -417,7 +562,7 @@
                 self.background_color = (100, 0, 0, 0.9)
             on_release: 
                 background_color: (255, 0, 0, 0.2)
-            size_hint: (0.5,0.45)
+            size_hint: (0.5,0.4)
             pos_hint: {'center_x': 0.5}
 
 <FrameModal>:
