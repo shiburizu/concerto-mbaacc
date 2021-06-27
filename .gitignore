@@ -1,6 +1,7 @@
 # Offline testing/storage folders
 cccaster/
 media/
+cccaster.v3.0.exe
 
 # Concerto EXEs
 Concerto.exe
@@ -41,7 +42,7 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+.spec
 
 # Installer logs
 pip-log.txt

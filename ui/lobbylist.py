@@ -46,6 +46,10 @@ class LobbyList(Screen):
     def join(self, obj=None, code=None):
         if code is None and self.lobby_code.text == '':
             return None
+        try:
+            int(self.lobby_code.text)
+        except ValueError:
+            return None
         c = None
         if code != None:
             c = code
@@ -70,7 +74,7 @@ class LobbyList(Screen):
             self.lobby_code.text = ''
         else:
             popup = GameModal()
-            popup.modal_txt.text = 'An error has occurred.'
+            popup.modal_txt.text = a['msg']
             popup.close_btn.text = 'Dismiss'
             popup.close_btn.bind(on_release=partial(popup.dismiss))
             popup.open()

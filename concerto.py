@@ -1,6 +1,8 @@
 # System
 import requests
-import os
+import subprocess
+import time
+import threading
 # Utility scripts
 from config import *  # App config functions
 # Melty Blood CCCaster
@@ -41,7 +43,8 @@ class Concerto(App):
         return self.sm
 
     def checkPop(self, *args):
-        if self.game.aproc != None:
+        n = False #if N is true, netplay was killed. So don't trigger alternative offline check
+        if self.game.aproc != None: #netplay checker
             if self.game.aproc.isalive():
                 pass
             else:
@@ -66,14 +69,30 @@ class Concerto(App):
                 self.game.ds = -1
                 self.game.rf = -1
                 self.game.df = -1
-                os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
                 self.sound.cut_bgm()
-
+                n = True
+                print("found online mbaa")
+        if n is False and self.game.offline is True: #this check only works for offline functions where activePop is not present.
+            q = subprocess.check_output('tasklist',shell=True)
+            if b'MBAA.exe' in q:
+                pass #currently playing
+            else:
+                if b'cccaster' in q: #not playing, caster is open, kill
+                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                    self.game.aproc = None
+                    self.game.offline = False
+                if self.sound.bgm.state == 'stop':
+                    self.sound.cut_bgm() #toggle audio if needed
+        time.sleep(2)
+        self.checkPop()
+            
 
 def run():
     CApp = Concerto()
     try:
-        Clock.schedule_interval(lambda dt: CApp.checkPop(), 2)
+        c = threading.Thread(target=CApp.checkPop,daemon=True)
+        c.start()
         CApp.run()
     finally:
         if CApp.LobbyScreen.code != None:

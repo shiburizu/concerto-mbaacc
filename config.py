@@ -15,14 +15,6 @@ Config.set('graphics', 'width', '600')
 Config.set('graphics', 'height', '400')
 Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'multisamples', 0)
-Config.set(
-    "kivy",
-    "default_font",
-    [
-        "Tex Gyre",
-        "res/texgyreheros-bolditalic.otf",
-    ],
-)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 Config.set('kivy', 'window_icon', 'concertoicon.ico')
 Config.write()

@@ -1,5 +1,6 @@
 #:import webbrowser webbrowser
 #:import threading threading
+#:import res kivy.resources
 
 <MenuBtn@Button>
     text_size: self.size
@@ -10,6 +11,7 @@
     padding_x: 50
     background_normal: 'res/menubtn.png'
     outline_width: 2
+    font_name: 'res/texgyreheros-bolditalic.otf'
     on_press: self.background_color = (255, 0, 0, 1)
     on_release: self.background_color = (1, 1 ,1 ,1)
 
@@ -21,6 +23,7 @@
     height: 36
     padding_x: 50
     outline_width: 2
+    font_name: 'res/texgyreheros-bolditalic.otf'
     background_normal: 'res/menubtn.png'
 
 <MainScreen>:
@@ -325,17 +328,25 @@
                     outline_width: 2
                     background_color: '#343B88'
                     RstDocument:
-                        id: doc1
+                        id: controls
                         background_color: (0,0,0,0.5)
-                        source: 'res/controls.rst' 
+                        source: res.resource_find('res/controls.rst')
                 TabbedPanelItem:
                     text: 'Movement'
                     outline_width: 2
                     background_color: '#343B88'
                     RstDocument:
-                        id: doc2
+                        id: movement
                         background_color: (0,0,0,0.5)
-                        source: 'res/movement.rst'
+                        source: res.resource_find('res/movement.rst')
+                TabbedPanelItem:
+                    text: 'Moon Styles'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: moons
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/moons.rst')
       
 <OfflineScreen>:
     name: 'Offline'
@@ -550,12 +561,12 @@
         Label:
             id: modal_txt
             background_color: (0, 0, 0, 0)
-            outline_width: 1
             text_size: self.size
             halign: 'center'
             valign: 'top'
         Button:
             id: close_btn
+            font_name: 'res/texgyreheros-bolditalic.otf'
             background_color: (255, 0, 0, 0.2)
             outline_width: 1
             on_press: 
@@ -610,6 +621,7 @@
             Button:
                 text: 'Start'
                 id: start_btn
+                font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1
                 on_press: self.background_color = (100, 0, 0, 0.9)
@@ -618,6 +630,7 @@
             Button:
                 text: 'Close'
                 id: close_btn
+                font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1
                 on_press: self.background_color = (100, 0, 0, 0.9)

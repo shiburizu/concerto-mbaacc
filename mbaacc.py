@@ -2,6 +2,7 @@ from winpty import PtyProcess  # pywinpty
 from datetime import datetime
 import re
 import time
+import subprocess
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 
@@ -30,6 +31,7 @@ class Caster():
         self.rs = -1 # Caster's suggested rollback frames. Sent to UI.
         self.ds = -1 # delay suggestion
         self.aproc = None # active caster Thread object to check for isalive()
+        self.offline = False #True when an offline mode has been started
 
     def validate_read(self, con):
         if "rollback:" in con:
@@ -57,6 +59,7 @@ class Caster():
         return False
 
     def host(self, sc): #sc is a Screen for UI triggers
+        self.kill_existing()
         self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n 0')
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
@@ -110,7 +113,8 @@ class Caster():
                             self.aproc.write(str(self.df))
                             self.aproc.write('\x0D')
                             self.playing = True  # set netplaying to avoid more reads
-                            self.app.sound.cut_bgm()
+                            if self.app.sound.bgm.state == 'play':
+                                self.app.sound.cut_bgm()
                             break
                     break
                 else:
@@ -121,6 +125,7 @@ class Caster():
                 break
 
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
+        self.kill_existing()
         self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
         cur_con = ""
         last_con = ""
@@ -164,7 +169,8 @@ class Caster():
                             self.aproc.write(str(self.df))
                             self.aproc.write('\x0D')
                             self.playing = True
-                            self.app.sound.cut_bgm()
+                            if self.app.sound.bgm.state == 'play':
+                                self.app.sound.cut_bgm()
                             break
                     break
                 else:
@@ -175,6 +181,7 @@ class Caster():
                 break
 
     def watch(self, ip, modal=None, *args): #modal is kivy label to update
+        self.kill_existing()
         self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
         cur_con = ""
         last_con = ""
@@ -204,7 +211,8 @@ class Caster():
                         r.insert(0, x)
                 if modal:
                     modal.text = ' '.join(r)
-                self.app.sound.cut_bgm()
+                if self.app.sound.bgm.state == 'play':
+                    self.app.sound.cut_bgm()
                 # replace connecting text with match name in caster
                 break
             else:
@@ -213,6 +221,7 @@ class Caster():
                 continue
 
     def training(self):
+        self.kill_existing()
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         logger.write('\n== Training ==\n')
@@ -223,10 +232,13 @@ class Caster():
                 self.aproc.write('4')  # 4 is offline
                 time.sleep(0.1)
                 self.aproc.write('1')
-                self.app.sound.cut_bgm()
+                if self.app.sound.bgm.state == 'play':
+                    self.app.sound.cut_bgm()
+                self.flag_offline()
                 break
 
     def local(self):
+        self.kill_existing()
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
@@ -234,10 +246,13 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('2')
-                self.app.sound.cut_bgm()
+                if self.app.sound.bgm.state == 'play':
+                    self.app.sound.cut_bgm()
+                self.flag_offline()
                 break
 
     def tournament(self):
+        self.kill_existing()
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
@@ -245,10 +260,13 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('4')
-                self.app.sound.cut_bgm()
+                if self.app.sound.bgm.state == 'play':
+                    self.app.sound.cut_bgm()
+                self.flag_offline()
                 break
 
     def replays(self):
+        self.kill_existing()
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
@@ -256,5 +274,23 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('5')
-                self.app.sound.cut_bgm()
+                if self.app.sound.bgm.state == 'play':
+                    self.app.sound.cut_bgm()
+                self.flag_offline()
                 break
+
+    def flag_offline(self):
+        while True:
+            q = subprocess.check_output('tasklist',shell=True)
+            if b'MBAA.exe' in q and self.offline is False:
+                self.offline = True
+                break
+            if b'cccaster' not in q:
+                break
+            time.sleep(0.2)
+
+    def kill_existing(self):
+        if self.aproc != None:
+            subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+            self.aproc = None
+            self.offline = False
