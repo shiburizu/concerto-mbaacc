@@ -33,10 +33,12 @@ class OnlineScreen(Screen):
                 self.active_pop = popup
                 popup.open()
                 break
+            elif self.app.game.aproc is None:
+                break
 
     def join(self):
         caster = threading.Thread(target=self.app.game.join, args=[
-                                  self.direct_pop.join_ip.text, self], daemon=True)
+                                  self.direct_pop.join_ip.text,self], daemon=True)
         caster.start()
         popup = GameModal()
         popup.modal_txt.text = 'Connecting to IP: %s' % self.direct_pop.join_ip.text
@@ -50,7 +52,7 @@ class OnlineScreen(Screen):
         popup = GameModal()
         self.active_pop = popup
         caster = threading.Thread(target=self.app.game.watch, args=[
-                                  self.direct_pop.watch_ip.text,popup.modal_txt], daemon=True)
+                                  self.direct_pop.watch_ip.text,self], daemon=True)
         caster.start()
         popup.modal_txt.text = 'Watching IP: %s' % self.direct_pop.watch_ip.text
         popup.close_btn.text = 'Close game'
@@ -75,6 +77,16 @@ class OnlineScreen(Screen):
         fpopup.close_btn.bind(on_release=partial(
             self.dismiss, t=self.app.game.aproc, p=fpopup))
         fpopup.open()
+
+    def error_message(self,e):
+        popup = GameModal()
+        for i in e:
+            popup.modal_txt.text += i + '\n'
+        popup.close_btn.bind(on_release=popup.dismiss)
+        popup.close_btn.text = "Close"
+        if self.active_pop:
+            self.active_pop.dismiss()
+        popup.open()
 
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
     def dismiss(self, obj, t, p, *args):

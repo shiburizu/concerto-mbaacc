@@ -44,7 +44,7 @@ class Concerto(App):
 
     def checkPop(self, *args):
         n = False #if N is true, netplay was killed. So don't trigger alternative offline check
-        if self.game.aproc != None: #netplay checker
+        if self.game.aproc != None and self.game.offline is False: #netplay checker
             if self.game.aproc.isalive():
                 pass
             else:

@@ -98,16 +98,16 @@ class LobbyList(Screen):
                     b.bind(on_release=partial(self.join, code=i[0]))
                     self.lobby_view.add_widget(b)
                 if self.app.sm.current != 'LobbyList':
-                    self.app.sm.current = 'LobbyList'
+                    self.app.sm.switch_to(self.app.LobbyList)
             else:
-                self.app.sm.current = 'Online'
+                self.app.sm.switch_to(self.app.OnlineScreen)
                 p = GameModal()
                 p.modal_txt.text = a['msg']
                 p.close_btn.text = 'Close'
                 p.close_btn.bind(on_release=p.dismiss)
                 p.open()
         except requests.exceptions.ConnectionError as e:
-            self.app.sm.current = 'Online'
+            self.app.sm.switch_to(self.app.OnlineScreen)
             p = GameModal()
             p.modal_txt.text = 'Unable to establish a connection to lobby server.'
             p.close_btn.text = 'Close'

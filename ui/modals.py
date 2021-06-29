@@ -1,4 +1,3 @@
-from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
 from kivy.properties import ObjectProperty
 
@@ -8,7 +7,7 @@ class GameModal(ModalView):
     close_btn = ObjectProperty(None)
 
 
-class DirectModal(Popup):
+class DirectModal(ModalView):
     join_ip = ObjectProperty(None)
     watch_ip = ObjectProperty(None)
     screen = None

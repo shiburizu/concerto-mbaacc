@@ -100,9 +100,7 @@
                 MenuBtn:
                     text: 'LEAVE'
                     on_release: 
-                        app.sm.current = 'LobbyList'
                         root.exit()
-                        app.LobbyList.refresh()
                 Label:
                     id: lobby_code
                     text: 'Lobby ID: 1234'
@@ -494,7 +492,7 @@
 <OptionRow@BoxLayout>
     size_hint_x: 1
     size_hint_y: None
-    height: 32
+    height: 28
     canvas.before:
         Rectangle:
             pos: self.pos
@@ -503,50 +501,113 @@
 
 <DirectModal>:
     size_hint: None,None
-    size: 400,180
-    title: 'Direct Match'
+    size: 400,160
     auto_dismiss: False
     join_ip: join_ip
     watch_ip: watch_ip
-    BoxLayout:
-        orientation: 'vertical'
+    background_color: '#343B88'
+    GridLayout:
+        padding: 20,20
+        spacing: [0,8]
+        cols: 1
         TabbedPanel:
             size_hint_y: 0.7
             do_default_tab: False
+            background_color: '#343B88'
             TabbedPanelItem:
                 text: 'Host'
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                background_color: '#343B88'
                 BoxLayout:
+                    Label:
+                        text: 'Game type: '
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        size_hint_x: 0.3
                     Spinner:
                         text: 'Versus'
                         values: 'Versus','Training'
+                        size_hint_x: 0.7
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        background_color: (255, 0, 0, 0.2)
+                        size_hint_x: 0.5
                     Button:
                         text: 'Start'
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        background_color: '#343B88'
+                        size_hint_x: 0.2
                         on_release:
                             root.screen.host()
+                            self.background_color = (255, 0, 0, 0.2)
+                        on_press: 
+                            self.background_color = (100, 0, 0, 0.9)
             TabbedPanelItem:
-                text: 'Join'           
+                text: 'Join'  
+                font_name: 'res/texgyreheros-bolditalic.otf'  
+                background_color: '#343B88'
                 BoxLayout:
+                    Label:
+                        text: 'Connect to IP: '
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        size_hint_x: 0.3
                     TextInput:
                         multiline: False
                         id: join_ip
+                        size_hint_x: 0.5
+                        foreground_color: (255, 255, 255, 1)
+                        background_color: (255, 0, 0, 0.2)
                     Button:
                         text: 'Join'
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        background_color: '#343B88'
+                        size_hint_x: 0.2
                         on_release:
                             root.screen.join()
+                            background_color: '#343B88'
+                        on_press: 
+                            self.background_color = (100, 0, 0, 0.9)
             TabbedPanelItem:
                 text: 'Watch'
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                background_color: '#343B88'
                 BoxLayout:
+                    Label:
+                        text: 'Connect to IP: '
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        size_hint_x: 0.3
                     TextInput:
                         multiline: False
                         id: watch_ip
+                        size_hint_x: 0.5
+                        foreground_color: (255, 255, 255, 1)
+                        background_color: (255, 0, 0, 0.2)
                     Button:
                         text: 'Watch'
+                        font_name: 'res/texgyreheros-bolditalic.otf'
+                        outline_width: 1
+                        background_color: '#343B88'
+                        size_hint_x: 0.2
                         on_release:
                             root.screen.watch()
+                            background_color: '#343B88'
+                        on_press: 
+                            self.background_color = (100, 0, 0, 0.9)  
         Button:
             size_hint_y: 0.3
             text: 'Close'
-            on_release: root.dismiss()
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            outline_width: 1
+            background_color: (255, 0, 0, 0.2)
+            on_release: 
+                root.dismiss()
+                self.background_color = (255, 0, 0, 0.2)
+            on_press: 
+                self.background_color = (100, 0, 0, 0.9)  
 
 <GameModal>:
     modal_txt: modal_txt
@@ -572,7 +633,7 @@
             on_press: 
                 self.background_color = (100, 0, 0, 0.9)
             on_release: 
-                background_color: (255, 0, 0, 0.2)
+                self.background_color = (255, 0, 0, 0.2)
             size_hint: (0.5,0.4)
             pos_hint: {'center_x': 0.5}
 

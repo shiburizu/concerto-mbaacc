@@ -85,44 +85,55 @@ class LobbyScreen(Screen):
 
         if first:
             self.lobby_thread_flag = 0
-            self.lobby_updater = threading.Thread(
-                target=self.auto_refresh, daemon=True)  # netplay watchdog
-            self.lobby_updater.start()
+            #self.lobby_updater = threading.Thread(
+            #    target=self.auto_refresh, daemon=True)  # netplay watchdog
+            #self.lobby_updater.start()
+            self.lobby_updater = Clock.schedule_interval(lambda dt: self.auto_refresh(),2)
 
     def add_to_list(self, p, *args):
         self.player_list.add_widget(p)
 
     def auto_refresh(self):
-        while True:
-            if self.lobby_thread_flag == 0:
-                p = {
-                    'action': 'status',
-                    'id': self.code,
-                    'p': self.player_id,
-                    'secret': self.secret
-                }
-                print(p)
-                self.create(requests.get(url=LOBBYURL, params=p).json())
-                time.sleep(2)
-            else:
-                break
+        if self.lobby_thread_flag == 0:
+            p = {
+                'action': 'status',
+                'id': self.code,
+                'p': self.player_id,
+                'secret': self.secret
+            }
+            print(p)
+            try:
+                r = requests.get(url=LOBBYURL, params=p).json()
+                if r['msg'] == 'OK':
+                    self.create(r)
+                else:
+                    self.exit()
+            except ValueError:
+                    self.exit()
+            except requests.exceptions.ConnectionError:
+                    self.exit()
 
     def exit(self):
         self.lobby_thread_flag = 1
         self.player_list.clear_widgets()
-        p = {
-            'action': 'leave',
-            'id': self.code,
-            'p': self.player_id,
-            'secret': self.secret
-        }
-        requests.get(url=LOBBYURL, params=p)
+        try:
+            p = {
+                'action': 'leave',
+                'id': self.code,
+                'p': self.player_id,
+                'secret': self.secret
+            }
+            requests.get(url=LOBBYURL, params=p)
+        except:
+            pass
         self.secret = None
-        self.lobby_thread = None
+        self.lobby_thread = 1 #kill clock thread
         self.watch_player = None
         self.player_id = None
         self.code = None
+        Clock.unschedule(self.lobby_updater)
         self.lobby_updater = None
+        self.app.LobbyList.refresh()
 
     def send_challenge(self, obj, name, id, *args):
         caster = threading.Thread(
@@ -208,6 +219,15 @@ class LobbyScreen(Screen):
             self.confirm, p=popup, r=popup.r_input, d=popup.d_input, n=name, t=target))
         popup.close_btn.bind(on_release=partial(
             self.dismiss, t=self.app.game.aproc, p=popup))
+        popup.open()
+
+    def error_message(self,e):
+        popup = GameModal()
+        for i in e:
+            popup.modal_txt.text += i + '\n'
+        popup.close_btn.bind(on_release=popup.dismiss)
+        popup.close_btn.text = "Close"
+        self.active_pop.dismiss()
         popup.open()
 
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
