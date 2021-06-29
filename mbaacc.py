@@ -271,7 +271,7 @@ class Caster():
         while self.aproc.isalive():
             con = self.aproc.read()
             logger.write('\n%s\n' % con.split())
-            if "Offline" in ConnectionAbortedError:
+            if "Offline" in con:
                 self.aproc.write('4')  # 4 is offline
                 time.sleep(0.1)
                 self.aproc.write('1')
