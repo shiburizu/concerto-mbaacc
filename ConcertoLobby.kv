@@ -540,9 +540,6 @@
                         size_hint_x: 0.2
                         on_release:
                             root.screen.host()
-                            self.background_color = (255, 0, 0, 0.2)
-                        on_press: 
-                            self.background_color = (100, 0, 0, 0.9)
             TabbedPanelItem:
                 text: 'Join'  
                 font_name: 'res/texgyreheros-bolditalic.otf'  
@@ -567,9 +564,6 @@
                         size_hint_x: 0.2
                         on_release:
                             root.screen.join()
-                            background_color: '#343B88'
-                        on_press: 
-                            self.background_color = (100, 0, 0, 0.9)
             TabbedPanelItem:
                 text: 'Watch'
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -594,9 +588,6 @@
                         size_hint_x: 0.2
                         on_release:
                             root.screen.watch()
-                            background_color: '#343B88'
-                        on_press: 
-                            self.background_color = (100, 0, 0, 0.9)  
         Button:
             size_hint_y: 0.3
             text: 'Close'

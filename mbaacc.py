@@ -3,7 +3,7 @@ from winpty import PtyProcess  # pywinpty
 from datetime import datetime
 import re
 import time
-import subprocess
+import os
 
 error_strings = [
     'Internal error!',
@@ -94,7 +94,7 @@ class Caster():
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
-                subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                 self.aproc = None
                 return None
         logger.write('IP: %s\n' % self.adr)
@@ -149,7 +149,7 @@ class Caster():
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                        os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                         self.aproc = None
                         break
                     elif last_con != cur_con:
@@ -210,7 +210,7 @@ class Caster():
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                        os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                         self.aproc = None
                         break
                     elif last_con != cur_con:
@@ -256,7 +256,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
                 elif last_con != cur_con:
@@ -282,7 +282,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
@@ -303,7 +303,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
@@ -324,7 +324,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
@@ -345,13 +345,13 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
     def flag_offline(self):
         while True:
-            q = subprocess.check_output('tasklist',shell=True)
+            q = os.system('tasklist')
             if b'MBAA.exe' in q and self.offline is False:
                 self.offline = True
                 break
@@ -361,7 +361,7 @@ class Caster():
 
     def kill_existing(self):
         if self.aproc != None:
-            subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+            os.system('start /min taskkill /f /im cccaster.v3.0.exe')
             self.aproc = None
             self.offline = False
 

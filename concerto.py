@@ -1,8 +1,8 @@
 # System
 import requests
-import subprocess
 import time
 import threading
+import psutil
 # Utility scripts
 from config import *  # App config functions
 # Melty Blood CCCaster
@@ -40,12 +40,15 @@ class Concerto(App):
         self.sm.add_widget(self.LobbyList)
         self.sm.add_widget(self.LobbyScreen)
         self.sm.add_widget(self.HowtoScreen)
+        c = threading.Thread(target=self.checkPop,daemon=True)
+        c.start()
         return self.sm
 
     def checkPop(self, *args):
         n = False #if N is true, netplay was killed. So don't trigger alternative offline check
         if self.game.aproc != None and self.game.offline is False: #netplay checker
             if self.game.aproc.isalive():
+                print("found online mbaa")
                 pass
             else:
                 if self.OnlineScreen.active_pop != None:
@@ -64,22 +67,23 @@ class Concerto(App):
                     print(requests.get(url=LOBBYURL, params=r).json())
                 self.game.aproc = None
                 self.game.playing = False
+                self.game.offline = False #just in case
                 self.game.adr = None
                 self.game.rs = -1
                 self.game.ds = -1
                 self.game.rf = -1
                 self.game.df = -1
-                subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
-                self.sound.cut_bgm()
+                os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                 n = True
-                print("found online mbaa")
+                if self.sound.bgm.state == 'stop':
+                    self.sound.cut_bgm() #toggle audio if needed
         if n is False and self.game.offline is True: #this check only works for offline functions where activePop is not present.
-            q = subprocess.check_output('tasklist',shell=True)
-            if b'MBAA.exe' in q:
+            q = [p.info['name'] for p in psutil.process_iter(['name'])]
+            if 'MBAA' in q:
                 pass #currently playing
             else:
-                if b'cccaster' in q: #not playing, caster is open, kill
-                    subprocess.run('start /min taskkill /f /im cccaster.v3.0.exe',shell=True)
+                if 'cccaster' in q: #not playing, caster is open, kill
+                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.game.aproc = None
                     self.game.offline = False
                 if self.sound.bgm.state == 'stop':
@@ -91,8 +95,6 @@ class Concerto(App):
 def run():
     CApp = Concerto()
     try:
-        c = threading.Thread(target=CApp.checkPop,daemon=True)
-        c.start()
         CApp.run()
     finally:
         if CApp.LobbyScreen.code != None:

@@ -2,13 +2,14 @@ from kivy.config import Config
 from kivy.lang import Builder
 import configparser
 import logging
+logging.basicConfig(filename="concerto.log", level=logging.DEBUG)
 import os
 import sys
 from kivy.resources import resource_add_path
 if hasattr(sys, '_MEIPASS'):
     resource_add_path(os.path.join(sys._MEIPASS))
 os.environ["KIVY_AUDIO"] = "sdl2"
-logging.basicConfig(filename='concerto.log', level=logging.DEBUG)
+print(os.path.dirname(sys.executable))
 Builder.load_file("ConcertoLobby.kv")  # .kv defines UI
 # Kivy app configs
 Config.set('graphics', 'width', '600')

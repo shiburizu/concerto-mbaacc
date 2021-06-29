@@ -2,7 +2,7 @@
 from kivy_deps import sdl2, glew
 block_cipher = None
 
-a = Analysis(['concerto.py','mbaacc.py'],
+a = Analysis(['concerto.py','mbaacc.py','config.py'],
             binaries=[('winpty-agent.exe','.')],
             datas=[
                 ('mbaacc.py','.'),
@@ -31,8 +31,8 @@ exe = EXE(pyz,
             debug=True,
             bootloader_ignore_signals=False,
             strip=False,
-            upx=True,
+            upx=False,
             upx_exclude=[],
             runtime_tmpdir=None,
-            console=True,
+            console=False,
             icon='concertoicon.ico')
