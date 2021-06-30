@@ -4,6 +4,7 @@ from datetime import datetime
 import re
 import time
 import os
+import psutil
 
 error_strings = [
     'Internal error!',
@@ -55,6 +56,7 @@ class Caster():
         self.ds = -1 # delay suggestion
         self.aproc = None # active caster Thread object to check for isalive()
         self.offline = False #True when an offline mode has been started
+        self.startup = False #True when waiting for MBAA.exe to start in offline
 
     def validate_read(self, con):
         if "rollback:" in con:
@@ -265,6 +267,7 @@ class Caster():
 
     def training(self,sc):
         self.kill_existing()
+        self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         logger.write('\n== Training ==\n')
@@ -282,12 +285,14 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
+                    self.startup = False
                     os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
     def local(self,sc):
         self.kill_existing()
+        self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
@@ -303,12 +308,14 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
+                    self.startup = False
                     os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
     def tournament(self,sc):
         self.kill_existing()
+        self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
@@ -324,12 +331,14 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
+                    self.startup = False
                     os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
     def replays(self,sc):
         self.kill_existing()
+        self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
@@ -345,17 +354,19 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
+                    self.startup = False
                     os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.aproc = None
                     break
 
     def flag_offline(self):
         while True:
-            q = os.system('tasklist')
-            if b'MBAA.exe' in q and self.offline is False:
+            q = [p.info['name'] for p in psutil.process_iter(['name'])]
+            if 'MBAA.exe' in q and self.offline is False:
+                self.startup = False
                 self.offline = True
                 break
-            if b'cccaster' not in q:
+            if 'cccaster.v3.0.exe' not in q:
                 break
             time.sleep(0.2)
 
@@ -364,12 +375,13 @@ class Caster():
             os.system('start /min taskkill /f /im cccaster.v3.0.exe')
             self.aproc = None
             self.offline = False
+            self.startup = False
 
     def check_msg(self,s):
         e = []
         for i in error_strings:
             if i in s:
                 e.append(i)
-        print(e)
+                logger.write('\n%s\n' % e)
         return e
         

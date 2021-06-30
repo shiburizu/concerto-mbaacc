@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(filename="concerto.log", level=logging.DEBUG)
 # System
 import requests
 import time
@@ -40,15 +42,12 @@ class Concerto(App):
         self.sm.add_widget(self.LobbyList)
         self.sm.add_widget(self.LobbyScreen)
         self.sm.add_widget(self.HowtoScreen)
-        c = threading.Thread(target=self.checkPop,daemon=True)
-        c.start()
         return self.sm
 
     def checkPop(self, *args):
         n = False #if N is true, netplay was killed. So don't trigger alternative offline check
-        if self.game.aproc != None and self.game.offline is False: #netplay checker
+        if self.game.aproc != None and self.game.offline is False and self.game.startup is False: #netplay checke
             if self.game.aproc.isalive():
-                print("found online mbaa")
                 pass
             else:
                 if self.OnlineScreen.active_pop != None:
@@ -63,8 +62,7 @@ class Concerto(App):
                         'id': self.LobbyScreen.code,
                         'secret': self.LobbyScreen.secret
                     }
-                    print(r)
-                    print(requests.get(url=LOBBYURL, params=r).json())
+                    requests.get(url=LOBBYURL, params=r).json()
                 self.game.aproc = None
                 self.game.playing = False
                 self.game.offline = False #just in case
@@ -79,10 +77,10 @@ class Concerto(App):
                     self.sound.cut_bgm() #toggle audio if needed
         if n is False and self.game.offline is True: #this check only works for offline functions where activePop is not present.
             q = [p.info['name'] for p in psutil.process_iter(['name'])]
-            if 'MBAA' in q:
+            if 'MBAA.exe' in q:
                 pass #currently playing
             else:
-                if 'cccaster' in q: #not playing, caster is open, kill
+                if 'cccaster.v3.0.exe' in q: #not playing, caster is open, kill
                     os.system('start /min taskkill /f /im cccaster.v3.0.exe')
                     self.game.aproc = None
                     self.game.offline = False
@@ -95,6 +93,8 @@ class Concerto(App):
 def run():
     CApp = Concerto()
     try:
+        c = threading.Thread(target=CApp.checkPop,daemon=True)
+        c.start()
         CApp.run()
     finally:
         if CApp.LobbyScreen.code != None:

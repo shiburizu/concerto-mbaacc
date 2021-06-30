@@ -40,7 +40,7 @@ class LobbyScreen(Screen):
         if j['challenges'] != []:
             h = DummyBtn()
             h.text = 'Challenges (click to accept)'
-            Clock.schedule_once(partial(self.add_to_list, h), -1)
+            self.player_list.add_widget(h)
             for i in j['challenges']:  # name, id, ip of challenger
                 print(i)
                 print(self.player_id)
@@ -49,14 +49,12 @@ class LobbyScreen(Screen):
                 p.text = i[0]
                 p.bind(on_release=partial(
                     self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
-                # self.playerList.add_widget(p)
-                Clock.schedule_once(partial(self.add_to_list, p), -1)
+                self.player_list.add_widget(p)
 
         if j['idle'] != []:
             h = DummyBtn()
             h.text = 'Idle players (click to challenge)'
-            # self.playerList.add_widget(h)
-            Clock.schedule_once(partial(self.add_to_list, h), -1)
+            self.player_list.add_widget(h)
             for i in j['idle']:
                 if i[1] not in challenging_ids:
                     p = MenuBtn()
@@ -66,22 +64,19 @@ class LobbyScreen(Screen):
                             self.send_challenge, name=i[0], id=i[1]))
                     else:
                         p.text += " (self)"
-                    # self.playerList.add_widget(p)
-                    Clock.schedule_once(partial(self.add_to_list, p), -1)
+                    self.player_list.add_widget(p)
 
         if j['playing'] != []:
             h = DummyBtn()
             h.text = 'Now playing (click to watch)'
-            # self.playerList.add_widget(h)
-            Clock.schedule_once(partial(self.add_to_list, h), -1)
+            self.player_list.add_widget(h)
             for i in j['playing']:
                 p = MenuBtn()
                 p.text = "%s vs %s" % (i[0], i[1])
                 if i[2] != self.player_id and i[3] != self.player_id:
                     p.bind(on_release=partial(self.watch_match,
                            name="%s vs %s" % (i[0], i[1]), ip=i[4]))
-                # self.playerList.add_widget(p)
-                Clock.schedule_once(partial(self.add_to_list, p), -1)
+                self.player_list.add_widget(p)
 
         if first:
             self.lobby_thread_flag = 0
@@ -89,9 +84,7 @@ class LobbyScreen(Screen):
             #    target=self.auto_refresh, daemon=True)  # netplay watchdog
             #self.lobby_updater.start()
             self.lobby_updater = Clock.schedule_interval(lambda dt: self.auto_refresh(),2)
-
-    def add_to_list(self, p, *args):
-        self.player_list.add_widget(p)
+        
 
     def auto_refresh(self):
         if self.lobby_thread_flag == 0:

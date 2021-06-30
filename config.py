@@ -1,8 +1,6 @@
 from kivy.config import Config
 from kivy.lang import Builder
 import configparser
-import logging
-logging.basicConfig(filename="concerto.log", level=logging.DEBUG)
 import os
 import sys
 from kivy.resources import resource_add_path
