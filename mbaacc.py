@@ -144,9 +144,6 @@ class Caster():
                             self.aproc.write(str(self.df))
                             self.aproc.write('\x0D')
                             self.playing = True  # set netplaying to avoid more reads
-                            if self.app.sound.bgm.state == 'play':
-                                self.app.sound.cut_bgm()
-                            break
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -205,9 +202,6 @@ class Caster():
                             self.aproc.write(str(self.df))
                             self.aproc.write('\x0D')
                             self.playing = True
-                            if self.app.sound.bgm.state == 'play':
-                                self.app.sound.cut_bgm()
-                            break
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -251,8 +245,6 @@ class Caster():
                     elif x != '*' and x.replace('*', '') != '':
                         r.insert(0, x)
                 sc.active_pop.modal_txt.text = ' '.join(r)
-                if self.app.sound.bgm.state == 'play':
-                    self.app.sound.cut_bgm()
                 # replace connecting text with match name in caster
                 break
             else:
@@ -278,8 +270,6 @@ class Caster():
                 self.aproc.write('4')  # 4 is offline
                 time.sleep(0.1)
                 self.aproc.write('1')
-                if self.app.sound.bgm.state == 'play':
-                    self.app.sound.cut_bgm()
                 self.flag_offline()
                 break
             else:
@@ -301,8 +291,6 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('2')
-                if self.app.sound.bgm.state == 'play':
-                    self.app.sound.cut_bgm()
                 self.flag_offline()
                 break
             else:
@@ -324,8 +312,6 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('4')
-                if self.app.sound.bgm.state == 'play':
-                    self.app.sound.cut_bgm()
                 self.flag_offline()
                 break
             else:
@@ -347,8 +333,6 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('5')
-                if self.app.sound.bgm.state == 'play':
-                    self.app.sound.cut_bgm()
                 self.flag_offline()
                 break
             else:

@@ -85,9 +85,11 @@
                     on_ref_press: webbrowser.open('https://twitter.com/Bee_Sempai')
 
 <LobbyScreen>:
-    name: 'Lobby'
     player_list: player_list
+    challenge_list: challenge_list
+    match_list: match_list
     lobby_code: lobby_code
+    name: 'Lobby'
     AnchorLayout:
         anchor_x: 'left'
         anchor_y: 'top'
@@ -110,18 +112,40 @@
                 do_scroll_x: False
                 do_scroll_y: True
                 GridLayout:
-                    id: player_list
-                    cols: 1
                     height: self.minimum_height
-                    size_hint_x: 1
                     size_hint_y: None
+                    size_hint_x: 1
+                    cols: 1
                     spacing: [0,5]
+                    GridLayout:
+                        id: challenge_list
+                        cols: 1
+                        height: self.minimum_height
+                        size_hint_x: 1
+                        size_hint_y: None
+                        spacing: [0,5]
+                    DummyBtn:
+                        text: 'Idle players (click to challenge)'
+                    GridLayout:
+                        id: player_list
+                        cols: 1
+                        height: self.minimum_height
+                        size_hint_x: 1
+                        size_hint_y: None
+                        spacing: [0,5]
+                    GridLayout:
+                        id: match_list
+                        cols: 1
+                        height: self.minimum_height
+                        size_hint_x: 1
+                        size_hint_y: None
+                        spacing: [0,5]
                         
 <LobbyList>:
-    name: 'LobbyList'
     lobby_code: lobby_code
     lobby_type: lobby_type
     lobby_view: lobby_view
+    name: 'LobbyList'
     AnchorLayout:
         anchor_x: 'left'
         anchor_y: 'top'

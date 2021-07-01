@@ -44,12 +44,14 @@ class LobbyList(Screen):
             popup.open()
 
     def join(self, obj=None, code=None):
-        if code is None and self.lobby_code.text == '':
-            return None
-        try:
-            int(self.lobby_code.text)
-        except ValueError:
-            return None
+        if code is None:
+            if self.lobby_code.text == '':
+                return None
+            else:
+                try:
+                    int(self.lobby_code.text)
+                except ValueError:
+                    return None
         c = None
         if code != None:
             c = code

@@ -48,7 +48,8 @@ class Concerto(App):
         n = False #if N is true, netplay was killed. So don't trigger alternative offline check
         if self.game.aproc != None and self.game.offline is False and self.game.startup is False: #netplay checke
             if self.game.aproc.isalive():
-                pass
+                if self.sound.bgm.state == 'play':
+                    self.sound.cut_bgm() #toggle audio if needed
             else:
                 if self.OnlineScreen.active_pop != None:
                     self.OnlineScreen.active_pop.dismiss()
@@ -78,7 +79,8 @@ class Concerto(App):
         if n is False and self.game.offline is True: #this check only works for offline functions where activePop is not present.
             q = [p.info['name'] for p in psutil.process_iter(['name'])]
             if 'MBAA.exe' in q:
-                pass #currently playing
+                if self.sound.bgm.state == 'play':
+                    self.sound.cut_bgm() #toggle audio if needed
             else:
                 if 'cccaster.v3.0.exe' in q: #not playing, caster is open, kill
                     os.system('start /min taskkill /f /im cccaster.v3.0.exe')

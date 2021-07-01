@@ -14,6 +14,8 @@ from ui.buttons import MenuBtn, DummyBtn
 class LobbyScreen(Screen):
     active_pop = None  # active popup on the screen
     player_list = ObjectProperty(None)  # layout for players
+    challenge_list = ObjectProperty(None)  # layout for players
+    match_list = ObjectProperty(None)  # layout for players
     lobby_code = ObjectProperty(None)  # layout for players
 
     def __init__(self, CApp, **kwargs):
@@ -26,65 +28,126 @@ class LobbyScreen(Screen):
         self.player_id = None  # our own ID as provided by the JSON
         self.code = None  # lobby code
         self.lobby_updater = None  # thread to manage lobby updates
+        self.widget_index = {} #ids of players, widget of lobby
 
     def create(self, j, first=False, type=""):  # json response object
         print(j)
-        self.player_list.clear_widgets()
+
         if first:
             self.player_id = j['msg']
             self.code = j['id']
             self.lobby_code.text = "%s Lobby Code: %s" % (type, self.code)
+            self.widget_index = {}
+            self.player_list.clear_widgets()
+            self.match_list.clear_widgets()
+            self.challenge_list.clear_widgets()
 
         challenging_ids = []
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
-            h = DummyBtn()
-            h.text = 'Challenges (click to accept)'
-            self.player_list.add_widget(h)
-            for i in j['challenges']:  # name, id, ip of challenger
-                print(i)
-                print(self.player_id)
-                challenging_ids.append(i[1])
-                p = MenuBtn()
-                p.text = i[0]
-                p.bind(on_release=partial(
-                    self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
-                self.player_list.add_widget(p)
+            if 'c' not in self.widget_index:
+                h = DummyBtn()
+                h.text = 'Challenges (click to accept)'
+                self.challenge_list.add_widget(h)
+                self.widget_index.update({'c':h})
 
-        if j['idle'] != []:
-            h = DummyBtn()
-            h.text = 'Idle players (click to challenge)'
-            self.player_list.add_widget(h)
-            for i in j['idle']:
-                if i[1] not in challenging_ids:
+            for i in j['challenges']:  # name, id, ip of challenger
+                challenging_ids.append(i[1])
+                if i[1] in self.widget_index:
+                    if self.widget_index.get(i[1]).parent == self.challenge_list:
+                        pass
+                    else: #remove idle player
+                        self.widget_index.get(i[1]).parent.remove_widget(self.widget_index.get(i[1]))
+                        p = MenuBtn()
+                        p.text = i[0]
+                        p.bind(on_release=partial(
+                            self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
+                        self.challenge_list.add_widget(p)
+                        self.widget_index.update({i[1]:p})
+                else:
                     p = MenuBtn()
                     p.text = i[0]
-                    if i[1] != self.player_id:
-                        p.bind(on_release=partial(
-                            self.send_challenge, name=i[0], id=i[1]))
+                    p.bind(on_release=partial(
+                        self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
+                    self.challenge_list.add_widget(p)
+                    self.widget_index.update({i[1]:p})
+        else:
+            n = []
+            for k,v in self.widget_index.items():
+                if v in self.challenge_list.children:
+                    v.parent.remove_widget(v)
+                    n.append(k)
+            for i in n:
+                self.widget_index.pop(i)
+
+        if j['idle'] != []:
+            for i in j['idle']:
+                if i[1] not in challenging_ids:
+                    if i[1] in self.widget_index:
+                        pass
                     else:
-                        p.text += " (self)"
-                    self.player_list.add_widget(p)
+                        p = MenuBtn()
+                        p.text = i[0]
+                        if i[1] != self.player_id:
+                            p.bind(on_release=partial(
+                                self.send_challenge, name=i[0], id=i[1]))
+                        else:
+                            p.text += " (self)"
+                        self.player_list.add_widget(p)
+                        self.widget_index.update({i[1]:p})
 
         if j['playing'] != []:
-            h = DummyBtn()
-            h.text = 'Now playing (click to watch)'
-            self.player_list.add_widget(h)
+            if 'w' not in self.widget_index:
+                h = DummyBtn()
+                h.text = 'Now playing (click to watch)'
+                self.challenge_list.add_widget(h)
+                self.widget_index.update({'w':h})
             for i in j['playing']:
-                p = MenuBtn()
-                p.text = "%s vs %s" % (i[0], i[1])
-                if i[2] != self.player_id and i[3] != self.player_id:
-                    p.bind(on_release=partial(self.watch_match,
-                           name="%s vs %s" % (i[0], i[1]), ip=i[4]))
-                self.player_list.add_widget(p)
+                if (i[2],i[3]) in self.widget_index:
+                    pass
+                else:
+                    p = MenuBtn()
+                    p.text = "%s vs %s" % (i[0], i[1])
+                    if i[2] != self.player_id and i[3] != self.player_id:
+                        p.bind(on_release=partial(self.watch_match,
+                            name="%s vs %s" % (i[0], i[1]), ip=i[4]))
+                    self.match_list.add_widget(p)
+                    self.widget_index.update({(i[2],i[3]):p})
+        else:
+            n = []
+            for k,v in self.widget_index.items():
+                if v in self.match_list.children:
+                    v.parent.remove_widget(v)
+                    n.append(k)
+            for i in n:
+                self.widget_index.pop(i)
+
+        #if any widgets in the list don't correspond to json items, remove them
+        n = []
+        for k in self.widget_index.keys():
+            ok = False
+            if k != 'w' and k != 'c':
+                for i in j['challenges']:
+                    if k == i[1]:
+                        ok = True
+                for i in j['idle']:
+                    if k == i[1]:
+                        ok = True
+                for i in j['playing']:
+                    if k == i[2] or k == i[3]:
+                        ok = True
+                if ok is False:
+                    n.append(k)
+        for i in n:
+            self.widget_index.get(i).parent.remove_widget(self.widget_index.get(i))
+            self.widget_index.pop(i)
 
         if first:
             self.lobby_thread_flag = 0
-            #self.lobby_updater = threading.Thread(
-            #    target=self.auto_refresh, daemon=True)  # netplay watchdog
-            #self.lobby_updater.start()
-            self.lobby_updater = Clock.schedule_interval(lambda dt: self.auto_refresh(),2)
-        
+            self.lobby_updater = threading.Thread(
+                target=self.auto_refresh, daemon=True)  # netplay watchdog
+            self.lobby_updater.start()
+            #self.lobby_updater = Clock.schedule_interval(lambda dt: self.auto_refresh(),2)
 
     def auto_refresh(self):
         if self.lobby_thread_flag == 0:
@@ -99,6 +162,8 @@ class LobbyScreen(Screen):
                 r = requests.get(url=LOBBYURL, params=p).json()
                 if r['msg'] == 'OK':
                     self.create(r)
+                    time.sleep(2)
+                    self.auto_refresh()
                 else:
                     self.exit()
             except ValueError:
@@ -108,7 +173,6 @@ class LobbyScreen(Screen):
 
     def exit(self):
         self.lobby_thread_flag = 1
-        self.player_list.clear_widgets()
         try:
             p = {
                 'action': 'leave',
@@ -124,7 +188,7 @@ class LobbyScreen(Screen):
         self.watch_player = None
         self.player_id = None
         self.code = None
-        Clock.unschedule(self.lobby_updater)
+        #Clock.unschedule(self.lobby_updater)
         self.lobby_updater = None
         self.app.LobbyList.refresh()
 
@@ -141,18 +205,21 @@ class LobbyScreen(Screen):
                     self.dismiss, t=caster, p=popup))
                 self.active_pop = popup
                 popup.open()
+                p = {
+                    't': id,
+                    'p': self.player_id,
+                    'action': 'challenge',
+                    'id': self.code,
+                    'ip': self.app.game.adr,
+                    'secret': self.secret
+                }
+                print(p)
+                c = requests.get(url=LOBBYURL, params=p).json()
+                print(c)
                 break
-        p = {
-            't': id,
-            'p': self.player_id,
-            'action': 'challenge',
-            'id': self.code,
-            'ip': self.app.game.adr,
-            'secret': self.secret
-        }
-        print(p)
-        c = requests.get(url=LOBBYURL, params=p).json()
-        print(c)
+            elif self.app.game.aproc is None:
+                break
+        
 
     def accept_challenge(self, obj, name, id, ip, *args):
         caster = threading.Thread(target=self.app.game.join, args=[
@@ -220,7 +287,8 @@ class LobbyScreen(Screen):
             popup.modal_txt.text += i + '\n'
         popup.close_btn.bind(on_release=popup.dismiss)
         popup.close_btn.text = "Close"
-        self.active_pop.dismiss()
+        if self.active_pop != None:
+            self.active_pop.dismiss()
         popup.open()
 
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
@@ -245,5 +313,3 @@ class LobbyScreen(Screen):
         self.active_pop = None
         self.app.game.aproc = None
         self.app.game.playing = False
-        if self.app.sound.bgm.state == 'stop' and self.app.sound.muted is False:
-            self.app.sound.cut_bgm()

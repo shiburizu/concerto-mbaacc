@@ -103,5 +103,3 @@ class OnlineScreen(Screen):
         self.active_pop = None
         self.app.game.aproc = None
         self.app.game.playing = False
-        if self.app.sound.bgm.state == 'stop' and self.app.sound.muted is False:
-            self.app.sound.cut_bgm()
