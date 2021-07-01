@@ -3,8 +3,8 @@ from winpty import PtyProcess  # pywinpty
 from datetime import datetime
 import re
 import time
-import os
-import psutil
+import subprocess
+CREATE_NO_WINDOW = 0x08000000 #subprocess flag
 
 error_strings = [
     'Internal error!',
@@ -25,7 +25,9 @@ error_strings = [
     'Rollback must be less than',
     'Rollback data is corrupted!',
     'Missing relay_list.txt!',
-    'Couldn\'t find MBAA.exe!'
+    'Couldn\'t find MBAA.exe!',
+    'Timed out!',
+    'Network delay greater than limit:'
 ]
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
@@ -89,6 +91,7 @@ class Caster():
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
+            print(t.split())
             ip = re.findall(
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
@@ -96,9 +99,10 @@ class Caster():
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
-                os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                self.kill_caster()
                 self.aproc = None
                 return None
+        print('continue')
         logger.write('IP: %s\n' % self.adr)
         cur_con = "" #current Caster read
         last_con = "" #last Caster read
@@ -144,11 +148,12 @@ class Caster():
                             self.aproc.write(str(self.df))
                             self.aproc.write('\x0D')
                             self.playing = True  # set netplaying to avoid more reads
+                            break
                     break
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                        self.kill_caster()
                         self.aproc = None
                         break
                     elif last_con != cur_con:
@@ -202,11 +207,17 @@ class Caster():
                             self.aproc.write(str(self.df))
                             self.aproc.write('\x0D')
                             self.playing = True
+                            break
                     break
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                        self.kill_caster()
+                        self.aproc = None
+                        break
+                    elif 'Spectating versus mode' in con:
+                        sc.error_message(['Host is already in a game!'])
+                        self.kill_caster()
                         self.aproc = None
                         break
                     elif last_con != cur_con:
@@ -250,7 +261,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                    self.kill_caster()
                     self.aproc = None
                     break
                 elif last_con != cur_con:
@@ -276,7 +287,7 @@ class Caster():
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     self.startup = False
-                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                    self.kill_caster()
                     self.aproc = None
                     break
 
@@ -297,7 +308,7 @@ class Caster():
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     self.startup = False
-                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                    self.kill_caster()
                     self.aproc = None
                     break
 
@@ -318,7 +329,7 @@ class Caster():
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     self.startup = False
-                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                    self.kill_caster()
                     self.aproc = None
                     break
 
@@ -339,27 +350,34 @@ class Caster():
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     self.startup = False
-                    os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+                    self.kill_caster()
                     self.aproc = None
                     break
 
     def flag_offline(self):
         while True:
-            q = [p.info['name'] for p in psutil.process_iter(['name'])]
-            if 'MBAA.exe' in q and self.offline is False:
+            w = subprocess.run('qprocess mbaa.exe',capture_output=True)
+            #q = [p.info['name'] for p in psutil.process_iter(['name'])]
+            if b'No process exists for mbaa.exe\r\n' in w.stderr and self.offline is False:
                 self.startup = False
                 self.offline = True
                 break
-            if 'cccaster.v3.0.exe' not in q:
+            if self.aproc != None:
+                if self.aproc.isalive() is False:
+                    break
+            else:
                 break
             time.sleep(0.2)
 
     def kill_existing(self):
         if self.aproc != None:
-            os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+            self.kill_caster()
             self.aproc = None
             self.offline = False
             self.startup = False
+        
+    def kill_caster(self):
+        subprocess.Popen('taskkill /f /im cccaster.v3.0.exe', creationflags=CREATE_NO_WINDOW, stderr=None,stdout=None)
 
     def check_msg(self,s):
         e = []

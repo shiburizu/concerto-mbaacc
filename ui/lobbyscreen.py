@@ -1,12 +1,10 @@
 import time
 import requests
 import threading
-import os
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
-from kivy.clock import Clock
 from ui.modals import *
 from ui.buttons import MenuBtn, DummyBtn
 
@@ -29,6 +27,8 @@ class LobbyScreen(Screen):
         self.code = None  # lobby code
         self.lobby_updater = None  # thread to manage lobby updates
         self.widget_index = {} #ids of players, widget of lobby
+        self.error = False
+
 
     def create(self, j, first=False, type=""):  # json response object
         print(j)
@@ -217,7 +217,7 @@ class LobbyScreen(Screen):
                 c = requests.get(url=LOBBYURL, params=p).json()
                 print(c)
                 break
-            elif self.app.game.aproc is None:
+            elif self.error == True:
                 break
         
 
@@ -282,14 +282,19 @@ class LobbyScreen(Screen):
         popup.open()
 
     def error_message(self,e):
+        self.error = True
         popup = GameModal()
         for i in e:
             popup.modal_txt.text += i + '\n'
-        popup.close_btn.bind(on_release=popup.dismiss)
+        popup.close_btn.bind(on_release=partial(self.dismiss_error,p = popup))
         popup.close_btn.text = "Close"
         if self.active_pop != None:
             self.active_pop.dismiss()
         popup.open()
+    
+    def dismiss_error(self,obj,p):
+        p.dismiss()
+        self.error = False
 
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
     def dismiss(self, obj, t, p, *args):
@@ -298,7 +303,7 @@ class LobbyScreen(Screen):
         self.app.game.ds = -1
         self.app.game.rf = -1
         self.app.game.df = -1
-        os.system('start /min taskkill /f /im cccaster.v3.0.exe')
+        self.app.game.kill_caster()
         del(t)
         r = {
             'action': 'end',

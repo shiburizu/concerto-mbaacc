@@ -1,10 +1,8 @@
 from kivy.config import Config
-from kivy.lang import Builder
-Builder.load_file('ConcertoLobby.kv')
 import configparser
 import os
 import sys
-from kivy.resources import resource_add_path, resource_find
+from kivy.resources import resource_add_path
 if hasattr(sys, '_MEIPASS'):
     resource_add_path(os.path.join(sys._MEIPASS))
 os.environ["KIVY_AUDIO"] = "sdl2"
