@@ -356,18 +356,18 @@ class Caster():
 
     def flag_offline(self):
         while True:
-            w = subprocess.run('qprocess mbaa.exe',capture_output=True)
+            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
             #q = [p.info['name'] for p in psutil.process_iter(['name'])]
-            if b'No process exists for mbaa.exe\r\n' in w.stderr and self.offline is False:
+            if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
                 self.startup = False
                 self.offline = True
                 break
+
             if self.aproc != None:
                 if self.aproc.isalive() is False:
                     break
             else:
                 break
-            time.sleep(0.2)
 
     def kill_existing(self):
         if self.aproc != None:
@@ -377,7 +377,7 @@ class Caster():
             self.startup = False
         
     def kill_caster(self):
-        subprocess.Popen('taskkill /f /im cccaster.v3.0.exe', creationflags=CREATE_NO_WINDOW, stderr=None,stdout=None)
+        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=CREATE_NO_WINDOW)
 
     def check_msg(self,s):
         e = []
