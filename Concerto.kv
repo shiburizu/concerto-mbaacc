@@ -659,44 +659,60 @@
     r_input: r_input
     d_input: d_input
     size_hint: None,None
-    size: 400,150
+    size: 350,200
     auto_dismiss: False
     background_color: '#343B88'
     GridLayout:
         cols: 1
         padding: 20,20
-        row_force_default: True
-        row_default_height: 32
-        spacing: [0,10]  
+        spacing: [0,5]
         Label:
+            size_hint_y: 0.55
             id: frame_txt
             background_color: (0, 0, 0, 0)
-            outline_width: 1
+            text_size: self.size
+            valign: 'top'
+            halign: 'center'
+            markup: True
+        AnchorLayout:
+            size_hint_y: 0.20
+            anchor_x: 'center'
+            BoxLayout:  
+                size_hint_x: None
+                width: self.minimum_width
+                Label:
+                    text: 'Rollback:'
+                    background_color: (0, 0, 0, 0)
+                    outline_width: 1
+                    size_hint_x: None
+                    width: 70
+                TextInput
+                    multiline: False
+                    id: r_input
+                    input_filter: 'int'
+                    foreground_color: (255, 255, 255, 1)
+                    background_color: (255, 0, 0, 0.2)
+                    size_hint_x: None
+                    width: 30
+                Label:
+                    text: 'Delay:'
+                    background_color: (0, 0, 0, 0)
+                    outline_width: 1
+                    size_hint_x: None
+                    width: 50
+                TextInput
+                    multiline: False
+                    id: d_input
+                    input_filter: 'int'
+                    foreground_color: (255, 255, 255, 1)
+                    background_color: (255, 0, 0, 0.2)
+                    size_hint_x: None
+                    width: 30
         BoxLayout:
-            Label:
-                text: 'Rollback:'
-                background_color: (0, 0, 0, 0)
-                outline_width: 1
-            TextInput
-                multiline: False
-                id: r_input
-                input_filter: 'int'
-                foreground_color: (255, 255, 255, 1)
-                background_color: (255, 0, 0, 0.2)
-            Label:
-                text: 'Delay:'
-                background_color: (0, 0, 0, 0)
-                outline_width: 1
-            TextInput
-                multiline: False
-                id: d_input
-                input_filter: 'int'
-                foreground_color: (255, 255, 255, 1)
-                background_color: (255, 0, 0, 0.2)
-        BoxLayout:
+            size_hint_y: 0.25
             Button:
-                text: 'Start'
-                id: start_btn
+                text: 'Cancel'
+                id: close_btn
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1
@@ -704,8 +720,8 @@
                 on_release: 
                     background_color: (255, 0, 0, 0.2)
             Button:
-                text: 'Close'
-                id: close_btn
+                text: 'Start'
+                id: start_btn
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1

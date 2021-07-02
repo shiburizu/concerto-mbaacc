@@ -2,6 +2,7 @@
 cccaster/
 media/
 cccaster.v3.0.exe
+*.zip
 
 # Concerto EXEs
 Concerto.exe

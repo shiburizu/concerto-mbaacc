@@ -4,7 +4,6 @@ from datetime import datetime
 import re
 import time
 import subprocess
-CREATE_NO_WINDOW = 0x08000000 #subprocess flag
 
 error_strings = [
     'Internal error!',
@@ -52,8 +51,6 @@ class Caster():
         self.app = CApp
         self.adr = None #our IP when hosting, needed to trigger UI actions
         self.playing = False #True when netplay begins via input to CCCaster
-        self.rf = -1 # user's choice of rollback frames. Provided by UI to Caster
-        self.df = -1 # delay choice
         self.rs = -1 # Caster's suggested rollback frames. Sent to UI.
         self.ds = -1 # delay suggestion
         self.aproc = None # active caster Thread object to check for isalive()
@@ -85,9 +82,12 @@ class Caster():
                         return n #return list
         return False
 
-    def host(self, sc): #sc is a Screen for UI triggers
+    def host(self, sc, port=0, training=False): #sc is a Screen for UI triggers
         self.kill_existing()
-        self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n 0')
+        if training:
+            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
+        else:
+            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
@@ -100,7 +100,6 @@ class Caster():
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
                 self.kill_caster()
-                self.aproc = None
                 return None
         print('continue')
         logger.write('IP: %s\n' % self.adr)
@@ -133,22 +132,15 @@ class Caster():
                             r.insert(0, x)
                     # find all floats in caster output and use the last one [-1] to make sure we get caster text
                     p = re.findall('\d+\.\d+', con)
-                    sc.set_frames(' '.join(r), n[-2], p[-1]) #trigger frame delay settings in UI
-                    while True:  # todo optimize set_frames stutter by making this a thread
-                        if self.rf != -1 and self.df != -1:
-                            # two backspace keys for edge case of >9 frames
-                            self.aproc.write('\x08')
-                            self.aproc.write('\x08')
-                            self.aproc.write(str(self.rf))
-                            self.aproc.write('\x0D')
-                            # slight delay to let caster refresh screen
-                            time.sleep(0.1)
-                            self.aproc.write('\x08')
-                            self.aproc.write('\x08')
-                            self.aproc.write(str(self.df))
-                            self.aproc.write('\x0D')
-                            self.playing = True  # set netplaying to avoid more reads
-                            break
+                    m = ""
+                    r = 2
+                    if "Versus mode each game is" in con:
+                        m = "Versus"
+                        r = n[-3]
+                    elif "Training mode" in con:
+                        m = "Training"
+                        r = 0
+                    sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=r) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -194,31 +186,24 @@ class Caster():
                         elif name == True and x.replace('*', '') != '':
                             r.append(x)
                     p = re.findall('\d+\.\d+', con)
-                    sc.set_frames(' '.join(r), n[-2], p[-1], t) #send t for Accept network request
-                    while True: 
-                        if self.rf != -1 and self.df != -1:
-                            self.aproc.write('\x08')
-                            self.aproc.write('\x08')
-                            self.aproc.write(str(self.rf))
-                            self.aproc.write('\x0D')
-                            time.sleep(0.1)
-                            self.aproc.write('\x08')
-                            self.aproc.write('\x08')
-                            self.aproc.write(str(self.df))
-                            self.aproc.write('\x0D')
-                            self.playing = True
-                            break
+                    m = ""
+                    r = 2
+                    if "Versus mode each game is" in con:
+                        m = "Versus"
+                        r = n[-3]
+                    elif "Training mode" in con:
+                        m = "Training"
+                        r = 0
+                    sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=r) #send t for Accept network request
                     break
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
                         self.kill_caster()
-                        self.aproc = None
                         break
                     elif 'Spectating versus mode' in con:
                         sc.error_message(['Host is already in a game!'])
                         self.kill_caster()
-                        self.aproc = None
                         break
                     elif last_con != cur_con:
                         last_con = cur_con
@@ -226,7 +211,19 @@ class Caster():
             else:
                 break
 
-    def watch(self, ip, sc, *args): #modal is kivy label to update
+    def confirm_frames(self,rf,df):
+        self.aproc.write('\x08')
+        self.aproc.write('\x08')
+        self.aproc.write(str(rf))
+        self.aproc.write('\x0D')
+        time.sleep(0.1)
+        self.aproc.write('\x08')
+        self.aproc.write('\x08')
+        self.aproc.write(str(df))
+        self.aproc.write('\x0D')
+        self.playing = True
+
+    def watch(self, ip, sc, *args):
         self.kill_existing()
         self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
         cur_con = ""
@@ -262,7 +259,6 @@ class Caster():
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     self.kill_caster()
-                    self.aproc = None
                     break
                 elif last_con != cur_con:
                     last_con = cur_con
@@ -286,9 +282,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.startup = False
                     self.kill_caster()
-                    self.aproc = None
                     break
 
     def local(self,sc):
@@ -307,9 +301,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.startup = False
                     self.kill_caster()
-                    self.aproc = None
                     break
 
     def tournament(self,sc):
@@ -328,9 +320,7 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.startup = False
                     self.kill_caster()
-                    self.aproc = None
                     break
 
     def replays(self,sc):
@@ -349,20 +339,17 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.startup = False
                     self.kill_caster()
-                    self.aproc = None
                     break
 
     def flag_offline(self):
         while True:
-            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
+            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
             #q = [p.info['name'] for p in psutil.process_iter(['name'])]
             if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
                 self.startup = False
                 self.offline = True
                 break
-
             if self.aproc != None:
                 if self.aproc.isalive() is False:
                     break
@@ -372,12 +359,18 @@ class Caster():
     def kill_existing(self):
         if self.aproc != None:
             self.kill_caster()
-            self.aproc = None
-            self.offline = False
-            self.startup = False
+
         
     def kill_caster(self):
-        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=CREATE_NO_WINDOW)
+        self.adr = None
+        self.rs = -1
+        self.ds = -1
+        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
+        del self.aproc
+        self.aproc = None
+        self.startup = False
+        self.offline = False
+        self.playing = False
 
     def check_msg(self,s):
         e = []

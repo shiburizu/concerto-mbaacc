@@ -16,7 +16,6 @@ from kivy.lang import Builder
 Builder.load_file('Concerto.kv')
 # Internal UI objects
 from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, sound
-CREATE_NO_WINDOW = 0x08000000 #subprocess flag
 
 class Concerto(App):
     def __init__(self, **kwargs):
@@ -52,7 +51,7 @@ class Concerto(App):
         if self.game.aproc != None:
             if self.game.aproc.isalive():
                 if self.game.offline is True:
-                    w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
+                    w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
                     print("offline")
                     print(w.stderr)
                     if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
@@ -75,18 +74,10 @@ class Concerto(App):
                         'secret': self.LobbyScreen.secret
                     }
                     requests.get(url=LOBBYURL, params=r).json()
-                self.game.aproc = None
-                self.game.playing = False
-                self.game.offline = False #just in case
-                self.game.adr = None
-                self.game.rs = -1
-                self.game.ds = -1
-                self.game.rf = -1
-                self.game.df = -1
                 self.kill_caster()
                     
         if hasattr(self,'sound'):
-            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
+            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
             if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
                 if self.sound.bgm.state == 'stop':
                     self.sound.cut_bgm()
@@ -98,7 +89,7 @@ class Concerto(App):
         self.checkPop()
 
     def kill_caster(self):
-        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=CREATE_NO_WINDOW)
+        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
                     
 def run():
     CApp = Concerto()

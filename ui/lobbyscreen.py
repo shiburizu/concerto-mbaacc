@@ -20,7 +20,6 @@ class LobbyScreen(Screen):
         super(LobbyScreen, self).__init__(**kwargs)
         self.app = CApp
         self.secret = None  # secret required for server messages
-        self.lobby_thread = None
         self.lobby_thread_flag = 0 #whether or not the thread is running
         self.watch_player = None  # id of player to watch for spectating, TODO
         self.player_id = None  # our own ID as provided by the JSON
@@ -184,7 +183,6 @@ class LobbyScreen(Screen):
         except:
             pass
         self.secret = None
-        self.lobby_thread = 1 #kill clock thread
         self.watch_player = None
         self.player_id = None
         self.code = None
@@ -202,7 +200,7 @@ class LobbyScreen(Screen):
                 popup.modal_txt.text = 'Challenging %s' % name
                 popup.close_btn.text = 'Stop Hosting'
                 popup.close_btn.bind(on_release=partial(
-                    self.dismiss, t=caster, p=popup))
+                    self.dismiss, p=popup))
                 self.active_pop = popup
                 popup.open()
                 p = {
@@ -229,19 +227,21 @@ class LobbyScreen(Screen):
         popup.modal_txt.text = 'Connecting to %s' % name
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
-            self.dismiss, t=caster, p=popup))
+            self.dismiss, p=popup))
         self.active_pop = popup
         popup.open()
 
     def confirm(self, obj, r, d, p, n, t=None, *args):
-        self.app.game.rf = int(r.text)
-        self.app.game.df = int(d.text)
-        self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
+        try:
+            self.app.game.confirm_frames(int(r.text),int(d.text))
+            self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
-        p.dismiss()
-        if t: #if accepting, run MBAA check
-            threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
-
+            p.dismiss()
+            if t: #if accepting, run MBAA check
+                threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
+        except ValueError:
+            pass
+        
     def wait_for_MBAA(self, t):
         time.sleep(3)
         if self.app.game.playing is True and self.active_pop != None:
@@ -265,20 +265,24 @@ class LobbyScreen(Screen):
         popup.modal_txt.text = 'Watching %s' % name
         popup.close_btn.text = 'Close game'
         popup.close_btn.bind(on_release=partial(
-            self.dismiss, t=caster, p=popup))
+            self.dismiss, p=popup))
         popup.open()
         caster.start()
 
-    def set_frames(self, name, delay, ping, target=None):
+    def set_frames(self, name, delay, ping, target=None, mode="Versus", rounds=2):
         popup = FrameModal()
-        popup.frame_txt.text = 'Connected to: %s\nPing: %s Network Delay: %s, Suggested: Rollback %s,  Delay %s' % (
-            name, ping, delay, self.app.game.rs, self.app.game.ds)
+        if rounds != 0:
+            rounds = ", %s rounds per game" % rounds
+        else:
+            rounds = ''
+        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Rollback %s, Delay %s[/size]' % (
+            name, mode, rounds, delay, ping, self.app.game.rs, self.app.game.ds)
         popup.r_input.text = str(self.app.game.rs)
         popup.d_input.text = str(self.app.game.ds)
         popup.start_btn.bind(on_release=partial(
             self.confirm, p=popup, r=popup.r_input, d=popup.d_input, n=name, t=target))
         popup.close_btn.bind(on_release=partial(
-            self.dismiss, t=self.app.game.aproc, p=popup))
+            self.dismiss, p=popup))
         popup.open()
 
     def error_message(self,e):
@@ -297,14 +301,8 @@ class LobbyScreen(Screen):
         self.error = False
 
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
-    def dismiss(self, obj, t, p, *args):
-        self.app.game.adr = None
-        self.app.game.rs = -1
-        self.app.game.ds = -1
-        self.app.game.rf = -1
-        self.app.game.df = -1
+    def dismiss(self, obj, p, *args):
         self.app.game.kill_caster()
-        del(t)
         r = {
             'action': 'end',
             'p': self.player_id,
@@ -316,5 +314,3 @@ class LobbyScreen(Screen):
         if self.active_pop != None:
             self.active_pop.dismiss()
         self.active_pop = None
-        self.app.game.aproc = None
-        self.app.game.playing = False
