@@ -10,6 +10,7 @@ class GameModal(ModalView):
 class DirectModal(ModalView):
     join_ip = ObjectProperty(None)
     watch_ip = ObjectProperty(None)
+    game_type = ObjectProperty(None)
     screen = None
 
 

@@ -133,14 +133,14 @@ class Caster():
                     # find all floats in caster output and use the last one [-1] to make sure we get caster text
                     p = re.findall('\d+\.\d+', con)
                     m = ""
-                    r = 2
+                    rd = 2
                     if "Versus mode each game is" in con:
                         m = "Versus"
-                        r = n[-3]
+                        rd = n[-3]
                     elif "Training mode" in con:
                         m = "Training"
-                        r = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=r) #trigger frame delay settings in UI
+                        rd = 0
+                    sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=rd) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -187,14 +187,14 @@ class Caster():
                             r.append(x)
                     p = re.findall('\d+\.\d+', con)
                     m = ""
-                    r = 2
+                    rd = 2
                     if "Versus mode each game is" in con:
                         m = "Versus"
-                        r = n[-3]
+                        rd = n[-3]
                     elif "Training mode" in con:
                         m = "Training"
-                        r = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=r) #send t for Accept network request
+                        rd = 0
+                    sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=rd) #send t for Accept network request
                     break
                 else:
                     if self.check_msg(con) != []:
