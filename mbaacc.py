@@ -58,13 +58,13 @@ class Caster():
         self.startup = False #True when waiting for MBAA.exe to start in offline
 
     def validate_read(self, con):
-        if "rollback:" in con:
+        if "rollback:" in con or "rolback:" in con:
             conlst = con.split() # split string into list
             r = 0 #count all items before "rollback:" in list
             for i in reversed(conlst):
-                if i != 'rollback:':
+                if i != 'rollback:' or i != 'rolback:':
                     r += 1
-                elif i == 'rollback:':
+                elif i == 'rollback:' or i == 'rolback':
                     break
             if r > 0: #if the list of items after "rollback:" > 0...
                 rlst = re.sub("[^0-9]", "", ''.join(conlst[-r:])) # ...find all numbers in the list
@@ -122,7 +122,7 @@ class Caster():
                     r = []
                     name = False  # try to read names from caster output
                     for x in reversed(con.split()):
-                        if name == False and x == "connected":
+                        if name == False and (x == "connected" or x == "conected"):
                             name = True
                         elif name == True and x == '*':
                             break
@@ -271,7 +271,7 @@ class Caster():
         while self.aproc.isalive():
             con = self.aproc.read()
             logger.write('\n%s\n' % con.split())
-            if "Offline" in con:
+            if "Offline" in con or "Ofline" in con:
                 self.aproc.write('4')  # 4 is offline
                 time.sleep(0.1)
                 self.aproc.write('1')
@@ -290,7 +290,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con:
+            if "Offline" in con or "Ofline" in con:
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('2')
@@ -309,7 +309,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con:
+            if "Offline" in con or "Ofline" in con:
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('4')
@@ -328,7 +328,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con:
+            if "Offline" in con or "Ofline" in con:
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('5')

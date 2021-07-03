@@ -1,6 +1,7 @@
 import time
 import requests
 import threading
+import pyperclip
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
@@ -196,6 +197,7 @@ class LobbyScreen(Screen):
         caster.start()
         while True:
             if self.app.game.adr is not None:
+                pyperclip.copy('') #erase IP address from clipboard
                 popup = GameModal()
                 popup.modal_txt.text = 'Challenging %s' % name
                 popup.close_btn.text = 'Stop Hosting'
