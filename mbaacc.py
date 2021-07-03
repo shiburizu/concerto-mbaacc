@@ -82,16 +82,15 @@ class Caster():
                         return n #return list
         return False
 
-    def host(self, sc, port=0, training=False): #sc is a Screen for UI triggers
-        self.kill_existing()
-        if training:
+    def host(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
+        self.kill_caster()
+        if mode == "Training":
             self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
         else:
             self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
-            print(t.split())
             ip = re.findall(
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
@@ -101,7 +100,6 @@ class Caster():
                 sc.error_message(self.check_msg(t))
                 self.kill_caster()
                 return None
-        print('continue')
         logger.write('IP: %s\n' % self.adr)
         cur_con = "" #current Caster read
         last_con = "" #last Caster read
@@ -155,7 +153,7 @@ class Caster():
                 break
 
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
-        self.kill_existing()
+        self.kill_caster()
         self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
         cur_con = ""
         last_con = ""
@@ -224,7 +222,7 @@ class Caster():
         self.playing = True
 
     def watch(self, ip, sc, *args):
-        self.kill_existing()
+        self.kill_caster()
         self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
         cur_con = ""
         last_con = ""
@@ -265,7 +263,7 @@ class Caster():
                     continue
 
     def training(self,sc):
-        self.kill_existing()
+        self.kill_caster()
         self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
@@ -286,7 +284,7 @@ class Caster():
                     break
 
     def local(self,sc):
-        self.kill_existing()
+        self.kill_caster()
         self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
@@ -305,7 +303,7 @@ class Caster():
                     break
 
     def tournament(self,sc):
-        self.kill_existing()
+        self.kill_caster()
         self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
@@ -324,7 +322,7 @@ class Caster():
                     break
 
     def replays(self,sc):
-        self.kill_existing()
+        self.kill_caster()
         self.startup = True
         proc = PtyProcess.spawn('cccaster.v3.0.exe')
         self.aproc = proc
@@ -356,17 +354,13 @@ class Caster():
             else:
                 break
 
-    def kill_existing(self):
-        if self.aproc != None:
-            self.kill_caster()
-
-        
     def kill_caster(self):
         self.adr = None
         self.rs = -1
         self.ds = -1
-        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
-        del self.aproc
+        if self.aproc != None:
+            subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
+            del self.aproc
         self.aproc = None
         self.startup = False
         self.offline = False

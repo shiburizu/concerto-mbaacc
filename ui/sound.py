@@ -5,10 +5,11 @@ class Sound():
 
     def __init__(self):
         self.bgm = SoundLoader.load('res/main_bgm.flac')
+        self.alert = SoundLoader.load('res/alert.wav')
         self.muted = False
+        self.mute_alerts = False
 
     def cut_bgm(self, obj=None):
-        print(self.bgm.state)
         if self.muted is False and self.bgm:
             if self.bgm.state == 'play':
                 self.bgm.stop()
@@ -17,10 +18,7 @@ class Sound():
                 self.bgm.loop = True
                 self.bgm.play()
 
-    def toggle_cut_bgm(self, obj=None):
-        if self.muted is True:
-            self.muted = False
-            self.cut_bgm()
-        else:
-            self.cut_bgm()
-            self.muted = True
+    def play_alert(self,obj=None):
+        if self.mute_alerts is False:
+            self.alert.volume = 0.5
+            self.alert.play()

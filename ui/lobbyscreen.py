@@ -31,7 +31,6 @@ class LobbyScreen(Screen):
 
     def create(self, j, first=False, type=""):  # json response object
         print(j)
-
         if first:
             self.player_id = j['msg']
             self.code = j['id']
@@ -40,16 +39,15 @@ class LobbyScreen(Screen):
             self.player_list.clear_widgets()
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
-
         challenging_ids = []
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
+            self.app.sound.play_alert()
             if 'c' not in self.widget_index:
                 h = DummyBtn()
                 h.text = 'Challenges (click to accept)'
                 self.challenge_list.add_widget(h)
                 self.widget_index.update({'c':h})
-
             for i in j['challenges']:  # name, id, ip of challenger
                 challenging_ids.append(i[1])
                 if i[1] in self.widget_index:
@@ -78,7 +76,6 @@ class LobbyScreen(Screen):
                     n.append(k)
             for i in n:
                 self.widget_index.pop(i)
-
         if j['idle'] != []:
             for i in j['idle']:
                 if i[1] not in challenging_ids:
@@ -94,7 +91,6 @@ class LobbyScreen(Screen):
                             p.text += " (self)"
                         self.player_list.add_widget(p)
                         self.widget_index.update({i[1]:p})
-
         if j['playing'] != []:
             if 'w' not in self.widget_index:
                 h = DummyBtn()
@@ -120,7 +116,6 @@ class LobbyScreen(Screen):
                     n.append(k)
             for i in n:
                 self.widget_index.pop(i)
-
         #if any widgets in the list don't correspond to json items, remove them
         n = []
         for k in self.widget_index.keys():
@@ -140,7 +135,6 @@ class LobbyScreen(Screen):
         for i in n:
             self.widget_index.get(i).parent.remove_widget(self.widget_index.get(i))
             self.widget_index.pop(i)
-
         if first:
             self.lobby_thread_flag = 0
             self.lobby_updater = threading.Thread(
@@ -192,7 +186,7 @@ class LobbyScreen(Screen):
 
     def send_challenge(self, obj, name, id, *args):
         caster = threading.Thread(
-            target=self.app.game.host, args=[self], daemon=True)
+            target=self.app.game.host, args=[self, app_config['settings']['netplay_port']], daemon=True)
         caster.start()
         while True:
             if self.app.game.adr is not None:

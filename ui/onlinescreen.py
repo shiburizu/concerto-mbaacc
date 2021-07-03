@@ -2,7 +2,7 @@ import threading
 from functools import partial
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
-
+import config
 
 class OnlineScreen(Screen):
     
@@ -21,7 +21,7 @@ class OnlineScreen(Screen):
 
     def host(self):
         caster = threading.Thread(
-            target=self.app.game.host, args=[self,self.direct_pop.game_type.text], daemon=True)
+            target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)
         caster.start()
         while True:
             if self.app.game.adr is not None:

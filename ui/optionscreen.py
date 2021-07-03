@@ -3,8 +3,25 @@ from config import *
 from ui.modals import GameModal
 
 class OptionScreen(Screen):
+
+    def __init__(self, CApp, **kwargs):
+        super(OptionScreen, self).__init__(**kwargs)
+        self.app = CApp
     
     def load(self):
+
+        self.ids['netplay_port'].text = app_config['settings']['netplay_port']
+
+        if app_config['settings']['mute_alerts'] == '1':
+            self.ids['mute_alerts'].active = True
+        else:
+            self.ids['mute_alerts'].active = False
+
+        if app_config['settings']['mute_bgm'] == '1':
+            self.ids['mute_bgm'].active = True
+        else:
+            self.ids['mute_bgm'].active = False
+
         self.ids['display_name'].text = caster_config['settings']['displayName']
         self.ids['max_delay'].text = caster_config['settings']['maxRealDelay']
         self.ids['default_rollback'].text = caster_config['settings']['defaultRollback']
@@ -39,6 +56,11 @@ class OptionScreen(Screen):
     def save(self):
         error_check = []
         try:
+            if int(self.ids['netplay_port'].text) > 65536:
+                error_check.append("Online port must be less than 65536.")     
+        except ValueError:
+            error_check.append("Online port must be a whole number.")
+        try:
             int(self.ids['max_delay'].text)
         except ValueError:
             error_check.append("Max delay is not a whole number.")
@@ -53,7 +75,6 @@ class OptionScreen(Screen):
         if error_check == []:
             with open('cccaster/config.ini', 'r') as f:
                 config_file = f.readlines()
-                out = open('cccaster/config.ini','w')
                 n = 0
                 for i in config_file:
                     if "displayName" in i:
@@ -92,12 +113,48 @@ class OptionScreen(Screen):
                         else:
                             config_file[n] = "autoCheckUpdates=0\n"
                     n += 1
+                out = open('cccaster/config.ini','w')
                 out.writelines(config_file)
                 out.close()
                 f.close()
             with open('cccaster/config.ini', 'r') as f:
                 config_string = '[settings]\n' + f.read()
             caster_config.read_string(config_string)
+
+            with open('concerto.ini', 'r') as f:
+                config_file = f.readlines()
+                n = 0
+                for i in config_file:
+                    if "netplay_port" in i:
+                        config_file[n] = "netplay_port=%s\n" % self.ids['netplay_port'].text
+                    elif "mute_alerts" in i:
+                        if self.ids['mute_alerts'].active is True:
+                            config_file[n] = "mute_alerts=1\n"
+                            self.app.sound.mute_alerts = True
+                        else:
+                            config_file[n] = "mute_alerts=0\n"   
+                            self.app.sound.mute_alerts = False                          
+                    elif "mute_bgm" in i:
+                        if self.ids['mute_bgm'].active is True:
+                            config_file[n] = "mute_bgm=1\n"
+                            if self.app.sound.muted is False:
+                                if self.app.sound.bgm.state == 'play':
+                                    self.app.sound.cut_bgm() 
+                                self.app.sound.muted = True 
+                        else:
+                            config_file[n] = "mute_bgm=0\n"
+                            self.app.sound.muted = False
+                            if self.app.sound.bgm.state == 'stop':
+                                    self.app.sound.cut_bgm() 
+                    n += 1
+                out = open('concerto.ini','w')
+                out.writelines(config_file)
+                out.close()
+                f.close()
+            with open('concerto.ini', 'r') as f:
+                config_string = f.read()
+            app_config.read_string(config_string)
+
         else:
             p = GameModal()
             p.modal_txt.text = "Correct the following options:\n"

@@ -58,31 +58,66 @@
                     on_release: 
                         app.OptionScreen.load()
                         app.sm.current = 'Options'
+                MenuBtn:
+                    text: '5. ABOUT'
+                    on_release: app.sm.current = 'About'
         Image:
             source: 'res/arc.png'
+        Label:
+            id: version
+            size_hint: (0.97,0.1)
+            text_size: self.size
+            halign: 'left'
+            valign: 'center'
+            text: 'Version'
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            font_size: 12
+            outline_width: 2
         BoxLayout:
-            size_hint: (1, 0.1)
-            GridLayout:
-                cols: 2
-                BoxLayout:
-                    size_hint_x: 0.6183
-                    Label:
-                        text: '[ref=x]Website[/ref]'
-                        outline_width: 2
-                        markup: True
-                        on_ref_press: webbrowser.open('https://concerto.shib.live/')
-                    Label:
-                        text: '[ref=x]Toggle BGM (By Tempxa)[/ref]'
-                        outline_width: 2
-                        markup: True
-                        on_ref_press: 
-                            app.sound.toggle_cut_bgm()
+            size_hint: (0.2, 0.1)
+            Label:
+                text: '[ref=x]By Bee Chan[/ref]'
+                outline_width: 2
+                markup: True
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                font_size: 12
+                on_ref_press: webbrowser.open('https://twitter.com/Bee_Sempai')
+
+<AboutScreen>
+    name: 'About'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        Image:
+            source: 'res/bg.png'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_y: 0.1
+                MenuBtn:
+                    text: 'BACK'
+                    on_release: 
+                        app.sm.current = 'Main'
+            BoxLayout:
+                size_hint_y: 0.9
+                padding: 20,5
                 Label:
-                    size_hint_x: 0.3817
-                    text: '[ref=x]By Bee Chan[/ref]'
-                    outline_width: 2
+                    id: about
+                    size_hint: (1,1)
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'top'
                     markup: True
-                    on_ref_press: webbrowser.open('https://twitter.com/Bee_Sempai')
+        Label:
+            id: version
+            size_hint: (0.97,0.1)
+            text_size: self.size
+            halign: 'left'
+            valign: 'center'
+            text: 'Version'
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            font_size: 12
+            outline_width: 2
 
 <LobbyScreen>:
     player_list: player_list
@@ -282,12 +317,15 @@
                     on_release: app.sm.current = 'Main'
         Image:
             source: 'res/sion.png'
-        Label:
-            size_hint: (0.3817,0.1)
-            text: '[ref=x]By abitofBaileys[/ref]'
-            outline_width: 2
-            markup: True
-            on_ref_press: webbrowser.open('https://twitter.com/abitofBaileys')
+        BoxLayout:
+            size_hint: (0.2, 0.1)
+            Label:
+                text: '[ref=x]By abitofBaileys[/ref]'
+                outline_width: 2
+                markup: True
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                font_size: 12
+                on_ref_press: webbrowser.open('https://twitter.com/abitofBaileys')
 
 <ResourceScreen>:
     name: 'Resources'
@@ -319,12 +357,15 @@
                     on_release: app.sm.current = 'Main'
         Image:
             source: 'res/kohaku.png'
-        Label:
-            size_hint: (0.3817,0.1)
-            text: '[ref=x]By kohakudoori[/ref]'
-            outline_width: 2
-            markup: True
-            on_ref_press: webbrowser.open('https://twitter.com/kohakudoori')
+        BoxLayout:
+            size_hint: (0.2, 0.1)
+            Label:
+                text: '[ref=x]By kohakudoori[/ref]'
+                outline_width: 2
+                markup: True
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                font_size: 12
+                on_ref_press: webbrowser.open('https://twitter.com/kohakudoori')
 
 <HowtoScreen>
     name: 'HowTo'
@@ -410,12 +451,15 @@
                         app.sm.current = 'Main'
         Image:
             source: 'res/ries.png'
-        Label:
-            size_hint: (0.3817,0.1)
-            text: '[ref=x]Art by Onemi[/ref]'
-            outline_width: 2
-            markup: True
-            on_ref_press: webbrowser.open('https://twitter.com/OnemiESESEBEME')
+        BoxLayout:
+            size_hint: (0.2, 0.1)
+            Label:
+                text: '[ref=x]By Onemi[/ref]'
+                outline_width: 2
+                markup: True
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                font_size: 12
+                on_ref_press: webbrowser.open('https://twitter.com/OnemiESESEBEME')
 
 <OptionScreen>
     name: 'Options'
@@ -435,6 +479,7 @@
                         app.sm.current = 'Main'
                 Button:
                     text: 'SAVE'
+                    font_name: 'res/texgyreheros-bolditalic.otf'
                     size_hint_x: 0.2
                     outline_width: 2
                     background_color: '#343B88'
@@ -448,6 +493,24 @@
                     cols: 1
                     height: self.minimum_height
                     size_hint_y: None
+                    DummyBtn:
+                        text: 'Concerto Options'
+                    OptionRow:
+                        Label:
+                            text: 'Online play port (0 for auto)'
+                        TextInput:
+                            id: netplay_port
+                            multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Mute all alerts'
+                        CheckBox:
+                            id: mute_alerts
+                    OptionRow:
+                        Label:
+                            text: 'Mute all music'
+                        CheckBox:
+                            id: mute_bgm
                     DummyBtn:
                         text: 'CCCaster Options'
                     OptionRow:
@@ -512,6 +575,7 @@
                                 max: 5
                                 step: 1
                                 size_hint_x: 0.8
+                    
 
 <OptionRow@BoxLayout>
     size_hint_x: 1

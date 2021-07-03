@@ -15,7 +15,7 @@ from kivy.app import App
 from kivy.lang import Builder
 Builder.load_file('Concerto.kv')
 # Internal UI objects
-from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, sound
+from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, aboutscreen, sound
 
 class Concerto(App):
     def __init__(self, **kwargs):
@@ -25,15 +25,19 @@ class Concerto(App):
 
     def build(self):
         self.sound = sound.Sound()
-        self.sound.cut_bgm()
+        if app_config['settings']['mute_bgm'] == '1':
+            self.sound.muted = True
+        else:
+            self.sound.cut_bgm()
         self.MainScreen = mainscreen.MainScreen()
         self.OnlineScreen = onlinescreen.OnlineScreen(CApp=self)
         self.OfflineScreen = offlinescreen.OfflineScreen(CApp=self)
         self.ResourceScreen = resourcescreen.ResourceScreen()
-        self.OptionScreen = optionscreen.OptionScreen()
+        self.OptionScreen = optionscreen.OptionScreen(CApp=self)
         self.LobbyList = lobbylist.LobbyList(CApp=self)
         self.LobbyScreen = lobbyscreen.LobbyScreen(CApp=self)
         self.HowtoScreen = howtoscreen.HowtoScreen()
+        self.AboutScreen = aboutscreen.AboutScreen()
         self.sm.add_widget(self.MainScreen)
         self.sm.add_widget(self.OnlineScreen)
         self.sm.add_widget(self.OfflineScreen)
@@ -42,25 +46,19 @@ class Concerto(App):
         self.sm.add_widget(self.LobbyList)
         self.sm.add_widget(self.LobbyScreen)
         self.sm.add_widget(self.HowtoScreen)
+        self.sm.add_widget(self.AboutScreen)
         c = threading.Thread(target=self.checkPop,daemon=True)
         c.start()
         return self.sm
 
     def checkPop(self, *args):
-        print("run")
         if self.game.aproc != None:
             if self.game.aproc.isalive():
                 if self.game.offline is True:
                     w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-                    print("offline")
-                    print(w.stderr)
                     if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
-                        print("no MBAA found")
-                        self.kill_caster()
-                        self.game.aproc = None
-                        self.game.offline = False
+                        self.game.kill_caster()
             else:
-                print("game dead")
                 if self.OnlineScreen.active_pop != None:
                     self.OnlineScreen.active_pop.dismiss()
                     self.OnlineScreen.active_pop = None
@@ -74,8 +72,7 @@ class Concerto(App):
                         'secret': self.LobbyScreen.secret
                     }
                     requests.get(url=LOBBYURL, params=r).json()
-                self.kill_caster()
-                    
+                self.game.kill_caster()    
         if hasattr(self,'sound'):
             w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
             if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
@@ -84,18 +81,15 @@ class Concerto(App):
             else:
                 if self.sound.bgm.state == 'play':
                     self.sound.cut_bgm()
-
         time.sleep(2)
         self.checkPop()
-
-    def kill_caster(self):
-        subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
                     
 def run():
     CApp = Concerto()
     try:
         CApp.run()
     finally:
+        CApp.game.kill_caster()
         if CApp.LobbyScreen.code != None:
             CApp.LobbyScreen.exit()
 

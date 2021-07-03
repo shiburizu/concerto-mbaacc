@@ -34,6 +34,21 @@ with open('cccaster/config.ini', 'r') as f:
 caster_config = configparser.ConfigParser()
 caster_config.read_string(config_string)
 
+if os.path.exists('concerto.ini'):
+    with open('concerto.ini','r') as f:
+        config_string = f.read()
+else:
+    with open('concerto.ini', 'w') as f:
+        f.write('[settings]\n')
+        f.write('netplay_port = 0\n')
+        f.write('mute_alerts = 0\n')
+        f.write('mute_bgm = 0\n')
+        f.close()
+    with open('concerto.ini','r') as f:
+        config_string = f.read()
+app_config = configparser.ConfigParser()
+app_config.read_string(config_string)
+
 LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
 VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"
-CURRENT_VERSION = '7-2-2021'
+CURRENT_VERSION = '7-2-2021r2'
