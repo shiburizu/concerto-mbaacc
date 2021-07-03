@@ -31,6 +31,7 @@ class LobbyScreen(Screen):
 
     def create(self, j, first=False, type=""):  # json response object
         print(j)
+        newSound = False
         if first:
             self.player_id = j['msg']
             self.code = j['id']
@@ -42,7 +43,6 @@ class LobbyScreen(Screen):
         challenging_ids = []
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
-            self.app.sound.play_alert()
             if 'c' not in self.widget_index:
                 h = DummyBtn()
                 h.text = 'Challenges (click to accept)'
@@ -61,6 +61,9 @@ class LobbyScreen(Screen):
                             self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
                         self.challenge_list.add_widget(p)
                         self.widget_index.update({i[1]:p})
+                        if newSound is False:
+                            self.app.sound.play_alert()
+                            newSound = True
                 else:
                     p = MenuBtn()
                     p.text = i[0]
@@ -68,6 +71,9 @@ class LobbyScreen(Screen):
                         self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
                     self.challenge_list.add_widget(p)
                     self.widget_index.update({i[1]:p})
+                    if newSound is False:
+                        self.app.sound.play_alert()
+                        newSound = True
         else:
             n = []
             for k,v in self.widget_index.items():
