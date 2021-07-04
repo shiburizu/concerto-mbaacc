@@ -62,9 +62,9 @@ class Caster():
             conlst = con.split() # split string into list
             r = 0 #count all items before "rollback:" in list
             for i in reversed(conlst):
-                if i != 'rollback:' or i != 'rolback:':
+                if i != 'rollback:' and i != 'rolback:':
                     r += 1
-                elif i == 'rollback:' or i == 'rolback':
+                else:
                     break
             if r > 0: #if the list of items after "rollback:" > 0...
                 rlst = re.sub("[^0-9]", "", ''.join(conlst[-r:])) # ...find all numbers in the list
@@ -132,10 +132,10 @@ class Caster():
                     p = re.findall('\d+\.\d+', con)
                     m = ""
                     rd = 2
-                    if "Versus mode each game is" in con:
+                    if "Versus" in con:
                         m = "Versus"
                         rd = n[-3]
-                    elif "Training mode" in con:
+                    elif "Training" in con:
                         m = "Training"
                         rd = 0
                     sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=rd) #trigger frame delay settings in UI
