@@ -5,6 +5,7 @@ from config import *
 
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
+from kivy.clock import Clock
 
 from ui.modals import GameModal
 from ui.buttons import MenuBtn
@@ -100,18 +101,24 @@ class LobbyList(Screen):
                     b.bind(on_release=partial(self.join, code=i[0]))
                     self.lobby_view.add_widget(b)
                 if self.app.sm.current != 'LobbyList':
-                    self.app.sm.switch_to(self.app.LobbyList)
+                    Clock.schedule_once(lambda dt: self.switch_to_list(),0)
             else:
-                self.app.sm.switch_to(self.app.OnlineScreen)
+                Clock.schedule_once(lambda dt: self.switch_to_online(),0)
                 p = GameModal()
                 p.modal_txt.text = a['msg']
                 p.close_btn.text = 'Close'
                 p.close_btn.bind(on_release=p.dismiss)
                 p.open()
         except requests.exceptions.ConnectionError as e:
-            self.app.sm.switch_to(self.app.OnlineScreen)
+            Clock.schedule_once(lambda dt: self.switch_to_online(),0)
             p = GameModal()
             p.modal_txt.text = 'Unable to establish a connection to lobby server.'
             p.close_btn.text = 'Close'
             p.close_btn.bind(on_release=p.dismiss)
             p.open()
+
+    def switch_to_list(self):
+        self.app.sm.current = 'LobbyList'
+    
+    def switch_to_online(self):
+        self.app.sm.current = 'Online'

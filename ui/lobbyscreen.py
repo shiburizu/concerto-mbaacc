@@ -83,7 +83,13 @@ class LobbyScreen(Screen):
                     n.append(k)
             for i in n:
                 self.widget_index.pop(i)
+
         if j['idle'] != []:
+            if 'i' not in self.widget_index:
+                h = DummyBtn()
+                h.text = 'Idle players (click to challenge)'
+                self.player_list.add_widget(h)
+                self.widget_index.update({'i':h})
             for i in j['idle']:
                 if i[1] not in challenging_ids:
                     if i[1] in self.widget_index:
@@ -98,11 +104,20 @@ class LobbyScreen(Screen):
                             p.text += " (self)"
                         self.player_list.add_widget(p)
                         self.widget_index.update({i[1]:p})
+        else:
+            n = []
+            for k,v in self.widget_index.items():
+                if v in self.player_list.children:
+                    v.parent.remove_widget(v)
+                    n.append(k)
+            for i in n:
+                self.widget_index.pop(i)
+
         if j['playing'] != []:
             if 'w' not in self.widget_index:
                 h = DummyBtn()
                 h.text = 'Now playing (click to watch)'
-                self.challenge_list.add_widget(h)
+                self.match_list.add_widget(h)
                 self.widget_index.update({'w':h})
             for i in j['playing']:
                 if (i[2],i[3]) in self.widget_index:
@@ -127,7 +142,7 @@ class LobbyScreen(Screen):
         n = []
         for k in self.widget_index.keys():
             ok = False
-            if k != 'w' and k != 'c':
+            if k != 'w' and k != 'c' and k != 'i':
                 for i in j['challenges']:
                     if k == i[1]:
                         ok = True
@@ -135,7 +150,7 @@ class LobbyScreen(Screen):
                     if k == i[1]:
                         ok = True
                 for i in j['playing']:
-                    if k == i[2] or k == i[3]:
+                    if k == (i[2],i[3]) or k == (i[3],i[2]):
                         ok = True
                 if ok is False:
                     n.append(k)
@@ -147,7 +162,6 @@ class LobbyScreen(Screen):
             self.lobby_updater = threading.Thread(
                 target=self.auto_refresh, daemon=True)  # netplay watchdog
             self.lobby_updater.start()
-            #self.lobby_updater = Clock.schedule_interval(lambda dt: self.auto_refresh(),2)
 
     def auto_refresh(self):
         if self.lobby_thread_flag == 0:
@@ -187,7 +201,6 @@ class LobbyScreen(Screen):
         self.watch_player = None
         self.player_id = None
         self.code = None
-        #Clock.unschedule(self.lobby_updater)
         self.lobby_updater = None
         self.app.LobbyList.refresh()
 
@@ -262,7 +275,7 @@ class LobbyScreen(Screen):
     def watch_match(self, obj, name, ip, *args):
         popup = GameModal()
         caster = threading.Thread(
-            target=self.app.game.watch, args=[ip,popup.modal_txt], daemon=True)
+            target=self.app.game.watch, args=[ip,self], daemon=True)
         self.active_pop = popup
         popup.modal_txt.text = 'Watching %s' % name
         popup.close_btn.text = 'Close game'

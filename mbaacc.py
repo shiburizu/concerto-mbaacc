@@ -186,10 +186,10 @@ class Caster():
                     p = re.findall('\d+\.\d+', con)
                     m = ""
                     rd = 2
-                    if "Versus mode each game is" in con:
+                    if "Versus" in con:
                         m = "Versus"
                         rd = n[-3]
-                    elif "Training mode" in con:
+                    elif "Training" in con:
                         m = "Training"
                         rd = 0
                     sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=rd) #send t for Accept network request
