@@ -2,6 +2,7 @@ import time
 import requests
 import threading
 import pyperclip
+import subprocess
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
@@ -258,19 +259,27 @@ class LobbyScreen(Screen):
             pass
         
     def wait_for_MBAA(self, t):
-        time.sleep(3)
-        if self.app.game.playing is True and self.active_pop != None:
-            resp = {
-                't': t,
-                'p': self.player_id,
-                'action': 'accept',
-                'id': self.code,
-                'secret': self.secret
-            }
-            print(resp)
-            c = requests.get(url=LOBBYURL, params=resp).json()
-            print(c)
-            self.current_player = t
+        while True:
+            if self.app.game.playing is True and self.active_pop != None:
+                w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
+                if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
+                    print("not running yet")
+                else:
+                    print("MBAA running!")
+                    resp = {
+                        't': t,
+                        'p': self.player_id,
+                        'action': 'accept',
+                        'id': self.code,
+                        'secret': self.secret
+                    }
+                    print(resp)
+                    c = requests.get(url=LOBBYURL, params=resp).json()
+                    print(c)
+                    self.current_player = t
+                    break
+            else:
+                break
 
     def watch_match(self, obj, name, ip, *args):
         popup = GameModal()
