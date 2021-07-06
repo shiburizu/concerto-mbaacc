@@ -44,7 +44,7 @@ class LobbyList(Screen):
             popup.close_btn.bind(on_release=partial(popup.dismiss))
             popup.open()
 
-    def join(self, obj=None, code=None):
+    def join(self, obj=None, code=None, pub=False):
         if code is None:
             if self.lobby_code.text == '':
                 return None
@@ -72,8 +72,12 @@ class LobbyList(Screen):
         if a['status'] == 'OK':
             self.app.sm.current = 'Lobby'
             self.app.LobbyScreen.secret = int(a['secret'])
-            self.app.LobbyScreen.create(
-                a, first=True, type=self.lobby_type.text)
+            if pub:
+                self.app.LobbyScreen.create(
+                    a, first=True, type="Public")
+            else:
+                self.app.LobbyScreen.create(
+                    a, first=True, type=self.lobby_type.text)
             self.lobby_code.text = ''
         else:
             popup = GameModal()
@@ -98,7 +102,7 @@ class LobbyList(Screen):
                 for i in a['lobbies']:
                     b = MenuBtn()
                     b.text = "ID %s: %s players" % (i[0], i[1])
-                    b.bind(on_release=partial(self.join, code=i[0]))
+                    b.bind(on_release=partial(self.join, code=i[0],pub=True))
                     self.lobby_view.add_widget(b)
                 if self.app.sm.current != 'LobbyList':
                     Clock.schedule_once(lambda dt: self.switch_to_list(),0)
