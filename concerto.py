@@ -1,5 +1,6 @@
 import logging
-logging.basicConfig(filename="concerto.log", level=logging.DEBUG)
+import sys
+logging.basicConfig(sys.path[0] + '\concerto.log', level=logging.DEBUG)
 # System
 import requests
 import time
