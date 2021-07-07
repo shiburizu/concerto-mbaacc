@@ -24,6 +24,10 @@ class OfflineScreen(Screen):
     def tournament(self, *args):
         caster = threading.Thread(target=self.app.game.tournament,args=[self],daemon=True)
         caster.start()
+
+    def standalone(self, *args):
+        caster = threading.Thread(target=self.app.game.standalone,args=[self],daemon=True)
+        caster.start()
     
     def error_message(self,e):
         popup = GameModal()

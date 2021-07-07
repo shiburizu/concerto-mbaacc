@@ -400,6 +400,10 @@
                     on_release:
                         webbrowser.open('https://wiki.gbl.gg/w/Melty_Blood/MBAACC')
                 MenuBtn:
+                    text: '3. MELTY.GAMES DATABASE'
+                    on_release:
+                        webbrowser.open('http://mbaacc.melty.games/')
+                MenuBtn:
                     text: '0. BACK'
                     on_release: app.sm.current = 'Main'
         Image:
@@ -500,6 +504,10 @@
                     text: '4. REPLAY THEATER'
                     on_release: 
                         root.replays()
+                MenuBtn:
+                    text: '5. STANDALONE MBAACC'
+                    on_release: 
+                        root.standalone()
                 MenuBtn:
                     text: '0. BACK'
                     on_release: 

@@ -339,6 +339,10 @@ class Caster():
                     sc.error_message(self.check_msg(con))
                     self.kill_caster()
                     break
+    
+    def standalone(self,sc):
+        self.kill_caster()
+        PtyProcess.spawn(sys.path[0] + '\MBAA.exe')
 
     def flag_offline(self):
         while True:
