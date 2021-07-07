@@ -11,3 +11,7 @@ class DummyBtn(Button):
 
 class LobbyBtn(Button):
     pass
+
+
+class PlayerBtn(Button):
+    pass

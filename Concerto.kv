@@ -14,6 +14,19 @@
     font_name: 'res/texgyreheros-bolditalic.otf'
     on_press: self.background_color = (255, 0, 0, 1)
     on_release: self.background_color = (1, 1 ,1 ,1)
+    
+<PlayerBtn@Button>
+    text_size: self.size
+    halign: 'left'
+    valign: 'middle'
+    size_hint_y: None
+    height: 36
+    padding_x: 50
+    outline_width: 2
+    font_name: 'res/texgyreheros-bolditalic.otf'
+    background_color: (0,0,0,0.3)
+    on_press: self.background_color = (255, 0, 0, 1)
+    on_release: self.background_color = (0, 0, 0 ,0.3)
 
 <DummyBtn@Button>
     text_size: self.size
@@ -24,7 +37,7 @@
     padding_x: 50
     outline_width: 2
     font_name: 'res/texgyreheros-bolditalic.otf'
-    background_normal: 'res/menubtn.png'
+    background_color: (0,0,0,0.3)
 
 <LobbyBtn@Button>:
     text: 'LOBBY'
@@ -528,9 +541,11 @@
                     font_name: 'res/texgyreheros-bolditalic.otf'
                     size_hint_x: 0.2
                     outline_width: 2
-                    background_color: '#343B88'
-                    on_release:
-                        root.save()
+                    background_color: (255, 0, 0, 0.2)
+                    on_release: 
+                        self.background_color = (255, 0, 0, 0.2)
+                    on_press: 
+                        self.background_color = (100, 0, 0, 0.9)  
             ScrollView:
                 size_hint: (1,0.9)
                 do_scroll_x: False
@@ -631,10 +646,11 @@
     size_hint_y: None
     height: 28
     canvas.before:
+        Color:
+            rgba: (0,0,0,0.3)
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'res/menubtn.png'
 
 <DirectModal>:
     size_hint: None,None
@@ -796,20 +812,6 @@
                 size_hint_x: None
                 width: self.minimum_width
                 Label:
-                    text: 'Rollback:'
-                    background_color: (0, 0, 0, 0)
-                    outline_width: 1
-                    size_hint_x: None
-                    width: 70
-                TextInput
-                    multiline: False
-                    id: r_input
-                    input_filter: 'int'
-                    foreground_color: (255, 255, 255, 1)
-                    background_color: (255, 0, 0, 0.2)
-                    size_hint_x: None
-                    width: 30
-                Label:
                     text: 'Delay:'
                     background_color: (0, 0, 0, 0)
                     outline_width: 1
@@ -818,6 +820,20 @@
                 TextInput
                     multiline: False
                     id: d_input
+                    input_filter: 'int'
+                    foreground_color: (255, 255, 255, 1)
+                    background_color: (255, 0, 0, 0.2)
+                    size_hint_x: None
+                    width: 30
+                Label:
+                    text: 'Rollback:'
+                    background_color: (0, 0, 0, 0)
+                    outline_width: 1
+                    size_hint_x: None
+                    width: 70
+                TextInput
+                    multiline: False
+                    id: r_input
                     input_filter: 'int'
                     foreground_color: (255, 255, 255, 1)
                     background_color: (255, 0, 0, 0.2)

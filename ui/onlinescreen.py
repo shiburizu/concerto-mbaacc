@@ -76,8 +76,8 @@ class OnlineScreen(Screen):
             rounds = ", %s rounds per game" % rounds
         else:
             rounds = ''
-        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Rollback %s, Delay %s[/size]' % (
-            name, mode, rounds, delay, ping, self.app.game.rs, self.app.game.ds)
+        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Delay %s, Rollback %s[/size]' % (
+            name, mode, rounds, delay, ping, self.app.game.ds, self.app.game.rs)
         popup.r_input.text = str(self.app.game.rs)
         popup.d_input.text = str(self.app.game.ds)
         popup.start_btn.bind(on_release=partial(

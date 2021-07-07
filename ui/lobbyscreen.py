@@ -8,7 +8,7 @@ from config import *
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
-from ui.buttons import MenuBtn, DummyBtn
+from ui.buttons import DummyBtn, PlayerBtn
 
 
 class LobbyScreen(Screen):
@@ -57,7 +57,7 @@ class LobbyScreen(Screen):
                         pass
                     else: #remove idle player
                         self.widget_index.get(i[1]).parent.remove_widget(self.widget_index.get(i[1]))
-                        p = MenuBtn()
+                        p = PlayerBtn()
                         p.text = i[0]
                         p.bind(on_release=partial(
                             self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
@@ -67,7 +67,7 @@ class LobbyScreen(Screen):
                             self.app.sound.play_alert()
                             newSound = True
                 else:
-                    p = MenuBtn()
+                    p = PlayerBtn()
                     p.text = i[0]
                     p.bind(on_release=partial(
                         self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
@@ -96,7 +96,7 @@ class LobbyScreen(Screen):
                     if i[1] in self.widget_index:
                         pass
                     else:
-                        p = MenuBtn()
+                        p = PlayerBtn()
                         p.text = i[0]
                         if i[1] != self.player_id:
                             p.bind(on_release=partial(
@@ -124,7 +124,7 @@ class LobbyScreen(Screen):
                 if (i[2],i[3]) in self.widget_index:
                     pass
                 else:
-                    p = MenuBtn()
+                    p = PlayerBtn()
                     p.text = "%s vs %s" % (i[0], i[1])
                     if i[2] != self.player_id and i[3] != self.player_id:
                         p.bind(on_release=partial(self.watch_match,
@@ -306,8 +306,8 @@ class LobbyScreen(Screen):
             rounds = ", %s rounds per game" % rounds
         else:
             rounds = ''
-        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Rollback %s, Delay %s[/size]' % (
-            name, mode, rounds, delay, ping, self.app.game.rs, self.app.game.ds)
+        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Delay %s, Rollback %s[/size]' % (
+            name, mode, rounds, delay, ping, self.app.game.ds, self.app.game.rs)
         popup.r_input.text = str(self.app.game.rs)
         popup.d_input.text = str(self.app.game.ds)
         popup.start_btn.bind(on_release=partial(
