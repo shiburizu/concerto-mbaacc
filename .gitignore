@@ -4,6 +4,7 @@ media/
 cccaster.v3.0.exe
 *.zip
 concerto.ini
+Concerto_*.txt
 
 # Concerto EXEs
 Concerto.exe

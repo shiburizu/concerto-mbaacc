@@ -3,6 +3,7 @@ from functools import partial
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
 import config
+import re
 
 class OnlineScreen(Screen):
     
@@ -38,6 +39,11 @@ class OnlineScreen(Screen):
                 break
 
     def join(self):
+        ip = re.findall(
+            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', self.direct_pop.join_ip.text)
+        if ip == []:
+            self.error_message(['Please supply a valid IP.'])
+            return None
         caster = threading.Thread(target=self.app.game.join, args=[
                                   self.direct_pop.join_ip.text,self], daemon=True)
         caster.start()
@@ -50,6 +56,11 @@ class OnlineScreen(Screen):
         popup.open()
 
     def watch(self):
+        ip = re.findall(
+            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', self.direct_pop.watch_ip.text)
+        if ip == []:
+            self.error_message(['Please supply a valid IP.'])
+            return None
         popup = GameModal()
         self.active_pop = popup
         caster = threading.Thread(target=self.app.game.watch, args=[
