@@ -342,12 +342,12 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        PtyProcess.spawn(sys.path[0] + '\MBAA.exe')
+        self.aproc = PtyProcess.spawn(sys.path[0] + '\MBAA.exe')
+        self.flag_offline()
 
     def flag_offline(self):
         while True:
             w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-            #q = [p.info['name'] for p in psutil.process_iter(['name'])]
             if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
                 self.startup = False
                 self.offline = True

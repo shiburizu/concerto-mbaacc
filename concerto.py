@@ -26,11 +26,7 @@ class Concerto(App):
 
     def build(self):
         self.sound = sound.Sound()
-        if app_config['settings']['mute_bgm'] == '1':
-            self.sound.muted = True
-        else:
-            self.sound.cut_bgm()
-        self.MainScreen = mainscreen.MainScreen()
+        self.MainScreen = mainscreen.MainScreen(CApp=self)
         self.OnlineScreen = onlinescreen.OnlineScreen(CApp=self)
         self.OfflineScreen = offlinescreen.OfflineScreen(CApp=self)
         self.ResourceScreen = resourcescreen.ResourceScreen()
@@ -50,8 +46,23 @@ class Concerto(App):
         self.sm.add_widget(self.AboutScreen)
         c = threading.Thread(target=self.checkPop,daemon=True)
         c.start()
-        print(self.MainScreen.ids)
         return self.sm
+
+    def on_start(self):
+        #necessary file sanity checks
+        e = []
+        if app_config is None:
+            e.append('cccaster/config.ini not found.')
+            e.append('Please fix the above problems and restart Concerto.')
+        if e != []:
+            self.sound.muted = True
+            self.MainScreen.error_message(e)
+        else:
+            #if all is well, start loading in user options
+            if app_config['settings']['mute_bgm'] == '1':
+                    self.sound.muted = True
+            else:
+                self.sound.cut_bgm()
 
     def lobby_button(self, *args):
         lst = [
