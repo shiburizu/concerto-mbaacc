@@ -16,7 +16,7 @@ from kivy.app import App
 from kivy.lang import Builder
 Builder.load_file('Concerto.kv')
 # Internal UI objects
-from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, aboutscreen, sound
+from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, aboutscreen, sound, buttons
 
 class Concerto(App):
     def __init__(self, **kwargs):
@@ -50,7 +50,58 @@ class Concerto(App):
         self.sm.add_widget(self.AboutScreen)
         c = threading.Thread(target=self.checkPop,daemon=True)
         c.start()
+        print(self.MainScreen.ids)
         return self.sm
+
+    def lobby_button(self, *args):
+        lst = [
+            self.MainScreen.ids['lobbyAnchor'],
+            self.OnlineScreen.ids['lobbyAnchor'],
+            self.OfflineScreen.ids['lobbyAnchor'],
+            self.ResourceScreen.ids['lobbyAnchor'],
+            self.OptionScreen.ids['lobbyAnchor'],
+            self.HowtoScreen.ids['lobbyAnchor'],
+            self.AboutScreen.ids['lobbyAnchor']
+        ]
+        for i in lst:
+            b = buttons.LobbyBtn()
+            b.text += ' %s' % self.LobbyScreen.code
+            b.bind(on_release=self.switch_to_lobby)
+            i.clear_widgets()
+            i.add_widget(b)
+    
+    def remove_lobby_button(self, *args):
+        lst = [
+            self.MainScreen.ids['lobbyAnchor'],
+            self.OnlineScreen.ids['lobbyAnchor'],
+            self.OfflineScreen.ids['lobbyAnchor'],
+            self.ResourceScreen.ids['lobbyAnchor'],
+            self.OptionScreen.ids['lobbyAnchor'],
+            self.HowtoScreen.ids['lobbyAnchor'],
+            self.AboutScreen.ids['lobbyAnchor']
+        ]
+        for i in lst:
+            i.clear_widgets()
+
+    def update_lobby_button(self,text,*args):
+        lst = [
+            self.MainScreen.ids['lobbyAnchor'].children,
+            self.OnlineScreen.ids['lobbyAnchor'].children,
+            self.OfflineScreen.ids['lobbyAnchor'].children,
+            self.ResourceScreen.ids['lobbyAnchor'].children,
+            self.OptionScreen.ids['lobbyAnchor'].children,
+            self.HowtoScreen.ids['lobbyAnchor'].children,
+            self.AboutScreen.ids['lobbyAnchor'].children
+        ]
+        for i in lst:
+            for n in i:
+                n.text = text
+        
+    def switch_to_main(self, *args):
+        self.sm.current = 'Main'
+
+    def switch_to_lobby(self, *args):
+        self.sm.current = 'Lobby'
 
     def checkPop(self, *args):
         if self.game.aproc != None:

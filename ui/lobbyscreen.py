@@ -159,10 +159,16 @@ class LobbyScreen(Screen):
             self.widget_index.get(i).parent.remove_widget(self.widget_index.get(i))
             self.widget_index.pop(i)
         if first:
+            self.app.lobby_button()
             self.lobby_thread_flag = 0
             self.lobby_updater = threading.Thread(
                 target=self.auto_refresh, daemon=True)  # netplay watchdog
             self.lobby_updater.start()
+        else:
+            if len(self.challenge_list.children) > 0:
+                self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
+            else:
+                self.app.update_lobby_button('LOBBY %s ' % self.code)
 
     def auto_refresh(self):
         if self.lobby_thread_flag == 0:
@@ -203,6 +209,7 @@ class LobbyScreen(Screen):
         self.player_id = None
         self.code = None
         self.lobby_updater = None
+        self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
 
     def send_challenge(self, obj, name, id, *args):

@@ -23,6 +23,10 @@ class OptionScreen(Screen):
             self.ids['mute_bgm'].active = False
 
         self.ids['display_name'].text = caster_config['settings']['displayName']
+        if self.ids['lobbyAnchor'].children != []:
+            self.ids['display_name'].disabled = True
+        else:
+            self.ids['display_name'].disabled = False
         self.ids['max_delay'].text = caster_config['settings']['maxRealDelay']
         self.ids['default_rollback'].text = caster_config['settings']['defaultRollback']
         self.ids['held_start'].text = caster_config['settings']['heldStartDuration']

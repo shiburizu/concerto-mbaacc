@@ -26,6 +26,18 @@
     font_name: 'res/texgyreheros-bolditalic.otf'
     background_normal: 'res/menubtn.png'
 
+<LobbyBtn@Button>:
+    text: 'LOBBY'
+    size_hint_x: 0.25
+    size_hint_y: 0.1
+    outline_width: 2
+    font_name: 'res/texgyreheros-bolditalic.otf'
+    background_color: (255, 0, 0, 0.2)
+    on_release: 
+        self.background_color = (255, 0, 0, 0.2)
+    on_press: 
+        self.background_color = (100, 0, 0, 0.9)  
+        
 <MainScreen>:
     name: 'Main'
     AnchorLayout:
@@ -82,6 +94,10 @@
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 font_size: 12
                 on_ref_press: webbrowser.open('https://twitter.com/Bee_Sempai')
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
 
 <AboutScreen>
     name: 'About'
@@ -118,6 +134,10 @@
             font_name: 'res/texgyreheros-bolditalic.otf'
             font_size: 12
             outline_width: 2
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
 
 <LobbyScreen>:
     player_list: player_list
@@ -142,6 +162,11 @@
                     id: lobby_code
                     text: 'Lobby ID: 1234'
                     outline_width: 2
+                    padding_x: 25
+                    font_name: 'res/texgyreheros-bolditalic.otf'
+                    text_size: self.size
+                    halign: 'right'
+                    valign: 'middle'
             ScrollView:
                 size_hint: (1,0.9)
                 do_scroll_x: False
@@ -172,7 +197,14 @@
                         height: self.minimum_height
                         size_hint_x: 1
                         size_hint_y: None
-                        spacing: [0,5]
+                        spacing: [0,5]    
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
+        LobbyBtn:
+            text: 'MAIN MENU'
+            on_release: app.sm.current = 'Main'
                         
 <LobbyList>:
     lobby_code: lobby_code
@@ -324,6 +356,10 @@
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 font_size: 12
                 on_ref_press: webbrowser.open('https://twitter.com/abitofBaileys')
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
 
 <ResourceScreen>:
     name: 'Resources'
@@ -364,6 +400,10 @@
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 font_size: 12
                 on_ref_press: webbrowser.open('https://twitter.com/kohakudoori')
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
 
 <HowtoScreen>
     name: 'HowTo'
@@ -408,7 +448,11 @@
                         id: moons
                         background_color: (0,0,0,0.5)
                         source: res.resource_find('res/moons.rst')
-      
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
+
 <OfflineScreen>:
     name: 'Offline'
     AnchorLayout:
@@ -458,6 +502,10 @@
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 font_size: 12
                 on_ref_press: webbrowser.open('https://twitter.com/OnemiESESEBEME')
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
 
 <OptionScreen>
     name: 'Options'
@@ -573,7 +621,10 @@
                                 max: 5
                                 step: 1
                                 size_hint_x: 0.8
-                    
+    AnchorLayout
+        id: lobbyAnchor
+        anchor_x: 'center'
+        anchor_y: 'top'
 
 <OptionRow@BoxLayout>
     size_hint_x: 1

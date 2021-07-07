@@ -7,3 +7,7 @@ class MenuBtn(Button):
 
 class DummyBtn(Button):
     pass
+
+
+class LobbyBtn(Button):
+    pass
