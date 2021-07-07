@@ -50,8 +50,6 @@ else:
         config_string = f.read()
 app_config = configparser.ConfigParser()
 app_config.read_string(config_string)
-app_config = None
-caster_config = None
 
 LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
 VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"

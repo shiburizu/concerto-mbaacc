@@ -4,7 +4,24 @@ import re
 import time
 import subprocess
 import sys
+import threading
+#stats
+import ctypes
+from ctypes.wintypes import *
 
+#stats constants
+STRLEN = 1
+PROCESS_VM_READ = 0x0010
+MELTY_TITLE = "MELTY BLOOD Actress Again Current Code Ver.1.07 Rev*"
+k32 = ctypes.WinDLL('kernel32')
+k32.OpenProcess.argtypes = DWORD, BOOL, DWORD
+k32.OpenProcess.restype = HANDLE
+k32.ReadProcessMemory.argtypes = HANDLE,LPVOID,LPVOID,ctypes.c_size_t,ctypes.POINTER(ctypes.c_size_t)
+k32.ReadProcessMemory.restype = BOOL
+buf = ctypes.create_string_buffer(STRLEN)
+s = ctypes.c_size_t()
+
+#error messages
 error_strings = [
     'Internal error!',
     'Cannot find host',
@@ -56,6 +73,8 @@ class Caster():
         self.aproc = None # active caster Thread object to check for isalive()
         self.offline = False #True when an offline mode has been started
         self.startup = False #True when waiting for MBAA.exe to start in offline
+        self.stats = {} #dict of information we can read from memory
+        self.pid = None #PID of MBAA.exe
 
     def validate_read(self, con):
         if "rollback:" in con or "rolback:" in con:
@@ -351,12 +370,51 @@ class Caster():
             if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
                 self.startup = False
                 self.offline = True
+                threading.Thread(target=self.update_stats,daemon=True).start()
                 break
             if self.aproc != None:
                 if self.aproc.isalive() is False:
                     break
             else:
                 break
+
+    def update_stats(self):
+        while True:
+            if self.aproc == None:
+                break
+            if self.pid is None:
+                cmd = f"""tasklist /FI "WindowTitle eq {MELTY_TITLE}" /FO CSV /NH"""
+                task_data = subprocess.check_output(cmd, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+                print(task_data)
+                if not task_data.startswith("INFO: "):
+                    # Split the output up and grab the PID
+                    pid = task_data.replace("\"", "").split(",")[1]
+                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
+                    print("found MBAA PID")
+                else:
+                    print("no PID yet")
+            else:
+                state_info = {
+                    "p1selmode": self.read_memory(0x74D8EC),
+                    "p1char": self.read_memory(0x74D8FC),
+                    "p1moon": self.read_memory(0x74D900),
+                    "p1color": self.read_memory(0x74D904),
+                    "p2selmode": self.read_memory(0x74D910),
+                    "p2char": self.read_memory(0x74D920),
+                    "p2moon": self.read_memory(0x74D924),
+                    "p2color": self.read_memory(0x74D928),
+                    "p1wins": self.read_memory(0x559550),
+                    "p2wins": self.read_memory(0x559580),
+                    "towin": self.read_memory(0x553FDC)
+                }
+                print(state_info)
+            time.sleep(2)
+            self.update_stats()
+
+    def read_memory(self,addr):
+        if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
+            return int.from_bytes(buf.raw, "big")
+        return None
 
     def kill_caster(self):
         self.adr = None
