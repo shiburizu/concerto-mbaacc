@@ -51,7 +51,7 @@ class Concerto(App):
     def on_start(self):
         #necessary file sanity checks
         e = []
-        if app_config is None:
+        if caster_config is None:
             e.append('cccaster/config.ini not found.')
             e.append('Please fix the above problems and restart Concerto.')
         if e != []:
