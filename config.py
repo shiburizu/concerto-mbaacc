@@ -27,7 +27,10 @@ Config.set(
 )
 Config.write()
 
-PATH = os.path.dirname(sys.argv[0])
+if getattr(sys,'frozen', False): #frozen exe
+    PATH = os.path.dirname(sys.argv[0])
+else: #not frozen
+    PATH = os.path.dirname(os.path.abspath(__file__))
 
 try:
     # load caster .ini
