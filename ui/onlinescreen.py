@@ -82,7 +82,7 @@ class OnlineScreen(Screen):
                                   self.direct_pop.watch_ip.text,self], daemon=True)
         caster.start()
         popup.modal_txt.text = 'Watching IP: %s' % self.direct_pop.watch_ip.text
-        popup.close_btn.text = 'Close game'
+        popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
         popup.open()

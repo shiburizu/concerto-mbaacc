@@ -295,7 +295,7 @@ class LobbyScreen(Screen):
             target=self.app.game.watch, args=[ip,self], daemon=True)
         self.active_pop = popup
         popup.modal_txt.text = 'Watching %s' % name
-        popup.close_btn.text = 'Close game'
+        popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
         popup.open()
