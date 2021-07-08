@@ -5,6 +5,7 @@ import time
 import subprocess
 import sys
 import threading
+from config import *
 #stats
 import ctypes
 from ctypes.wintypes import *
@@ -55,7 +56,7 @@ class loghelper():
         dateTimeObj.strftime("%d-%b-%Y-%H-%M-%S") + '.txt'
 
     def write(self, s):
-        with open(sys.path[0] + '\\' + self.timestampStr, 'a') as log:
+        with open(PATH + '\\' + self.timestampStr, 'a') as log:
             log.write(s)
 
 
@@ -104,9 +105,9 @@ class Caster():
     def host(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
         self.kill_caster()
         if mode == "Training":
-            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -t %s' % port) 
+            self.aproc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe -n -t %s' % port) 
         else:
-            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n %s' % port) 
+            self.aproc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe -n %s' % port) 
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
@@ -174,7 +175,7 @@ class Caster():
 
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
         self.kill_caster()
-        self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n %s' % ip)
+        self.aproc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe -n %s' % ip)
         cur_con = ""
         last_con = ""
         con = ""
@@ -243,7 +244,7 @@ class Caster():
 
     def watch(self, ip, sc, *args):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -s %s' % ip)
+        self.aproc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe -n -s %s' % ip)
         cur_con = ""
         last_con = ""
         con = ""
@@ -285,9 +286,9 @@ class Caster():
     def broadcast(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
         self.kill_caster()
         if mode == "Training":
-            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b -t %s' % port) 
+            self.aproc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe -n -b -t %s' % port) 
         else:
-            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b %s' % port) 
+            self.aproc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe -n -b %s' % port) 
         logger.write('\n== Broadcast %s ==\n' % mode)
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
@@ -306,7 +307,7 @@ class Caster():
     def training(self,sc):
         self.kill_caster()
         self.startup = True
-        proc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe')
+        proc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe')
         self.aproc = proc
         logger.write('\n== Training ==\n')
         while self.aproc.isalive():
@@ -327,7 +328,7 @@ class Caster():
     def local(self,sc):
         self.kill_caster()
         self.startup = True
-        proc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe')
+        proc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
@@ -346,7 +347,7 @@ class Caster():
     def tournament(self,sc):
         self.kill_caster()
         self.startup = True
-        proc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe')
+        proc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
@@ -365,7 +366,7 @@ class Caster():
     def replays(self,sc):
         self.kill_caster()
         self.startup = True
-        proc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe')
+        proc = PtyProcess.spawn(PATH + '\cccaster.v3.0.exe')
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
@@ -383,7 +384,7 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn(sys.path[0] + '\MBAA.exe')
+        self.aproc = PtyProcess.spawn(PATH + '\MBAA.exe')
         self.flag_offline(sc,stats=False)
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
