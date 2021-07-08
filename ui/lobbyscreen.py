@@ -29,6 +29,8 @@ class LobbyScreen(Screen):
         self.lobby_updater = None  # thread to manage lobby updates
         self.widget_index = {} #ids of players, widget of lobby
         self.error = False
+        self.challenge_name = None #name of player being challenged
+        self.challenge_id = None #id of player being challenged
 
 
     def create(self, j, first=False, type=""):  # json response object
@@ -213,33 +215,32 @@ class LobbyScreen(Screen):
         self.app.LobbyList.refresh()
 
     def send_challenge(self, obj, name, id, *args):
+        self.challenge_name = name
+        self.challenge_id = id
+        popup = GameModal()
+        popup.modal_txt.text = 'Challenging %s' % self.challenge_name
+        popup.close_btn.text = 'Stop Hosting'
+        popup.close_btn.bind(on_release=partial(
+            self.dismiss, p=popup))
+        self.active_pop = popup
+        popup.open()
         caster = threading.Thread(
             target=self.app.game.host, args=[self, app_config['settings']['netplay_port']], daemon=True)
         caster.start()
-        while True:
-            if self.app.game.adr is not None:
-                pyperclip.copy('') #erase IP address from clipboard
-                popup = GameModal()
-                popup.modal_txt.text = 'Challenging %s' % name
-                popup.close_btn.text = 'Stop Hosting'
-                popup.close_btn.bind(on_release=partial(
-                    self.dismiss, p=popup))
-                self.active_pop = popup
-                popup.open()
-                p = {
-                    't': id,
-                    'p': self.player_id,
-                    'action': 'challenge',
-                    'id': self.code,
-                    'ip': self.app.game.adr,
-                    'secret': self.secret
-                }
-                print(p)
-                c = requests.get(url=LOBBYURL, params=p).json()
-                print(c)
-                break
-            elif self.error == True:
-                break
+
+    def set_ip(self):
+        pyperclip.copy('') #erase IP address from clipboard
+        p = {
+            't': self.challenge_id,
+            'p': self.player_id,
+            'action': 'challenge',
+            'id': self.code,
+            'ip': self.app.game.adr,
+            'secret': self.secret
+        }
+        print(p)
+        c = requests.get(url=LOBBYURL, params=p).json()
+        print(c)
         
 
     def accept_challenge(self, obj, name, id, ip, *args):
@@ -325,6 +326,7 @@ class LobbyScreen(Screen):
         popup.close_btn.text = "Close"
         if self.active_pop != None:
             self.active_pop.dismiss()
+        self.active_pop = None
         popup.open()
     
     def dismiss_error(self,obj,p):
@@ -334,6 +336,8 @@ class LobbyScreen(Screen):
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
     def dismiss(self, obj, p, *args):
         self.app.game.kill_caster()
+        self.challenge_name = None
+        self.challenge_id = None
         r = {
             'action': 'end',
             'p': self.player_id,

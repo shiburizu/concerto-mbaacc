@@ -30,35 +30,28 @@ class OnlineScreen(Screen):
         caster = threading.Thread(
             target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)
         caster.start()
-        while True:
-            if self.app.game.adr is not None:
-                popup = GameModal()
-                popup.modal_txt.text = 'Hosting to IP: %s\nAddress copied to clipboard.' % self.app.game.adr
-                popup.close_btn.text = 'Stop Hosting'
-                popup.close_btn.bind(on_release=partial(
-                    self.dismiss, p=popup))
-                self.active_pop = popup
-                popup.open()
-                break
-            elif self.error == True:
-                break
+        popup = GameModal()
+        popup.modal_txt.text = 'Hosting %s mode...\n' % self.direct_pop.game_type.text
+        popup.close_btn.text = 'Stop Hosting'
+        popup.close_btn.bind(on_release=partial(
+            self.dismiss, p=popup))
+        self.active_pop = popup
+        popup.open()
 
     def start_broadcast(self):
         caster = threading.Thread(
-            target=self.app.game.broadcast, args=[self,config.app_config['settings']['netplay_port'], self.broadcast_pop.game_type.text], daemon=True)
+            target=self.app.game.broadcast, args=[self,config.app_config['settings']['netplay_port'], self.broadcast_pop.mode_type.text], daemon=True)
         caster.start()
-        while True:
-            if self.app.game.adr is not None:
-                popup = GameModal()
-                popup.modal_txt.text = 'Broadcasting %s mode to IP: %s' % (self.broadcast_pop.game_type.text,self.app.game.adr)
-                popup.close_btn.text = 'Stop Playing'
-                popup.close_btn.bind(on_release=partial(
-                    self.dismiss, p=popup))
-                self.active_pop = popup
-                popup.open()
-                break
-            elif self.error == True:
-                break
+        popup = GameModal()
+        popup.modal_txt.text = 'Broadcasting %s mode...\n' % self.broadcast_pop.mode_type.text
+        popup.close_btn.text = 'Stop Playing'
+        popup.close_btn.bind(on_release=partial(
+            self.dismiss, p=popup))
+        self.active_pop = popup
+        popup.open()
+
+    def set_ip(self):
+        self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % self.app.game.adr
 
     def join(self):
         ip = re.findall(
@@ -128,6 +121,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = "Close"
         if self.active_pop:
             self.active_pop.dismiss()
+        self.active_pop = None
         popup.open()
 
     def dismiss_error(self,obj,p):

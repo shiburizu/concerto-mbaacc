@@ -128,6 +128,8 @@ class Concerto(App):
                 if self.LobbyScreen.active_pop != None:
                     self.LobbyScreen.active_pop.dismiss()
                     self.LobbyScreen.active_pop = None
+                    self.LobbyScreen.challenge_id = None
+                    self.LobbyScreen.challenge_name = None
                     r = {
                         'action': 'end',
                         'p': self.LobbyScreen.player_id,

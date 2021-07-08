@@ -114,6 +114,7 @@ class Caster():
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
                 self.adr = str(ip[0])
+                sc.set_ip() #tell UI we have the IP address
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
@@ -285,17 +286,17 @@ class Caster():
         self.kill_caster()
         if mode == "Training":
             self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b -t %s' % port) 
-        elif mode == "Tournament":
-            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b -T %s' % port) 
         else:
             self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b %s' % port) 
         logger.write('\n== Broadcast %s ==\n' % mode)
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
+            print(t)
             ip = re.findall(
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
                 self.adr = str(ip[0])
+                sc.set_ip()
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
@@ -443,7 +444,6 @@ class Caster():
         self.ds = -1
         if self.aproc != None:
             subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
-            del self.aproc
         self.aproc = None
         self.startup = False
         self.offline = False

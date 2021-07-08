@@ -670,7 +670,7 @@
     size_hint: None,None
     size: 400,160
     auto_dismiss: False
-    game_type: game_type
+    mode_type: mode_type
     background_color: '#343B88'
     GridLayout:
         padding: 20,20
@@ -687,9 +687,9 @@
                 outline_width: 1
                 size_hint_x: 0.3
             Spinner:
-                values: 'Versus','Tournament','Training'
                 text: 'Versus'
-                id: game_type
+                values: 'Versus','Training'
+                id: mode_type
                 size_hint_x: 0.7
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 outline_width: 1
