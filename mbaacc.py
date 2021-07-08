@@ -386,7 +386,7 @@ class Caster():
         self.aproc = PtyProcess.spawn(sys.path[0] + '\MBAA.exe')
         self.flag_offline(sc,stats=False)
 
-    def flag_offline(self,sc,stats=True): #stats tells us whether or n ot to pull info from the game
+    def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
         while True:
             w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
             if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
@@ -450,6 +450,7 @@ class Caster():
         self.startup = False
         self.offline = False
         self.playing = False
+        self.pid = None
 
     def check_msg(self,s):
         e = []
