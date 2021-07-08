@@ -354,7 +354,9 @@
                     on_release: 
                         app.LobbyList.refresh()
                 MenuBtn:
-                    text: '3. COMING SOON'
+                    text: '3. BROADCAST'
+                    on_release:
+                        root.broadcast()
                 MenuBtn:
                     text: '0. BACK'
                     on_release: app.sm.current = 'Main'
@@ -663,6 +665,55 @@
         Rectangle:
             pos: self.pos
             size: self.size
+
+<BroadcastModal>:
+    size_hint: None,None
+    size: 400,160
+    auto_dismiss: False
+    game_type: game_type
+    background_color: '#343B88'
+    GridLayout:
+        padding: 20,20
+        spacing: [0,8]
+        cols: 1
+        Label:
+            text: 'Broadcast a local offline session for online spectators.'
+            size_hint_y: 0.32
+        BoxLayout:
+            size_hint_y: 0.36
+            Label:
+                text: 'Game type: '
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                outline_width: 1
+                size_hint_x: 0.3
+            Spinner:
+                values: 'Versus','Tournament','Training'
+                text: 'Versus'
+                id: game_type
+                size_hint_x: 0.7
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                outline_width: 1
+                background_color: (255, 0, 0, 0.2)
+                size_hint_x: 0.5
+            Button:
+                text: 'Start'
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                outline_width: 1
+                background_color: '#343B88'
+                size_hint_x: 0.2
+                on_release:
+                    root.screen.start_broadcast()
+        Button:
+            size_hint_y: 0.32
+            text: 'Close'
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            outline_width: 1
+            background_color: (255, 0, 0, 0.2)
+            on_release: 
+                root.dismiss()
+                self.background_color = (255, 0, 0, 0.2)
+            on_press: 
+                self.background_color = (100, 0, 0, 0.9)  
 
 <DirectModal>:
     size_hint: None,None

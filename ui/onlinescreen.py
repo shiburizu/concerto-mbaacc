@@ -12,6 +12,7 @@ class OnlineScreen(Screen):
         super(OnlineScreen, self).__init__(**kwargs)
         self.direct_pop = None  # Direct match popup for user settings
         self.active_pop = None  # active popup on the screen during netplay
+        self.broadcast_pop = None
         self.app = CApp
         self.error = False
 
@@ -19,6 +20,11 @@ class OnlineScreen(Screen):
         self.direct_pop = DirectModal()
         self.direct_pop.screen = self
         self.direct_pop.open()
+
+    def broadcast(self):
+        self.broadcast_pop = BroadcastModal()
+        self.broadcast_pop.screen = self
+        self.broadcast_pop.open()
 
     def host(self):
         caster = threading.Thread(
@@ -33,7 +39,23 @@ class OnlineScreen(Screen):
                     self.dismiss, p=popup))
                 self.active_pop = popup
                 popup.open()
-                print('open')
+                break
+            elif self.error == True:
+                break
+
+    def start_broadcast(self):
+        caster = threading.Thread(
+            target=self.app.game.broadcast, args=[self,config.app_config['settings']['netplay_port'], self.broadcast_pop.game_type.text], daemon=True)
+        caster.start()
+        while True:
+            if self.app.game.adr is not None:
+                popup = GameModal()
+                popup.modal_txt.text = 'Broadcasting %s mode to IP: %s' % (self.broadcast_pop.game_type.text,self.app.game.adr)
+                popup.close_btn.text = 'Stop Playing'
+                popup.close_btn.bind(on_release=partial(
+                    self.dismiss, p=popup))
+                self.active_pop = popup
+                popup.open()
                 break
             elif self.error == True:
                 break

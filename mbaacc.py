@@ -281,6 +281,27 @@ class Caster():
                     last_con = cur_con
                     continue
 
+    def broadcast(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
+        self.kill_caster()
+        if mode == "Training":
+            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b -t %s' % port) 
+        elif mode == "Tournament":
+            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b -T %s' % port) 
+        else:
+            self.aproc = PtyProcess.spawn(sys.path[0] + '\cccaster.v3.0.exe -n -b %s' % port) 
+        logger.write('\n== Broadcast %s ==\n' % mode)
+        while self.aproc.isalive(): # find IP and port combo for host
+            t = self.aproc.read()
+            ip = re.findall(
+                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
+            if ip != []:
+                self.adr = str(ip[0])
+                break
+            elif self.check_msg(t) != []:
+                sc.error_message(self.check_msg(t))
+                self.kill_caster()
+                return None
+
     def training(self,sc):
         self.kill_caster()
         self.startup = True
