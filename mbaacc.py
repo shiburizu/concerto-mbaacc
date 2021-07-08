@@ -316,7 +316,7 @@ class Caster():
                 self.aproc.write('4')  # 4 is offline
                 time.sleep(0.1)
                 self.aproc.write('1')
-                self.flag_offline()
+                self.flag_offline(sc)
                 break
             else:
                 if self.check_msg(con) != []:
@@ -335,7 +335,7 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('2')
-                self.flag_offline()
+                self.flag_offline(sc)
                 break
             else:
                 if self.check_msg(con) != []:
@@ -354,7 +354,7 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('4')
-                self.flag_offline()
+                self.flag_offline(sc)
                 break
             else:
                 if self.check_msg(con) != []:
@@ -373,7 +373,7 @@ class Caster():
                 self.aproc.write('4')
                 time.sleep(0.1)
                 self.aproc.write('5')
-                self.flag_offline()
+                self.flag_offline(sc)
                 break
             else:
                 if self.check_msg(con) != []:
@@ -384,9 +384,9 @@ class Caster():
     def standalone(self,sc):
         self.kill_caster()
         self.aproc = PtyProcess.spawn(sys.path[0] + '\MBAA.exe')
-        self.flag_offline()
+        self.flag_offline(sc)
 
-    def flag_offline(self):
+    def flag_offline(self,sc):
         while True:
             w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
             if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
@@ -399,6 +399,7 @@ class Caster():
                     break
             else:
                 break
+        sc.active_pop.dismiss()
 
     def update_stats(self):
         while True:
