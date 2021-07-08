@@ -219,7 +219,7 @@ class LobbyScreen(Screen):
         self.challenge_id = id
         popup = GameModal()
         popup.modal_txt.text = 'Challenging %s' % self.challenge_name
-        popup.close_btn.text = 'Stop Hosting'
+        popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
         self.active_pop = popup
