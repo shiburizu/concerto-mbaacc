@@ -27,26 +27,28 @@ Config.set(
 )
 Config.write()
 
+PATH = os.path.dirname(sys.argv[0])
+
 try:
     # load caster .ini
-    with open(sys.path[0] + '\cccaster\config.ini', 'r') as f:
+    with open(PATH + '\cccaster\config.ini', 'r') as f:
         config_string = '[settings]\n' + f.read()
     caster_config = configparser.ConfigParser()
     caster_config.read_string(config_string)
 except:
     caster_config = None
 
-if os.path.exists(sys.path[0] + '\concerto.ini'):
-    with open(sys.path[0] + '\concerto.ini') as f:
+if os.path.exists(PATH + '\concerto.ini'):
+    with open(PATH + '\concerto.ini') as f:
         config_string = f.read()
 else:
-    with open(sys.path[0] + '\concerto.ini', 'w') as f:
+    with open(PATH + '\concerto.ini', 'w') as f:
         f.write('[settings]\n')
         f.write('netplay_port = 0\n')
         f.write('mute_alerts = 0\n')
         f.write('mute_bgm = 0\n')
         f.close()
-    with open(sys.path[0] + '\concerto.ini','r') as f:
+    with open(PATH + '\concerto.ini','r') as f:
         config_string = f.read()
 app_config = configparser.ConfigParser()
 app_config.read_string(config_string)
