@@ -5,6 +5,26 @@ cccaster.v3.0.exe
 *.zip
 concerto.ini
 Concerto_*.txt
+Information/
+GRP/
+*.dat
+*.p
+*.bat
+*.dll
+*.csv
+*.d
+*.dds
+dat/
+Movie/
+ReplayVS/
+RepDummy/
+ScreenShot/
+System/
+output/
+DejaVuSansCondensed.ttf
+MBAA.exe
+relay_list.txt
+Translation Changelog.html
 
 # Concerto EXEs
 Concerto.exe
