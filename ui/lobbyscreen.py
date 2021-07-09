@@ -105,7 +105,10 @@ class LobbyScreen(Screen):
                         if i[1] != self.player_id:
                             p.ids['PlayerBtn'].bind(on_release=partial(
                                 self.send_challenge, name=i[0], id=i[1]))
-                            p.ids['WatchBtn'].text = 'FOLLOW'
+                            if i[1] == self.watch_player:
+                                p.ids['WatchBtn'].text = 'FOLLOWING'
+                            else:
+                                p.ids['WatchBtn'].text = 'FOLLOW'
                             p.ids['WatchBtn'].bind(on_release=partial(self.follow_player, i=i[1]))
                         else:
                             p.ids['PlayerBtn'].text += " (self)"
@@ -239,6 +242,13 @@ class LobbyScreen(Screen):
         self.app.LobbyList.refresh()
 
     def send_challenge(self, obj, name, id, *args):
+        self.watch_player = None
+        for k,v in self.widget_index.items():
+            try:
+                if k != self.player_id and v.parent == self.player_list:
+                    v.ids['WatchBtn'].text = "FOLLOW"
+            except KeyError:
+                pass
         self.challenge_name = name
         self.challenge_id = id
         popup = GameModal()
@@ -269,6 +279,12 @@ class LobbyScreen(Screen):
 
     def accept_challenge(self, obj, name, id, ip, *args):
         self.watch_player = None
+        for k,v in self.widget_index.items():
+            try:
+                if k != self.player_id and v.parent == self.player_list:
+                    v.ids['WatchBtn'].text = "FOLLOW"
+            except KeyError:
+                pass
         caster = threading.Thread(target=self.app.game.join, args=[
                                   ip, self, id], daemon=True)
         caster.start()
@@ -315,6 +331,13 @@ class LobbyScreen(Screen):
                 break
 
     def watch_match(self, obj, name, ip, *args):
+        self.watch_player = None
+        for k,v in self.widget_index.items():
+            try:
+                if k != self.player_id and v.parent == self.player_list:
+                    v.ids['WatchBtn'].text = "FOLLOW"
+            except KeyError:
+                pass
         popup = GameModal()
         caster = threading.Thread(
             target=self.app.game.watch, args=[ip,self], daemon=True)

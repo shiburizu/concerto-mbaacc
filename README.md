@@ -51,8 +51,7 @@ This is a list of priorities attached to suspected version labels.
 * Broadcast game support DONE
 * Fill out How to Play guide
 * Rewrite server to be fast
-* Mark player for spectating when match begins
-* Player match details in lobby (character & moon)
+* Mark player for spectating when match begins DONE
 
 ### Version 1.1 (first major update)
 * In-client game button binding
