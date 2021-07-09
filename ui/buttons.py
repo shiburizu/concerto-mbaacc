@@ -1,4 +1,5 @@
 from kivy.uix.button import Button
+from kivy.uix.anchorlayout import AnchorLayout
 
 
 class MenuBtn(Button):
@@ -13,5 +14,5 @@ class LobbyBtn(Button):
     pass
 
 
-class PlayerBtn(Button):
+class PlayerRow(AnchorLayout):
     pass

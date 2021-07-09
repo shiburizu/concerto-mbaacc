@@ -8,7 +8,7 @@ from config import *
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
-from ui.buttons import DummyBtn, PlayerBtn
+from ui.buttons import DummyBtn, PlayerRow
 
 
 class LobbyScreen(Screen):
@@ -59,20 +59,22 @@ class LobbyScreen(Screen):
                         pass
                     else: #remove idle player
                         self.widget_index.get(i[1]).parent.remove_widget(self.widget_index.get(i[1]))
-                        p = PlayerBtn()
-                        p.text = i[0]
-                        p.bind(on_release=partial(
+                        p = PlayerRow()
+                        p.ids['PlayerBtn'].text = i[0]
+                        p.ids['PlayerBtn'].bind(on_release=partial(
                             self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
+                        p.ids['WatchBtn'].text = ""
                         self.challenge_list.add_widget(p)
                         self.widget_index.update({i[1]:p})
                         if newSound is False:
                             self.app.sound.play_alert()
                             newSound = True
                 else:
-                    p = PlayerBtn()
-                    p.text = i[0]
-                    p.bind(on_release=partial(
+                    p = PlayerRow()
+                    p.ids['PlayerBtn'].text = i[0]
+                    p.ids['PlayerBtn'].bind(on_release=partial(
                         self.accept_challenge, name=i[0], id=i[1], ip=i[2]))
+                    p.ids['WatchBtn'].text = ""
                     self.challenge_list.add_widget(p)
                     self.widget_index.update({i[1]:p})
                     if newSound is False:
@@ -98,13 +100,17 @@ class LobbyScreen(Screen):
                     if i[1] in self.widget_index:
                         pass
                     else:
-                        p = PlayerBtn()
-                        p.text = i[0]
+                        p = PlayerRow()
+                        p.ids['PlayerBtn'].text = i[0]
                         if i[1] != self.player_id:
-                            p.bind(on_release=partial(
+                            p.ids['PlayerBtn'].bind(on_release=partial(
                                 self.send_challenge, name=i[0], id=i[1]))
+                            p.ids['WatchBtn'].text = 'FOLLOW'
+                            p.ids['WatchBtn'].bind(on_release=partial(self.follow_player, i=i[1]))
                         else:
-                            p.text += " (self)"
+                            p.ids['PlayerBtn'].text += " (self)"
+                            p.ids['WatchBtn'].disabled = True
+                            p.ids['WatchBtn'].text = ""
                         self.player_list.add_widget(p)
                         self.widget_index.update({i[1]:p})
         else:
@@ -126,13 +132,16 @@ class LobbyScreen(Screen):
                 if (i[2],i[3]) in self.widget_index:
                     pass
                 else:
-                    p = PlayerBtn()
-                    p.text = "%s vs %s" % (i[0], i[1])
+                    p = PlayerRow()
+                    p.ids['PlayerBtn'].text = "%s vs %s" % (i[0], i[1])
                     if i[2] != self.player_id and i[3] != self.player_id:
-                        p.bind(on_release=partial(self.watch_match,
+                        p.ids['PlayerBtn'].bind(on_release=partial(self.watch_match,
                             name="%s vs %s" % (i[0], i[1]), ip=i[4]))
+                    p.ids['WatchBtn'].text = ""
                     self.match_list.add_widget(p)
                     self.widget_index.update({(i[2],i[3]):p})
+                if i[2] == self.watch_player or i[3] == self.watch_player:
+                    self.watch_match(name="%s vs %s" % (i[0], i[1]), ip=i[4])
         else:
             n = []
             for k,v in self.widget_index.items():
@@ -171,6 +180,21 @@ class LobbyScreen(Screen):
                 self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
             else:
                 self.app.update_lobby_button('LOBBY %s ' % self.code)
+
+    def follow_player(self,obj,i):
+        w = self.widget_index.get(i).ids['WatchBtn']
+        if w.text == 'FOLLOW':
+            self.watch_player = i
+            for k,v in self.widget_index.items(): # clear first
+                try:
+                    if v.parent == self.player_list and k != self.player_id:
+                        v.ids['WatchBtn'].text = 'FOLLOW'
+                except KeyError:
+                    pass
+            self.widget_index.get(i).ids['WatchBtn'].text = 'FOLLOWING'
+        else:
+            self.watch_player = None
+            w.text = 'FOLLOW'
 
     def auto_refresh(self):
         if self.lobby_thread_flag == 0:
@@ -244,6 +268,7 @@ class LobbyScreen(Screen):
         
 
     def accept_challenge(self, obj, name, id, ip, *args):
+        self.watch_player = None
         caster = threading.Thread(target=self.app.game.join, args=[
                                   ip, self, id], daemon=True)
         caster.start()

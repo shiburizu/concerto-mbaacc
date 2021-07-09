@@ -24,6 +24,7 @@ class OnlineScreen(Screen):
     def broadcast(self):
         self.broadcast_pop = BroadcastModal()
         self.broadcast_pop.screen = self
+        self.broadcast_pop.mode_type.text = "Versus"
         self.broadcast_pop.open()
 
     def host(self):
