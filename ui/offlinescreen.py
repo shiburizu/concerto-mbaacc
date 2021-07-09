@@ -43,11 +43,17 @@ class OfflineScreen(Screen):
         self.active_pop = popup
     
     def error_message(self,e):
-        popup = GameModal()
-        for i in e:
-            popup.modal_txt.text += i + '\n'
-        popup.close_btn.bind(on_release=popup.dismiss)
-        popup.close_btn.text = "Close"
-        if self.active_pop:
-            self.active_pop.dismiss()
-        popup.open()
+        if self.active_pop != None:
+            self.active_pop.modal_txt.text = ""
+            for i in e:
+                self.active_pop.modal_txt.text += i + '\n'
+            self.active_pop.close_btn.disabled = False
+            self.active_pop.close_btn.bind(on_release=self.active_pop.dismiss)
+            self.active_pop.close_btn.text = "Close"
+        else:
+            popup = GameModal()
+            for i in e:
+                popup.modal_txt.text += i + '\n'
+            popup.close_btn.bind(on_release=popup.dismiss)
+            popup.close_btn.text = "Close"
+            popup.open()

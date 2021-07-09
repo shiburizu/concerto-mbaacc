@@ -194,7 +194,7 @@ class LobbyScreen(Screen):
                         v.ids['WatchBtn'].text = 'FOLLOW'
                 except KeyError:
                     pass
-            self.widget_index.get(i).ids['WatchBtn'].text = 'FOLLOWING'
+            w.text = 'FOLLOWING'
         else:
             self.watch_player = None
             w.text = 'FOLLOW'
