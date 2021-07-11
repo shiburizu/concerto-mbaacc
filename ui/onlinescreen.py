@@ -27,6 +27,12 @@ class OnlineScreen(Screen):
         self.broadcast_pop.mode_type.text = "Versus"
         self.broadcast_pop.open()
 
+    def lobby(self):
+        if config.caster_config['settings']['displayName'] == '':
+            self.error_message(['Please go to Options and set a display name.'])
+        else:
+            self.app.LobbyList.refresh()
+
     def host(self):
         caster = threading.Thread(
             target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)
