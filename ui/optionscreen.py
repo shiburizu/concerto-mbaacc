@@ -79,13 +79,15 @@ class OptionScreen(Screen):
             float(self.ids['held_start'].text)
         except ValueError:
             error_check.append("Held start duration is not in seconds.")
+        if self.ids['display_name'].text.strip() == '':
+            error_check.append('Display name cannot be empty.')
         if error_check == []:
             with open(PATH + '\cccaster\config.ini', 'r') as f:
                 config_file = f.readlines()
                 n = 0
                 for i in config_file:
                     if "displayName" in i:
-                        config_file[n] = "displayName=%s\n" % self.ids['display_name'].text
+                        config_file[n] = "displayName=%s\n" % self.ids['display_name'].text.strip()
                     elif "maxRealDelay" in i:
                         config_file[n] = "maxRealDelay=%s\n" % self.ids['max_delay'].text
                     elif "defaultRollback" in i:

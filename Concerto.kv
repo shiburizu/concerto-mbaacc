@@ -597,6 +597,7 @@
                         TextInput:
                             id: netplay_port
                             multiline: False
+                            input_filter: 'int'
                     OptionRow:
                         Label:
                             text: 'Mute all alerts'
@@ -621,18 +622,21 @@
                         TextInput:
                             id: max_delay
                             multiline: False
+                            input_filter: 'int'
                     OptionRow:
                         Label:
                             text: 'Default rollback frames'
                         TextInput:
                             id: default_rollback
                             multiline: False
+                            input_filter: 'int'
                     OptionRow:
                         Label:
                             text: 'Held start button in VS (seconds)'
                         TextInput:
                             id: held_start
                             multiline: False
+                            input_filter: 'float'
                     OptionRow:
                         Label:
                             text: 'Play sound on connect'
