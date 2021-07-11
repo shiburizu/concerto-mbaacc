@@ -47,21 +47,14 @@ This is a list of priorities attached to suspected version labels.
 * About & credits screens
 * CCCaster & Concerto configuration screens
 
-#### Todo for 1.0
-* Broadcast game support DONE
-* Fill out How to Play guide
-* Rewrite server to be fast
-* Mark player for spectating when match begins DONE
-
 ### Version 1.1 (first major update)
 * In-client game button binding
 * Character introductions in Resources
-* Results.csv viewer and analyzer
+* Mark player for spectating when match begins
 
 ### Short-term goals
 * Ping display in lobby
 * Character/moon/win count display in lobby
-* FTx challenges in lobbies (necessary for potential Ranked matchmaking)
 
 ### Long-term goals
 * Matchmaking

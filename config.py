@@ -31,16 +31,33 @@ if getattr(sys,'frozen', False): #frozen exe
     PATH = os.path.dirname(sys.argv[0])
 else: #not frozen
     PATH = os.path.dirname(os.path.abspath(__file__))
-
-try:
-    # load caster .ini
+#CCCaster ini default settings
+if os.path.exists(PATH + '\cccaster\config.ini'):
     with open(PATH + '\cccaster\config.ini', 'r') as f:
-        config_string = '[settings]\n' + f.read()
-    caster_config = configparser.ConfigParser()
-    caster_config.read_string(config_string)
-except:
-    caster_config = None
-
+        config_string = f.read()
+else:
+    with open(PATH + '\cccaster\config.ini', 'w') as f:
+        f.write('alertOnConnect=3\n\n')
+        f.write('alertWavFile=SystemDefault\n\n')
+        f.write('autoCheckUpdates=1\n\n')
+        f.write('defaultRollback=4\n\n')
+        f.write('displayName=Concerto Player\n\n')
+        f.write('fullCharacterName=0\n\n')
+        f.write('heldStartDuration=1.5\n\n')
+        f.write('highCpuPriority=1\n\n')
+        f.write('lastMainMenuPosition=-1\n\n')
+        f.write('lastOfflineMenuPosition=-1\n\n')
+        f.write('lastUsedPort=-1\n\n')
+        f.write('maxRealDelay=254\n\n')
+        f.write('replayRollbackOn=1\n\n')
+        f.write('updateChannel=1\n\n')
+        f.write('versusWinCount=2')
+        f.close()
+    with open(PATH + '\cccaster\config.ini', 'r') as f:
+        config_string = f.read()
+caster_config = configparser.ConfigParser()
+caster_config.read_string('[settings]\n' + config_string)
+#Concerto ini default settings
 if os.path.exists(PATH + '\concerto.ini'):
     with open(PATH + '\concerto.ini') as f:
         config_string = f.read()
