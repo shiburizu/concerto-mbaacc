@@ -28,7 +28,7 @@ class OnlineScreen(Screen):
         self.broadcast_pop.open()
 
     def lobby(self):
-        if config.caster_config['settings']['displayName'] == '':
+        if config.caster_config['settings']['displayName'].strip() == '':
             self.error_message(['Please go to Options and set a display name.'])
         else:
             self.app.LobbyList.refresh()
