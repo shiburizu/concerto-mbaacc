@@ -1,12 +1,14 @@
-import logging
 import sys
 # System
 import requests
 import time
 import threading
 import subprocess
+import winreg
 # Utility scripts
 from config import *  # App config functions
+# Logging
+import logging
 logging.basicConfig(filename=PATH + '\concerto.log', level=logging.DEBUG)
 # Melty Blood CCCaster
 from mbaacc import Caster
@@ -52,6 +54,19 @@ class Concerto(App):
     def on_start(self):
         #necessary file sanity checks
         e = []
+
+        # Register concerto:// url protocol handler
+        try:
+            key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
+            winreg.SetValueEx(key, '', 0, winreg.REG_SZ, 'URL:Concerto Protocol')
+            winreg.SetValueEx(key, 'URL Protocol', 0, winreg.REG_SZ, '')
+            winreg.SetValueEx(winreg.CreateKey(key, 'DefaultIcon'), '', 0, winreg.REG_SZ, 'concerto.exe,0')
+            winreg.SetValueEx(winreg.CreateKey(key, 'shell\\open\\command'), '', 0, winreg.REG_SZ, '"' + sys.argv[0] + '" "%1"')
+            if key:
+                winreg.CloseKey(key)
+        except:
+            logging.warn('please start as admin once to add concerto protocol handler')
+        
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
             e.append('Please fix the above problems and restart Concerto.')
@@ -61,7 +76,7 @@ class Concerto(App):
         else:
             #if all is well, start loading in user options
             if app_config['settings']['mute_bgm'] == '1':
-                    self.sound.muted = True
+                self.sound.muted = True
             else:
                 self.sound.cut_bgm()
 
@@ -155,6 +170,8 @@ def run():
     try:
         CApp.run()
     finally:
+        # close rich presence connection
+        presence.close()
         CApp.game.kill_caster()
         if CApp.LobbyScreen.code != None:
             CApp.LobbyScreen.exit()
