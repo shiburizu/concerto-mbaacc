@@ -22,10 +22,10 @@ class LobbyList(Screen):
 
     def create(self):
         name = ""
-        if len(caster_config['settings']['displayName']) > 16:
-            name = caster_config['settings']['displayName'][0:15]
+        if len(caster_config['settings']['displayName'].strip()) > 16:
+            name = caster_config['settings']['displayName'].strip()[0:15]
         else:
-            name = caster_config['settings']['displayName']
+            name = caster_config['settings']['displayName'].strip()
         p = {
             'name': name,
             'action': 'create',
