@@ -80,6 +80,12 @@ class Concerto(App):
             else:
                 self.sound.cut_bgm()
 
+        # Execute launch params
+        if len(sys.argv) > 1:
+            params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':')
+            if params[0] == 'lobby':
+                self.LobbyList.join(code=int(params[1]))
+
     def lobby_button(self, *args):
         lst = [
             self.MainScreen.ids['lobbyAnchor'],
