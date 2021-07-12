@@ -12,6 +12,8 @@ import logging
 logging.basicConfig(filename=PATH + '\concerto.log', level=logging.DEBUG)
 # Melty Blood CCCaster
 from mbaacc import Caster
+# Discord Rich Presence
+import presence
 
 # Kivy
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
@@ -79,6 +81,10 @@ class Concerto(App):
                 self.sound.muted = True
             else:
                 self.sound.cut_bgm()
+
+        # Connect discord rich presence
+        presence.connect()
+        presence.menu()
 
         # Execute launch params
         if len(sys.argv) > 1:
