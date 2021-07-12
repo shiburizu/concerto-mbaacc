@@ -67,7 +67,7 @@ class Concerto(App):
             if key:
                 winreg.CloseKey(key)
         except:
-            logging.warn('please start as admin once to add concerto protocol handler')
+            logging.warning('Concerto: please start as admin once to add concerto protocol handler')
         
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
