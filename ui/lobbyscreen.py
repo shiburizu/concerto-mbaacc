@@ -9,6 +9,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
+import presence
 
 
 class LobbyScreen(Screen):
@@ -45,6 +46,12 @@ class LobbyScreen(Screen):
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
         challenging_ids = []
+
+        if type.lower() == 'public':
+            presence.public_lobby(self.code)
+        elif type.lower() == 'private':
+            presence.private_lobby()
+
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
             if 'c' not in self.widget_index:
@@ -240,6 +247,8 @@ class LobbyScreen(Screen):
         self.lobby_updater = None
         self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
+        # Set Rich Presence to main menu again
+        presence.menu()
 
     def send_challenge(self, obj, name, id, *args):
         self.watch_player = None

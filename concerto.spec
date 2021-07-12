@@ -7,6 +7,7 @@ a = Analysis(['concerto.py','mbaacc.py','config.py'],
             datas=[
                 ('mbaacc.py','.'),
                 ('config.py','.'),
+                ('presence.py','.'),
                 ('Concerto.kv','.'),
                 ('./ui','/ui'),
                 ('./res','/res')
