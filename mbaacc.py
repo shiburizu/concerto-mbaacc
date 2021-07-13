@@ -9,6 +9,7 @@ from config import *
 #stats
 import ctypes
 from ctypes.wintypes import *
+import presence
 
 #stats constants
 STRLEN = 1
@@ -24,16 +25,16 @@ s = ctypes.c_size_t()
 
 # Character associations
 CHARACTER = {
-    "00": "Sion",
-    "01": "Arcueid",
-    "02": "Ciel",
-    "03": "Akiha",
-    "04": "Maids",
-    "05": "Hisui",
-    "06": "Kohaku",
-    "07": "Tohno",
-    "08": "Miyako",
-    "09": "Warakia",
+    "0": "Sion",
+    "1": "Arcueid",
+    "2": "Ciel",
+    "3": "Akiha",
+    "4": "Maids",
+    "5": "Hisui",
+    "6": "Kohaku",
+    "7": "Tohno",
+    "8": "Miyako",
+    "9": "Warakia",
     "10": "Nero",
     "11": "V.Sion",
     "12": "Red Arcueid",
@@ -472,6 +473,7 @@ class Caster():
         sc.active_pop.dismiss()
 
     def update_stats(self):
+        gamemode = None
         while True:
             if self.aproc == None:
                 break
@@ -487,7 +489,7 @@ class Caster():
                 else:
                     print("no PID yet")
             else:
-                state_info = {
+                self.stats = {
                     "gamemode": self.read_memory(0x54EEE8),
                     "p1char": self.read_memory(0x74D8FC),
                     "p1moon": self.read_memory(0x74D900),
@@ -499,9 +501,13 @@ class Caster():
                     "p2wins": self.read_memory(0x559580),
                     "towin": self.read_memory(0x553FDC)
                 }
-                print(state_info)
+                if self.stats["gamemode"] == 1 and self.stats["gamemode"] != gamemode:
+                    presence.offline_game('In Game', CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                    gamemode = self.stats["gamemode"]
+                elif self.stats["gamemode"] == 20 and self.stats["gamemode"] != gamemode:
+                    presence.character_select()
+                    gamemode = self.stats["gamemode"]
             time.sleep(2)
-            self.update_stats()
 
     def read_memory(self,addr):
         if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
