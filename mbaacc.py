@@ -488,11 +488,10 @@ class Caster():
                     print("no PID yet")
             else:
                 state_info = {
-                    "p1selmode": self.read_memory(0x74D8EC),
+                    "gamemode": self.read_memory(0x54EEE8),
                     "p1char": self.read_memory(0x74D8FC),
                     "p1moon": self.read_memory(0x74D900),
                     "p1color": self.read_memory(0x74D904),
-                    "p2selmode": self.read_memory(0x74D910),
                     "p2char": self.read_memory(0x74D920),
                     "p2moon": self.read_memory(0x74D924),
                     "p2color": self.read_memory(0x74D928),
