@@ -22,6 +22,42 @@ k32.ReadProcessMemory.restype = BOOL
 buf = ctypes.create_string_buffer(STRLEN)
 s = ctypes.c_size_t()
 
+# Character associations
+CHARACTER = {
+    "00": "Sion",
+    "01": "Arcueid",
+    "02": "Ciel",
+    "03": "Tohno Akiha",
+    "04": "Maids",
+    "05": "Hisui",
+    "06": "Kohaku",
+    "07": "Tohno Shiki",
+    "08": "Miyako",
+    "09": "Warakia",
+    "10": "Nero",
+    "11": "TATARI",
+    "12": "Red Arcueid",
+    "13": "Vermillion Akiha",
+    "14": "Mech-Hisui",
+    "15": "Nanaya",
+    "17": "Satsuki",
+    "18": "Len",
+    "19": "Powerd Ciel",
+    "20": "Neco Arc",
+    "22": "Aoko",
+    "23": "White Len",
+    "25": "Neco Chaos",
+    "28": "Kouma",
+    "29": "Seifuku",
+    "30": "Riesbyfe",
+    "31": "Roa",
+    "32": "Dust of Osiris",
+    "33": "Ryougi Shiki",
+    "34": "Neco Arc & Mech",
+    "35": "Kohaku & Mech",
+    "51": "Hime"
+}
+
 #error messages
 error_strings = [
     'Internal error!',
