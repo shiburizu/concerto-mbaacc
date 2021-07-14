@@ -26,7 +26,6 @@ Config.set(
     ],
 )
 Config.write()
-
 if getattr(sys,'frozen', False): #frozen exe
     PATH = os.path.dirname(sys.argv[0])
 else: #not frozen

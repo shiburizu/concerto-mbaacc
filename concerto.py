@@ -1,16 +1,18 @@
 import logging
-import sys
+import os,sys
+if getattr(sys,'frozen', False): #frozen exe
+    logging.basicConfig(filename= os.path.dirname(sys.executable) + '\concerto.log', level=logging.DEBUG)
+else: #not frozen
+    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
+from config import *  # App config functions
 # System
 import requests
 import time
 import threading
 import subprocess
 # Utility scripts
-from config import *  # App config functions
-logging.basicConfig(filename=PATH + '\concerto.log', level=logging.DEBUG)
 # Melty Blood CCCaster
 from mbaacc import Caster
-
 # Kivy
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.app import App
