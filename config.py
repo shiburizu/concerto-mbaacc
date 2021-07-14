@@ -1,7 +1,11 @@
-from kivy.config import Config
-import configparser
 import os
 import sys
+if getattr(sys,'frozen', False): #frozen exe
+    PATH = os.path.dirname(sys.argv[0])
+else: #not frozen
+    PATH = os.path.dirname(os.path.abspath(__file__))
+import configparser
+from kivy.config import Config
 from kivy.resources import resource_add_path
 if hasattr(sys, '_MEIPASS'):
     resource_add_path(os.path.join(sys._MEIPASS))
@@ -26,10 +30,6 @@ Config.set(
     ],
 )
 Config.write()
-if getattr(sys,'frozen', False): #frozen exe
-    PATH = os.path.dirname(sys.argv[0])
-else: #not frozen
-    PATH = os.path.dirname(os.path.abspath(__file__))
 #CCCaster ini default settings
 if os.path.exists(PATH + '\cccaster\config.ini'):
     with open(PATH + '\cccaster\config.ini', 'r') as f:
@@ -74,4 +74,4 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
 VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"
-CURRENT_VERSION = '7-13-2021'
+CURRENT_VERSION = '7-13-2021r2'
