@@ -210,6 +210,7 @@ class LobbyScreen(Screen):
             print(p)
             try:
                 r = requests.get(url=LOBBYURL, params=p).json()
+                print(r)
                 if r['msg'] == 'OK':
                     self.create(r)
                     time.sleep(2)
@@ -219,6 +220,8 @@ class LobbyScreen(Screen):
             except ValueError:
                     self.exit()
             except requests.exceptions.ConnectionError:
+                    self.exit()
+            except:
                     self.exit()
 
     def exit(self):
@@ -330,7 +333,7 @@ class LobbyScreen(Screen):
             else:
                 break
 
-    def watch_match(self, obj, name, ip, *args):
+    def watch_match(self, obj=None, name="", ip="", *args):
         self.watch_player = None
         for k,v in self.widget_index.items():
             try:

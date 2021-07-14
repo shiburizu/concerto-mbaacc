@@ -425,8 +425,8 @@ class Caster():
             if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
                 self.startup = False
                 self.offline = True
-                if stats is True:
-                    threading.Thread(target=self.update_stats,daemon=True).start()
+                #if stats is True:
+                #    threading.Thread(target=self.update_stats,daemon=True).start()
                 break
             if self.aproc != None:
                 if self.aproc.isalive() is False:
@@ -437,7 +437,7 @@ class Caster():
 
     def update_stats(self):
         while True:
-            if self.aproc == None:
+            if self.aproc is None:
                 break
             if self.pid is None:
                 cmd = f"""tasklist /FI "WindowTitle eq {MELTY_TITLE}" /FO CSV /NH"""
@@ -466,7 +466,6 @@ class Caster():
                 }
                 print(state_info)
             time.sleep(2)
-            self.update_stats()
 
     def read_memory(self,addr):
         if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
