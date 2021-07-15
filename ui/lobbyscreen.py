@@ -220,6 +220,7 @@ class LobbyScreen(Screen):
             print(p)
             try:
                 r = requests.get(url=LOBBYURL, params=p).json()
+                print(r)
                 if r['msg'] == 'OK':
                     self.create(r)
                     time.sleep(2)
@@ -229,6 +230,8 @@ class LobbyScreen(Screen):
             except ValueError:
                     self.exit()
             except requests.exceptions.ConnectionError:
+                    self.exit()
+            except:
                     self.exit()
 
     def exit(self):
@@ -323,11 +326,12 @@ class LobbyScreen(Screen):
     def wait_for_MBAA(self, t):
         while True:
             if self.app.game.playing is True and self.active_pop != None:
-                w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-                if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
+                cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
+                print(task_data)
+                if task_data.startswith("INFO: "): #case sensitive
                     print("not running yet")
                 else:
-                    print("MBAA running!")
                     resp = {
                         't': t,
                         'p': self.player_id,
@@ -343,7 +347,7 @@ class LobbyScreen(Screen):
             else:
                 break
 
-    def watch_match(self, obj, name, ip, *args):
+    def watch_match(self, obj=None, name="", ip="", *args):
         self.watch_player = None
         for k,v in self.widget_index.items():
             try:
