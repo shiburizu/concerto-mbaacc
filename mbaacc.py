@@ -3,8 +3,6 @@ from datetime import datetime
 import re
 import time
 import subprocess
-import sys
-import threading
 from config import *
 #stats
 import ctypes
@@ -13,7 +11,6 @@ from ctypes.wintypes import *
 #stats constants
 STRLEN = 1
 PROCESS_VM_READ = 0x0010
-MELTY_TITLE = "MELTY BLOOD Actress Again Current Code Ver.1.07 Rev*"
 k32 = ctypes.WinDLL('kernel32')
 k32.OpenProcess.argtypes = DWORD, BOOL, DWORD
 k32.OpenProcess.restype = HANDLE
@@ -421,8 +418,10 @@ class Caster():
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
         while True:
-            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-            if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
+            cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+            print(task_data)
+            if not task_data.startswith("INFO: ") and self.offline is False:
                 self.startup = False
                 self.offline = True
                 #if stats is True:
@@ -440,8 +439,8 @@ class Caster():
             if self.aproc is None:
                 break
             if self.pid is None:
-                cmd = f"""tasklist /FI "WindowTitle eq {MELTY_TITLE}" /FO CSV /NH"""
-                task_data = subprocess.check_output(cmd, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+                cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
                 print(task_data)
                 if not task_data.startswith("INFO: "):
                     # Split the output up and grab the PID
@@ -477,7 +476,7 @@ class Caster():
         self.rs = -1
         self.ds = -1
         if self.aproc != None:
-            subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run('taskkill /f /im cccaster.v3.0.exe', shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.aproc = None
         self.startup = False
         self.offline = False

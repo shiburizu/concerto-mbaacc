@@ -313,11 +313,12 @@ class LobbyScreen(Screen):
     def wait_for_MBAA(self, t):
         while True:
             if self.app.game.playing is True and self.active_pop != None:
-                w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-                if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
+                cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+                print(task_data)
+                if task_data.startswith("INFO: "): #case sensitive
                     print("not running yet")
                 else:
-                    print("MBAA running!")
                     resp = {
                         't': t,
                         'p': self.player_id,
