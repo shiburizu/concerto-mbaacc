@@ -419,7 +419,7 @@ class Caster():
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
         while True:
             cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
-            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
             print(task_data)
             if not task_data.startswith("INFO: ") and self.offline is False:
                 self.startup = False
@@ -440,7 +440,7 @@ class Caster():
                 break
             if self.pid is None:
                 cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
-                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
                 print(task_data)
                 if not task_data.startswith("INFO: "):
                     # Split the output up and grab the PID

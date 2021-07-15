@@ -314,7 +314,7 @@ class LobbyScreen(Screen):
         while True:
             if self.app.game.playing is True and self.active_pop != None:
                 cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
-                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
                 print(task_data)
                 if task_data.startswith("INFO: "): #case sensitive
                     print("not running yet")
