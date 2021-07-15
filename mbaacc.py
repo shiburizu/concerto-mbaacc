@@ -3,8 +3,6 @@ from datetime import datetime
 import re
 import time
 import subprocess
-import sys
-import threading
 from config import *
 #stats
 import ctypes
@@ -14,7 +12,6 @@ import presence
 #stats constants
 STRLEN = 1
 PROCESS_VM_READ = 0x0010
-MELTY_TITLE = "MELTY BLOOD Actress Again Current Code Ver.1.07 Rev*"
 k32 = ctypes.WinDLL('kernel32')
 k32.OpenProcess.argtypes = DWORD, BOOL, DWORD
 k32.OpenProcess.restype = HANDLE
@@ -143,9 +140,9 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port, cwd=PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port, cwd = PATH) 
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port, cwd=PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port, cwd = PATH) 
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -219,7 +216,7 @@ class Caster():
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip, cwd=PATH)
+            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip, cwd = PATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -294,7 +291,7 @@ class Caster():
     def watch(self, ip, sc, *args):
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip, cwd=PATH)
+            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip, cwd = PATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -340,9 +337,9 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port, cwd=PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port, cwd = PATH) 
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port, cwd=PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port, cwd = PATH) 
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -365,7 +362,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd=PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -390,7 +387,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd=PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -413,7 +410,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd=PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -436,7 +433,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd=PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -457,17 +454,19 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn('MBAA.exe', cwd=PATH)
+        self.aproc = PtyProcess.spawn('MBAA.exe', cwd = PATH)
         self.flag_offline(sc,stats=False)
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
         while True:
-            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-            if b'No Process exists for mbaa.exe\r\n' not in w.stderr and self.offline is False:
+            cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
+            print(task_data)
+            if not task_data.startswith("INFO: ") and self.offline is False:
                 self.startup = False
                 self.offline = True
-                if stats is True:
-                    threading.Thread(target=self.update_stats,daemon=True).start()
+                #if stats is True:
+                #    threading.Thread(target=self.update_stats,daemon=True).start()
                 break
             if self.aproc != None:
                 if self.aproc.isalive() is False:
@@ -480,11 +479,11 @@ class Caster():
         # Used to update presence only on state change 
         state = None
         while True:
-            if self.aproc == None:
+            if self.aproc is None:
                 break
             if self.pid is None:
-                cmd = f"""tasklist /FI "WindowTitle eq {MELTY_TITLE}" /FO CSV /NH"""
-                task_data = subprocess.check_output(cmd, creationflags=subprocess.CREATE_NO_WINDOW).decode("UTF8")
+                cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
                 print(task_data)
                 if not task_data.startswith("INFO: "):
                     # Split the output up and grab the PID
@@ -535,7 +534,7 @@ class Caster():
         self.rs = -1
         self.ds = -1
         if self.aproc != None:
-            subprocess.run('taskkill /f /im cccaster.v3.0.exe', creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run('taskkill /f /im cccaster.v3.0.exe', shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.aproc = None
         self.startup = False
         self.offline = False

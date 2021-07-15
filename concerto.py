@@ -1,4 +1,10 @@
-import sys
+import logging
+import os,sys
+if getattr(sys,'frozen', False): #frozen exe
+    logging.basicConfig(filename= os.path.dirname(sys.argv[0]) + '\concerto.log', level=logging.DEBUG)
+else: #not frozen
+    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
+from config import *  # App config functions
 # System
 import requests
 import time
@@ -6,15 +12,10 @@ import threading
 import subprocess
 import winreg
 # Utility scripts
-from config import *  # App config functions
-# Logging
-import logging
-logging.basicConfig(filename= PATH + '\concerto.log', level=logging.DEBUG)
-# Melty Blood CCCaster
-from mbaacc import Caster
 # Discord Rich Presence
 import presence
-
+# Melty Blood CCCaster
+from mbaacc import Caster
 # Kivy
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.app import App
@@ -151,8 +152,10 @@ class Concerto(App):
         if self.game.aproc != None:
             if self.game.aproc.isalive():
                 if self.game.offline is True:
-                    w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-                    if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
+                    cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+                    task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
+                    print(task_data)
+                    if task_data.startswith("INFO: "):
                         self.game.kill_caster()
             else:
                 if self.OnlineScreen.active_pop != None:
@@ -172,8 +175,10 @@ class Concerto(App):
                     requests.get(url=LOBBYURL, params=r).json()
                 self.game.kill_caster()    
         if hasattr(self,'sound'):
-            w = subprocess.run('qprocess mbaa.exe', stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
-            if w.stderr == b'No Process exists for mbaa.exe\r\n': #case sensitive
+            cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
+            print(task_data)
+            if task_data.startswith("INFO: "):
                 if self.sound.bgm.state == 'stop':
                     self.sound.cut_bgm()
             else:
