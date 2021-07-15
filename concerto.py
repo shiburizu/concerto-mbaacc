@@ -26,6 +26,7 @@ from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen,
 class Concerto(App):
     def __init__(self, **kwargs):
         super(Concerto, self).__init__(**kwargs)
+        self.mode = 'Menu' # current mode selection
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
         self.game = Caster(CApp=self)  # expects Caster object
 

@@ -42,6 +42,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Hosting'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        self.app.mode = 'Direct Match'
         self.active_pop = popup
         popup.open()
 
@@ -76,6 +77,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        self.app.mode = 'Online Direct Match'
         self.active_pop = popup
         popup.open()
 

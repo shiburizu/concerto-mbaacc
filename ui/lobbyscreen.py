@@ -31,6 +31,7 @@ class LobbyScreen(Screen):
         self.widget_index = {} #ids of players, widget of lobby
         self.error = False
         self.challenge_name = None #name of player being challenged
+        self.opponent = None # name of player currently being played against
         self.challenge_id = None #id of player being challenged
 
 
@@ -48,8 +49,10 @@ class LobbyScreen(Screen):
         challenging_ids = []
 
         if type.lower() == 'public':
+            self.app.mode = 'Public Lobby'
             presence.public_lobby(self.code)
         elif type.lower() == 'private':
+            self.app.mode = 'Private Lobby'
             presence.private_lobby()
 
         # TODO: come up with a solution for players with identical names (this does not affect the server )
@@ -308,6 +311,7 @@ class LobbyScreen(Screen):
     def confirm(self, obj, r, d, p, n, t=None, *args):
         try:
             self.app.game.confirm_frames(int(r.text),int(d.text))
+            self.opponent = n
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
             p.dismiss()
@@ -394,6 +398,7 @@ class LobbyScreen(Screen):
     def dismiss(self, obj, p, *args):
         self.app.game.kill_caster()
         self.challenge_name = None
+        self.opponent = None
         self.challenge_id = None
         r = {
             'action': 'end',

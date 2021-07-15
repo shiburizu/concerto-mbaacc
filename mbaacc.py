@@ -149,6 +149,8 @@ class Caster():
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
+        # Stats
+        threading.Thread(target=self.update_stats,daemon=True).start()
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
@@ -221,6 +223,8 @@ class Caster():
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
+        # Stats
+        threading.Thread(target=self.update_stats,daemon=True).start()
         cur_con = ""
         last_con = ""
         con = ""
@@ -473,7 +477,8 @@ class Caster():
         sc.active_pop.dismiss()
 
     def update_stats(self):
-        gamemode = None
+        # Used to update presence only on state change 
+        state = None
         while True:
             if self.aproc == None:
                 break
@@ -490,7 +495,7 @@ class Caster():
                     print("no PID yet")
             else:
                 self.stats = {
-                    "gamemode": self.read_memory(0x54EEE8),
+                    "state": self.read_memory(0x54EEE8),
                     "p1char": self.read_memory(0x74D8FC),
                     "p1moon": self.read_memory(0x74D900),
                     "p1color": self.read_memory(0x74D904),
@@ -501,12 +506,23 @@ class Caster():
                     "p2wins": self.read_memory(0x559580),
                     "towin": self.read_memory(0x553FDC)
                 }
-                if self.stats["gamemode"] == 1 and self.stats["gamemode"] != gamemode:
-                    presence.offline_game('In Game', CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
-                    gamemode = self.stats["gamemode"]
-                elif self.stats["gamemode"] == 20 and self.stats["gamemode"] != gamemode:
-                    presence.character_select()
-                    gamemode = self.stats["gamemode"]
+                # Check if in game once
+                print(self.stats)
+                if self.stats["state"] == 1 and self.stats["state"] != state:
+                    print('--------- ingame')
+                    if self.offline:
+                        presence.offline_game(self.app.mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                    else:
+                        if self.app.mode.lower() == 'public lobby':
+                            presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                        else:
+                            presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                    state = self.stats["state"]
+                # Check if in character select once
+                elif self.stats["state"] == 20 and self.stats["state"] != state:
+                    print('--------- character select')
+                    presence.character_select(self.app.mode)
+                    state = self.stats["state"]
             time.sleep(2)
 
     def read_memory(self,addr):
@@ -525,6 +541,13 @@ class Caster():
         self.offline = False
         self.playing = False
         self.pid = None
+        if self.app.mode.lower() == 'public lobby':
+            presence.public_lobby(self.app.LobbyScreen.code)
+        elif self.app.mode.lower() == 'private lobby':
+            presence.private_lobby()
+        else:
+            self.mode = 'Menu'
+            presence.menu()
 
     def check_msg(self,s):
         e = []
