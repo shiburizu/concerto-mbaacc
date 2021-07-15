@@ -9,7 +9,7 @@ import winreg
 from config import *  # App config functions
 # Logging
 import logging
-logging.basicConfig(filename=PATH + '\concerto.log', level=logging.DEBUG)
+logging.basicConfig(filename= PATH + '\concerto.log', level=logging.DEBUG)
 # Melty Blood CCCaster
 from mbaacc import Caster
 # Discord Rich Presence
@@ -88,9 +88,13 @@ class Concerto(App):
 
         # Execute launch params
         if len(sys.argv) > 1:
-            params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':')
+            params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
             if params[0] == 'lobby':
                 self.LobbyList.join(code=int(params[1]))
+            elif params[0] == 'connect':
+                self.OnlineScreen.join(ip=params[1])
+            elif params[0] == 'watch':
+                self.OnlineScreen.watch(ip=params[1])
 
     def lobby_button(self, *args):
         lst = [
