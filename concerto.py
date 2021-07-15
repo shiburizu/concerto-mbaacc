@@ -192,9 +192,9 @@ def run():
     try:
         CApp.run()
     finally:
+        CApp.game.kill_caster()
         # close rich presence connection
         presence.close()
-        CApp.game.kill_caster()
         if CApp.LobbyScreen.code != None:
             CApp.LobbyScreen.exit()
 

@@ -3,6 +3,7 @@ from datetime import datetime
 import re
 import time
 import subprocess
+import threading
 from config import *
 #stats
 import ctypes
@@ -465,8 +466,8 @@ class Caster():
             if not task_data.startswith("INFO: ") and self.offline is False:
                 self.startup = False
                 self.offline = True
-                #if stats is True:
-                #    threading.Thread(target=self.update_stats,daemon=True).start()
+                if stats is True:
+                   threading.Thread(target=self.update_stats,daemon=True).start()
                 break
             if self.aproc != None:
                 if self.aproc.isalive() is False:
@@ -506,9 +507,7 @@ class Caster():
                     "towin": self.read_memory(0x553FDC)
                 }
                 # Check if in game once
-                print(self.stats)
                 if self.stats["state"] == 1 and self.stats["state"] != state:
-                    print('--------- ingame')
                     if self.offline:
                         presence.offline_game(self.app.mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
                     else:
@@ -519,7 +518,6 @@ class Caster():
                     state = self.stats["state"]
                 # Check if in character select once
                 elif self.stats["state"] == 20 and self.stats["state"] != state:
-                    print('--------- character select')
                     presence.character_select(self.app.mode)
                     state = self.stats["state"]
             time.sleep(2)
