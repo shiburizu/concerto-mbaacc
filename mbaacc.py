@@ -23,38 +23,44 @@ s = ctypes.c_size_t()
 
 # Character associations
 CHARACTER = {
-    "0": "Sion",
-    "1": "Arcueid",
-    "2": "Ciel",
-    "3": "Akiha",
-    "4": "Maids",
-    "5": "Hisui",
-    "6": "Kohaku",
-    "7": "Tohno",
-    "8": "Miyako",
-    "9": "Warakia",
-    "10": "Nero",
-    "11": "V.Sion",
-    "12": "Red Arcueid",
-    "13": "V.Akiha",
-    "14": "Mech-Hisui",
-    "15": "Nanaya",
-    "17": "Satsuki",
-    "18": "Len",
-    "19": "Powerd Ciel",
-    "20": "Neco Arc",
-    "22": "Aoko",
-    "23": "White Len",
-    "25": "NAC",
-    "28": "Kouma",
-    "29": "Seifuku",
-    "30": "Riesbyfe",
-    "31": "Roa",
-    "32": "Dust of Osiris",
-    "33": "Ryougi",
-    "34": "Neco-Mech",
-    "35": "Koha-Mech",
-    "51": "Hime"
+    0 : "Sion",
+    1 : "Arcueid",
+    2 : "Ciel",
+    3 : "Akiha",
+    4 : "Maids",
+    5 : "Hisui",
+    6 : "Kohaku",
+    7 : "Tohno",
+    8 : "Miyako",
+    9 : "Warakia",
+    10 : "Nero",
+    11 : "V.Sion",
+    12 : "Red Arcueid",
+    13 : "V.Akiha",
+    14 : "Mech-Hisui",
+    15 : "Nanaya",
+    17 : "Satsuki",
+    18 : "Len",
+    19 : "Powerd Ciel",
+    20 : "Neco Arc",
+    22 : "Aoko",
+    23 : "White Len",
+    25 : "NAC",
+    28 : "Kouma",
+    29 : "Seifuku",
+    30 : "Riesbyfe",
+    31 : "Roa",
+    32 : "Dust of Osiris",
+    33 : "Ryougi",
+    34 : "Neco-Mech",
+    35 : "Koha-Mech",
+    51 : "Hime"
+}
+
+MOON = {
+    0 : 'C',
+    1 : 'F',
+    2 : 'H'
 }
 
 #error messages
@@ -516,34 +522,29 @@ class Caster():
                 }
                 # Check if in game once
                 if self.stats["state"] == 1 and self.stats["state"] != state:
+                    p1_char = "%s-" % MOON[self.stats["p1moon"]] + CHARACTER[self.stats["p1char"]]
+                    p2_char = "%s-" % MOON[self.stats["p2moon"]] + CHARACTER[self.stats["p2char"]]
                     if self.broadcasting: #to be expanded upon
-                        moons = {
-                            0 : 'C',
-                            1 : 'F',
-                            2 : 'H'
-                        }
-                        tooltip_1 = "%s-" % moons[self.stats["p1moon"]] + CHARACTER[str(self.stats["p1char"])]
-                        tooltip_2 = "%s-" % moons[self.stats["p2moon"]] + CHARACTER[str(self.stats["p2char"])]
                         
                         mode = self.app.offline_mode
                         if mode.lower() == 'spectating':
-                            mode = "Spectating %s vs %s" % (tooltip_1,tooltip_2)
+                            mode = "Spectating %s vs %s" % (p1_char, p2_char)
                         print(self.app.mode.lower())
                         if self.app.mode.lower() == 'public lobby':
-                            presence.broadcast_game(mode, self.stats["p1char"], tooltip_1, self.stats["p2char"], tooltip_2, lobby_id=self.app.LobbyScreen.code)
+                            presence.broadcast_game(mode, self.stats["p1char"], p1_char, self.stats["p2char"], p2_char, lobby_id=self.app.LobbyScreen.code)
                         else:
-                            presence.broadcast_game(mode, self.stats["p1char"], tooltip_1, self.stats["p2char"], tooltip_2)
+                            presence.broadcast_game(mode, self.stats["p1char"], p1_char, self.stats["p2char"], p2_char)
                     else:
                         if self.app.mode.lower() == 'public lobby':
                             if self.app.offline_mode:
-                                presence.offline_game(self.app.offline_mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"],lobby_id=self.app.LobbyScreen.code)
+                                presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], self.stats["p1moon"],lobby_id=self.app.LobbyScreen.code)
                             else:
-                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, p1_char, self.stats["p1char"], self.stats["p1moon"])
                         else:
                             if self.app.offline_mode:
-                                presence.offline_game(self.app.offline_mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                                presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], self.stats["p1moon"])
                             else:
-                                presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                                presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, p1_char, self.stats["p1char"], self.stats["p1moon"])
                     state = self.stats["state"]
                 # Check if in character select once
                 elif self.stats["state"] == 20 and self.stats["state"] != state:

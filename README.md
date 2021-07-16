@@ -30,7 +30,7 @@ Art & sound are provided by community members for exclusive use with Concerto.
 * [Sion by aBitofbaileys](https://www.pixiv.net/en/artworks/90676177)
 * [Riesbyfe by Onemi](https://www.pixiv.net/en/artworks/90219044)
 * [Kohaku by Kohakudoori](https://www.pixiv.net/en/artworks/83141238)
-* UI direction in cooperation with [Okk](https://github.com/okkdev) and [M-AS](https://twitter.com/matthewrobo)
+* UI direction in cooperation with [okk](https://github.com/okkdev) and [M-AS](https://twitter.com/matthewrobo)
 * Backgrounds sourced from Unsplash
 ### Audio
 * Main BGM (menu_bgm) by [Tempxa](https://twitter.com/TempxaRK9)
