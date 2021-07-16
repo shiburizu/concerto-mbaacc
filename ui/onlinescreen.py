@@ -42,6 +42,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Hosting'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        self.app.mode = 'Direct Match'
         self.active_pop = popup
         popup.open()
 
@@ -60,35 +61,40 @@ class OnlineScreen(Screen):
     def set_ip(self):
         self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % self.app.game.adr
 
-    def join(self):
-        ip = re.findall(
-            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', self.direct_pop.join_ip.text)
-        if ip == []:
+    def join(self, ip=None):
+        if ip == None:
+            ip = self.direct_pop.join_ip.text
+
+        check_ip = re.findall(
+            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', ip)
+        if check_ip == []:
             self.error_message(['Please supply a valid IP.'])
             return None
-        caster = threading.Thread(target=self.app.game.join, args=[
-                                  self.direct_pop.join_ip.text,self], daemon=True)
+        caster = threading.Thread(target=self.app.game.join, args=[ip, self], daemon=True)
         caster.start()
         popup = GameModal()
-        popup.modal_txt.text = 'Connecting to IP: %s' % self.direct_pop.join_ip.text
+        popup.modal_txt.text = 'Connecting to IP: %s' % ip
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        self.app.mode = 'Online Direct Match'
         self.active_pop = popup
         popup.open()
 
-    def watch(self):
-        ip = re.findall(
-            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', self.direct_pop.watch_ip.text)
-        if ip == []:
+    def watch(self, ip=None):
+        if ip == None:
+            ip = self.direct_pop.watch_ip.text
+
+        check_ip = re.findall(
+            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', ip)
+        if check_ip == []:
             self.error_message(['Please supply a valid IP.'])
             return None
         popup = GameModal()
         self.active_pop = popup
-        caster = threading.Thread(target=self.app.game.watch, args=[
-                                  self.direct_pop.watch_ip.text,self], daemon=True)
+        caster = threading.Thread(target=self.app.game.watch, args=[ip, self], daemon=True)
         caster.start()
-        popup.modal_txt.text = 'Watching IP: %s' % self.direct_pop.watch_ip.text
+        popup.modal_txt.text = 'Watching IP: %s' % ip
         popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))

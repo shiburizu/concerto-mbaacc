@@ -10,7 +10,10 @@ import requests
 import time
 import threading
 import subprocess
+import winreg
 # Utility scripts
+# Discord Rich Presence
+import presence
 # Melty Blood CCCaster
 from mbaacc import Caster
 # Kivy
@@ -24,6 +27,7 @@ from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen,
 class Concerto(App):
     def __init__(self, **kwargs):
         super(Concerto, self).__init__(**kwargs)
+        self.mode = 'Menu' # current mode selection
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
         self.game = Caster(CApp=self)  # expects Caster object
 
@@ -54,6 +58,19 @@ class Concerto(App):
     def on_start(self):
         #necessary file sanity checks
         e = []
+
+        # Register concerto:// url protocol handler
+        try:
+            key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
+            winreg.SetValueEx(key, '', 0, winreg.REG_SZ, 'URL:Concerto Protocol')
+            winreg.SetValueEx(key, 'URL Protocol', 0, winreg.REG_SZ, '')
+            winreg.SetValueEx(winreg.CreateKey(key, 'DefaultIcon'), '', 0, winreg.REG_SZ, 'concerto.exe,0')
+            winreg.SetValueEx(winreg.CreateKey(key, 'shell\\open\\command'), '', 0, winreg.REG_SZ, '"' + sys.argv[0] + '" "%1"')
+            if key:
+                winreg.CloseKey(key)
+        except:
+            logging.warning('Concerto: please start as admin once to add concerto protocol handler')
+        
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
             e.append('Please fix the above problems and restart Concerto.')
@@ -63,9 +80,23 @@ class Concerto(App):
         else:
             #if all is well, start loading in user options
             if app_config['settings']['mute_bgm'] == '1':
-                    self.sound.muted = True
+                self.sound.muted = True
             else:
                 self.sound.cut_bgm()
+
+        # Connect discord rich presence
+        presence.connect()
+        presence.menu()
+
+        # Execute launch params
+        if len(sys.argv) > 1:
+            params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
+            if params[0] == 'lobby':
+                self.LobbyList.join(code=int(params[1]))
+            elif params[0] == 'connect':
+                self.OnlineScreen.join(ip=params[1])
+            elif params[0] == 'watch':
+                self.OnlineScreen.watch(ip=params[1])
 
     def lobby_button(self, *args):
         lst = [
@@ -162,6 +193,8 @@ def run():
         CApp.run()
     finally:
         CApp.game.kill_caster()
+        # close rich presence connection
+        presence.close()
         if CApp.LobbyScreen.code != None:
             CApp.LobbyScreen.exit()
 
