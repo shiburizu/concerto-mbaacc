@@ -108,6 +108,7 @@ class Caster():
         self.ds = -1 # delay suggestion
         self.aproc = None # active caster Thread object to check for isalive()
         self.offline = False #True when an offline mode has been started
+        self.broadcasting = False #True when Broadcasting offline has been started
         self.startup = False #True when waiting for MBAA.exe to start in offline
         self.stats = {} #dict of information we can read from memory
         self.pid = None #PID of MBAA.exe
@@ -139,6 +140,7 @@ class Caster():
 
     def host(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
         self.kill_caster()
+        self.app.offline_mode = None
         try:
             if mode == "Training":
                 self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port, cwd = PATH) 
@@ -216,6 +218,7 @@ class Caster():
 
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
         self.kill_caster()
+        self.app.offline_mode = None
         try:
             self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip, cwd = PATH)
         except FileNotFoundError:
@@ -300,6 +303,8 @@ class Caster():
         last_con = ""
         con = ""
         logger.write('\n== Watch %s ==\n' % ip)
+        self.broadcasting = True
+        threading.Thread(target=self.update_stats,daemon=True).start()
         while self.aproc.isalive():
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
             con += last_con + cur_con
@@ -345,6 +350,8 @@ class Caster():
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
         logger.write('\n== Broadcast %s ==\n' % mode)
+        self.broadcasting = True
+        threading.Thread(target=self.update_stats,daemon=True).start()
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
             print(t)
@@ -508,17 +515,44 @@ class Caster():
                 }
                 # Check if in game once
                 if self.stats["state"] == 1 and self.stats["state"] != state:
-                    if self.offline:
+                    if self.offline and self.app.LobbyScreen.type == None:
                         presence.offline_game(self.app.mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                        print("triggered std offline")
+                    elif self.broadcasting: #to be expanded upon
+                        moons = {
+                            0 : 'C',
+                            1 : 'F',
+                            2 : 'H'
+                        }
+                        tooltip_1 = "%s-" % moons[self.stats["p1moon"]] + CHARACTER[str(self.stats["p1char"])]
+                        tooltip_2 = "%s-" % moons[self.stats["p2moon"]] + CHARACTER[str(self.stats["p2char"])]
+                        
+                        mode = self.app.offline_mode
+                        if mode.lower() == 'spectating':
+                            mode = "Spectating %s vs %s" % (tooltip_1,tooltip_2)
+                        print(self.app.mode.lower())
+                        if self.app.mode.lower() == 'public lobby':
+                            presence.broadcast_game(mode, self.stats["p1char"], tooltip_1, self.stats["p2char"], tooltip_2, lobby_id=self.app.LobbyScreen.code)
+                        else:
+                            presence.broadcast_game(mode, self.stats["p1char"], tooltip_1, self.stats["p2char"], tooltip_2)
                     else:
                         if self.app.mode.lower() == 'public lobby':
-                            presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                            if self.app.offline_mode:
+                                presence.offline_game(self.app.offline_mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"],lobby_id=self.app.LobbyScreen.code)
+                            else:
+                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
                         else:
-                            presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                            if self.app.offline_mode:
+                                presence.offline_game(self.app.offline_mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
+                            else:
+                                presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
                     state = self.stats["state"]
                 # Check if in character select once
                 elif self.stats["state"] == 20 and self.stats["state"] != state:
-                    presence.character_select(self.app.mode)
+                    if self.app.mode.lower() == 'public lobby':
+                        presence.character_select(self.app.mode,lobby_id=self.app.LobbyScreen.code)
+                    else:
+                        presence.character_select(self.app.mode)
                     state = self.stats["state"]
             time.sleep(2)
 
@@ -536,14 +570,18 @@ class Caster():
         self.aproc = None
         self.startup = False
         self.offline = False
+        self.broadcasting = False
         self.playing = False
         self.pid = None
-        if self.app.mode.lower() == 'public lobby':
-            presence.public_lobby(self.app.LobbyScreen.code)
-        elif self.app.mode.lower() == 'private lobby':
-            presence.private_lobby()
+        if self.app.LobbyScreen.type != None:
+            if self.app.LobbyScreen.type.lower() == 'public':
+                self.app.mode = 'Public Lobby'
+                presence.public_lobby(self.app.LobbyScreen.code)
+            elif self.app.LobbyScreen.type.lower() == 'private':
+                self.app.mode = 'Private Lobby'
+                presence.private_lobby()
         else:
-            self.mode = 'Menu'
+            self.app.mode = 'Menu'
             presence.menu()
 
     def check_msg(self,s):

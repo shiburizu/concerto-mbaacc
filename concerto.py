@@ -28,6 +28,7 @@ class Concerto(App):
     def __init__(self, **kwargs):
         super(Concerto, self).__init__(**kwargs)
         self.mode = 'Menu' # current mode selection
+        self.offline_mode = None #secondary Offline activity, mostly for lobby
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
         self.game = Caster(CApp=self)  # expects Caster object
 

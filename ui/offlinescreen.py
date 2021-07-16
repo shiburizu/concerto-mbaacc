@@ -41,6 +41,7 @@ class OfflineScreen(Screen):
         popup.close_btn.disabled = True
         popup.open()
         self.app.mode = mode
+        self.app.offline_mode = mode
         self.active_pop = popup
     
     def error_message(self,e):

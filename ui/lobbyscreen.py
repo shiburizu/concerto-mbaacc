@@ -33,6 +33,7 @@ class LobbyScreen(Screen):
         self.challenge_name = None #name of player being challenged
         self.opponent = None # name of player currently being played against
         self.challenge_id = None #id of player being challenged
+        self.type = None
 
 
     def create(self, j, first=False, type=""):  # json response object
@@ -46,8 +47,11 @@ class LobbyScreen(Screen):
             self.player_list.clear_widgets()
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
+            self.type = type
         challenging_ids = []
-
+        #this does not use self.type because it should only run once per lobby.
+        #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
+        #self.type is used for update_stats in the Caster function to signal info to the presence.
         if type.lower() == 'public':
             self.app.mode = 'Public Lobby'
             presence.public_lobby(self.code)
@@ -228,11 +232,11 @@ class LobbyScreen(Screen):
                 else:
                     self.exit()
             except ValueError:
-                    self.exit()
+                self.exit()
             except requests.exceptions.ConnectionError:
-                    self.exit()
+                self.exit()
             except:
-                    self.exit()
+                self.exit()
 
     def exit(self):
         self.lobby_thread_flag = 1
@@ -250,6 +254,7 @@ class LobbyScreen(Screen):
         self.watch_player = None
         self.player_id = None
         self.code = None
+        self.type = None
         self.lobby_updater = None
         self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
@@ -364,6 +369,7 @@ class LobbyScreen(Screen):
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
         popup.open()
+        self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         caster.start()
 
     def set_frames(self, name, delay, ping, target=None, mode="Versus", rounds=2):

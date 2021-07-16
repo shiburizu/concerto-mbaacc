@@ -55,6 +55,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
         self.active_pop = popup
         popup.open()
 
@@ -98,6 +99,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         popup.open()
 
     def confirm(self, obj, r, d, p, n, *args):
