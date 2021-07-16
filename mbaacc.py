@@ -515,10 +515,7 @@ class Caster():
                 }
                 # Check if in game once
                 if self.stats["state"] == 1 and self.stats["state"] != state:
-                    if self.offline and self.app.LobbyScreen.type == None:
-                        presence.offline_game(self.app.mode, CHARACTER[str(self.stats["p1char"])], self.stats["p1char"], self.stats["p1moon"])
-                        print("triggered std offline")
-                    elif self.broadcasting: #to be expanded upon
+                    if self.broadcasting: #to be expanded upon
                         moons = {
                             0 : 'C',
                             1 : 'F',
