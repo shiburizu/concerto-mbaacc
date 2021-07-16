@@ -79,7 +79,8 @@ error_strings = [
     'Missing relay_list.txt!',
     'Couldn\'t find MBAA.exe!',
     'Timed out!',
-    'Network delay greater than limit:'
+    'Network delay greater than limit:',
+    'Incompatible cccaster\hook.dll!'
 ]
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
