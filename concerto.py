@@ -11,6 +11,7 @@ import time
 import threading
 import subprocess
 import winreg
+import traceback
 # Utility scripts
 # Discord Rich Presence
 import presence
@@ -70,9 +71,12 @@ class Concerto(App):
             if key:
                 winreg.CloseKey(key)
         except:
-            logging.warning('Concerto: please start as admin once to add concerto protocol handler')
-            self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
-        
+            try:
+                check = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
+            except FileNotFoundError:
+                self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
+                logging.warning('Concerto: please start as admin once to add concerto protocol handler')
+            
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
             e.append('Please fix the above problems and restart Concerto.')
