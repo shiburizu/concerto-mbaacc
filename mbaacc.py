@@ -477,12 +477,17 @@ class Caster():
         while True:
             cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
             task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-            if not task_data.startswith("INFO: ") and self.offline is False:
-                self.startup = False
-                self.offline = True
-                if stats is True:
-                   threading.Thread(target=self.update_stats,daemon=True).start()
-                break
+            try:
+                task_data.replace("\"", "").split(",")[1]
+            except IndexError:
+                pass
+            else:
+                if self.offline is False:
+                    self.startup = False
+                    self.offline = True
+                    if stats is True:
+                        threading.Thread(target=self.update_stats,daemon=True).start()
+                    break
             if self.aproc != None:
                 if self.aproc.isalive() is False:
                     break
@@ -499,9 +504,11 @@ class Caster():
             if self.pid is None:
                 cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
                 task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-                if not task_data.startswith("INFO: "):
-                    # Split the output up and grab the PID
+                try:
                     pid = task_data.replace("\"", "").split(",")[1]
+                except IndexError:
+                    pass
+                else:
                     self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
             else:
                 self.stats = {
@@ -578,9 +585,8 @@ class Caster():
                 self.app.mode = 'Private Lobby'
                 presence.private_lobby()
         else:
-            if self.app.mode != 'Menu':
-                self.app.mode = 'Menu'
-                presence.menu()
+            self.app.mode = 'Menu'
+            presence.menu()
 
     def check_msg(self,s):
         e = []

@@ -72,7 +72,7 @@ class Concerto(App):
                 winreg.CloseKey(key)
         except:
             try:
-                check = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
+                winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
             except:
                 self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
@@ -160,7 +160,10 @@ class Concerto(App):
                 if self.game.offline is True:
                     cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
                     task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-                    if task_data.startswith("INFO: "):
+                    print(task_data)
+                    try:
+                        task_data.replace("\"", "").split(",")[1]
+                    except IndexError:
                         self.game.kill_caster()
             else:
                 if self.OnlineScreen.active_pop != None:
@@ -182,12 +185,14 @@ class Concerto(App):
         if hasattr(self,'sound'):
             cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
             task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-            if task_data.startswith("INFO: "):
+            try:
+                task_data.replace("\"", "").split(",")[1]
+            except IndexError:
                 if self.sound.bgm.state == 'stop':
                     self.sound.cut_bgm()
             else:
                 if self.sound.bgm.state == 'play':
-                    self.sound.cut_bgm()
+                    self.sound.cut_bgm()              
         time.sleep(2)
         self.checkPop()
                     
