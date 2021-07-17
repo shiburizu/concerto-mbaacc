@@ -86,7 +86,9 @@ error_strings = [
     'Couldn\'t find MBAA.exe!',
     'Timed out!',
     'Network delay greater than limit:',
-    'Incompatible cccaster\hook.dll!'
+    'Incompatible cccaster\hook.dll!',
+    'Latest version is',
+    'Update?'
 ]
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
@@ -361,7 +363,6 @@ class Caster():
         threading.Thread(target=self.update_stats,daemon=True).start()
         while self.aproc.isalive(): # find IP and port combo for host
             t = self.aproc.read()
-            print(t)
             ip = re.findall(
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
@@ -476,7 +477,6 @@ class Caster():
         while True:
             cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
             task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
-            print(task_data)
             if not task_data.startswith("INFO: ") and self.offline is False:
                 self.startup = False
                 self.offline = True
@@ -499,14 +499,10 @@ class Caster():
             if self.pid is None:
                 cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
                 task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
-                print(task_data)
                 if not task_data.startswith("INFO: "):
                     # Split the output up and grab the PID
                     pid = task_data.replace("\"", "").split(",")[1]
                     self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
-                    print("found MBAA PID")
-                else:
-                    print("no PID yet")
             else:
                 self.stats = {
                     "state": self.read_memory(0x54EEE8),
@@ -529,7 +525,6 @@ class Caster():
                         mode = self.app.offline_mode
                         if mode.lower() == 'spectating':
                             mode = "Spectating %s vs %s" % (p1_char, p2_char)
-                        print(self.app.mode.lower())
                         if self.app.mode.lower() == 'public lobby':
                             presence.broadcast_game(mode, self.stats["p1char"], p1_char, self.stats["p2char"], p2_char, lobby_id=self.app.LobbyScreen.code)
                         else:
@@ -580,14 +575,19 @@ class Caster():
                 self.app.mode = 'Private Lobby'
                 presence.private_lobby()
         else:
-            self.app.mode = 'Menu'
-            presence.menu()
+            if self.app.mode != 'Menu':
+                self.app.mode = 'Menu'
+                presence.menu()
 
     def check_msg(self,s):
         e = []
         for i in error_strings:
             if i in s:
-                e.append(i)
+                if i == 'Latest version is' or i == 'Update?': #update prompt
+                    e.append('A CCCaster update is available. Visit concerto.shib.live to download.')
+                    return e
+                else:
+                    e.append(i)
                 logger.write('\n%s\n' % e)
         return e
         

@@ -8,7 +8,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 
 from ui.modals import GameModal
-from ui.buttons import MenuBtn
+from ui.buttons import DummyBtn
 
 
 class LobbyList(Screen):
@@ -87,6 +87,9 @@ class LobbyList(Screen):
             popup.open()
 
     def refresh(self):
+        if self.app.LobbyScreen.lobby_updater != None:
+            Clock.schedule_once(lambda dt: self.switch_to_lobby(),0)
+            return None
         try:
             p = {
                 'action': 'check',
@@ -100,7 +103,8 @@ class LobbyList(Screen):
                 a = requests.get(url=LOBBYURL, params=p).json()
                 self.lobby_view.clear_widgets()
                 for i in a['lobbies']:
-                    b = MenuBtn()
+                    b = DummyBtn()
+                    b.halign = 'left'
                     b.text = "ID %s: %s players" % (i[0], i[1])
                     b.bind(on_release=partial(self.join, code=i[0],pub=True))
                     self.lobby_view.add_widget(b)
@@ -126,3 +130,6 @@ class LobbyList(Screen):
     
     def switch_to_online(self):
         self.app.sm.current = 'Online'
+
+    def switch_to_lobby(self):
+        self.app.sm.current = 'Lobby'

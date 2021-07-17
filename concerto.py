@@ -155,7 +155,6 @@ class Concerto(App):
                 if self.game.offline is True:
                     cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
                     task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
-                    print(task_data)
                     if task_data.startswith("INFO: "):
                         self.game.kill_caster()
             else:
@@ -178,7 +177,6 @@ class Concerto(App):
         if hasattr(self,'sound'):
             cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
             task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8")
-            print(task_data)
             if task_data.startswith("INFO: "):
                 if self.sound.bgm.state == 'stop':
                     self.sound.cut_bgm()

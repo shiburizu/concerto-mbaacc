@@ -34,6 +34,7 @@ class LobbyScreen(Screen):
         self.opponent = None # name of player currently being played against
         self.challenge_id = None #id of player being challenged
         self.type = None
+        self.get_attempts = 0 #if 2, exit
 
 
     def create(self, j, first=False, type=""):  # json response object
@@ -230,15 +231,11 @@ class LobbyScreen(Screen):
                     time.sleep(2)
                     self.auto_refresh()
                 else:
-                    self.exit()
-            except ValueError:
-                self.exit()
-            except requests.exceptions.ConnectionError:
-                self.exit()
+                    self.exit(msg='Bad response from server.')
             except:
-                self.exit()
+                self.exit(msg='Error: %s' % sys.exc_info()[0])
 
-    def exit(self):
+    def exit(self,msg=None):
         self.lobby_thread_flag = 1
         try:
             p = {
@@ -258,6 +255,12 @@ class LobbyScreen(Screen):
         self.lobby_updater = None
         self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
+        if msg:
+            popup = GameModal()
+            popup.modal_txt.text = msg
+            popup.close_btn.text = 'Close'
+            popup.close_btn.bind(on_release=popup.dismiss)
+            popup.open()
         # Set Rich Presence to main menu again
         presence.menu()
 
