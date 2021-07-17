@@ -14,13 +14,13 @@ def connect():
 def close():
     try:
         RPC.close()
-    except (InvalidPipe, AssertionError):
+    except (InvalidPipe, AssertionError, RuntimeError):
         pass
 
 def menu():
     try:
         RPC.update(start=int(time.time()), details='Menu', large_image='concerto_icon')
-    except (InvalidPipe, AssertionError):
+    except (InvalidPipe, AssertionError, RuntimeError):
         pass
 
 def character_select(mode,lobby_id=None):
