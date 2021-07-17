@@ -74,4 +74,4 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
 VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"
-CURRENT_VERSION = '7-16-2021'
+CURRENT_VERSION = '7-16-2021r2'
