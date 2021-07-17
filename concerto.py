@@ -67,7 +67,6 @@ class Concerto(App):
             winreg.SetValueEx(key, 'URL Protocol', 0, winreg.REG_SZ, '')
             winreg.SetValueEx(winreg.CreateKey(key, 'DefaultIcon'), '', 0, winreg.REG_SZ, 'concerto.exe,0')
             winreg.SetValueEx(winreg.CreateKey(key, 'shell\\open\\command'), '', 0, winreg.REG_SZ, '"' + sys.argv[0] + '" "%1"')
-            self.MainScreen.ids['welcome'].text = 'Joining public lobbies via Discord is now enabled for your PC.'
             if key:
                 winreg.CloseKey(key)
         except:
