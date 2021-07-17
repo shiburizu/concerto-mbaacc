@@ -233,7 +233,10 @@ class LobbyScreen(Screen):
                 else:
                     self.exit(msg='Bad response from server.')
             except:
-                self.exit(msg='Error: %s' % sys.exc_info()[0])
+                if self.get_attempts < 2:
+                    self.get_attempts += 1
+                else:
+                    self.exit(msg='Error: %s' % sys.exc_info()[0])
 
     def exit(self,msg=None):
         self.lobby_thread_flag = 1
@@ -253,6 +256,7 @@ class LobbyScreen(Screen):
         self.code = None
         self.type = None
         self.lobby_updater = None
+        self.get_attempts = 0
         self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
         if msg:
