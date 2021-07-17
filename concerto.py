@@ -67,10 +67,12 @@ class Concerto(App):
             winreg.SetValueEx(key, 'URL Protocol', 0, winreg.REG_SZ, '')
             winreg.SetValueEx(winreg.CreateKey(key, 'DefaultIcon'), '', 0, winreg.REG_SZ, 'concerto.exe,0')
             winreg.SetValueEx(winreg.CreateKey(key, 'shell\\open\\command'), '', 0, winreg.REG_SZ, '"' + sys.argv[0] + '" "%1"')
+            self.MainScreen.ids['welcome'].text = 'Joining public lobbies via Discord is now enabled for your PC.'
             if key:
                 winreg.CloseKey(key)
         except:
             logging.warning('Concerto: please start as admin once to add concerto protocol handler')
+            self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
         
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
