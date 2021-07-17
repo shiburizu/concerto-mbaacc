@@ -340,22 +340,20 @@ class LobbyScreen(Screen):
             if self.app.game.playing is True and self.active_pop != None:
                 cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
                 task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-                print(task_data)
                 if task_data.startswith("INFO: "): #case sensitive
-                    print("not running yet")
-                else:
-                    resp = {
-                        't': t,
-                        'p': self.player_id,
-                        'action': 'accept',
-                        'id': self.code,
-                        'secret': self.secret
-                    }
-                    print(resp)
-                    c = requests.get(url=LOBBYURL, params=resp).json()
-                    print(c)
-                    self.current_player = t
-                    break
+                    if self.app.game.read_memory(0x54EEE8) == 20: #wait for char select
+                        resp = {
+                            't': t,
+                            'p': self.player_id,
+                            'action': 'accept',
+                            'id': self.code,
+                            'secret': self.secret
+                        }
+                        print(resp)
+                        c = requests.get(url=LOBBYURL, params=resp).json()
+                        print(c)
+                        self.current_player = t
+                        break
             else:
                 break
 

@@ -551,9 +551,12 @@ class Caster():
             time.sleep(2)
 
     def read_memory(self,addr):
-        if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
-            return int.from_bytes(buf.raw, "big")
-        return None
+        try:
+            if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
+                return int.from_bytes(buf.raw, "big")
+            return None
+        except:
+            return None
 
     def kill_caster(self):
         self.adr = None
