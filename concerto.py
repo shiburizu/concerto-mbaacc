@@ -11,7 +11,6 @@ import time
 import threading
 import subprocess
 import winreg
-import traceback
 # Utility scripts
 # Discord Rich Presence
 import presence
@@ -76,6 +75,8 @@ class Concerto(App):
             except:
                 self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
+
+        logging.warning('Concerto: PATH is %s' % sys.argv[0])
             
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
@@ -160,7 +161,6 @@ class Concerto(App):
                 if self.game.offline is True:
                     cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
                     task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-                    print(task_data)
                     try:
                         task_data.replace("\"", "").split(",")[1]
                     except IndexError:
