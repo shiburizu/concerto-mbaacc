@@ -73,7 +73,7 @@ class Concerto(App):
         except:
             try:
                 check = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
-            except FileNotFoundError:
+            except:
                 self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
             
