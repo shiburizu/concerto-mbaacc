@@ -76,8 +76,10 @@ class Concerto(App):
                 self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
 
-        logging.warning('Concerto: PATH is %s' % sys.argv[0])
-            
+        logging.warning('Concerto: argv is %s' % sys.argv[0])
+        s = PATH
+        logging.warning('Concerto: PATH is %s' % s)
+
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
             e.append('Please fix the above problems and restart Concerto.')
