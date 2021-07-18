@@ -82,7 +82,7 @@ class OptionScreen(Screen):
         if self.ids['display_name'].text.strip() == '':
             error_check.append('Display name cannot be empty.')
         if error_check == []:
-            with open(PATH + '\cccaster\config.ini', 'r') as f:
+            with open(PATH + 'cccaster\config.ini', 'r') as f:
                 config_file = f.readlines()
                 n = 0
                 for i in config_file:
@@ -122,15 +122,15 @@ class OptionScreen(Screen):
                         else:
                             config_file[n] = "autoCheckUpdates=0\n"
                     n += 1
-                out = open(PATH + '\cccaster\config.ini','w')
+                out = open(PATH + 'cccaster\config.ini','w')
                 out.writelines(config_file)
                 out.close()
                 f.close()
-            with open(PATH + '\cccaster\config.ini', 'r') as f:
+            with open(PATH + 'cccaster\config.ini', 'r') as f:
                 config_string = '[settings]\n' + f.read()
             caster_config.read_string(config_string)
 
-            with open(PATH + '\concerto.ini', 'r') as f:
+            with open(PATH + 'concerto.ini', 'r') as f:
                 config_file = f.readlines()
                 n = 0
                 for i in config_file:
@@ -156,11 +156,11 @@ class OptionScreen(Screen):
                             if self.app.sound.bgm.state == 'stop':
                                     self.app.sound.cut_bgm() 
                     n += 1
-                out = open(PATH + '\concerto.ini','w')
+                out = open(PATH + 'concerto.ini','w')
                 out.writelines(config_file)
                 out.close()
                 f.close()
-            with open(PATH + '\concerto.ini', 'r') as f:
+            with open(PATH + 'concerto.ini', 'r') as f:
                 config_string = f.read()
             app_config.read_string(config_string)
 
