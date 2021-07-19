@@ -4,6 +4,10 @@ if getattr(sys,'frozen', False): #frozen exe
     PATH = os.path.dirname(sys.argv[0]) + '\\'
 else: #not frozen
     PATH = os.path.dirname(os.path.abspath(__file__)) + '\\'
+if " " in PATH: #if there is a space in the path use the local folder as a bandaid. Only useful for ptyprocess.
+    PROCPATH = ""
+else:
+    PROCPATH = PATH
 import configparser
 from kivy.config import Config
 from kivy.resources import resource_add_path

@@ -96,7 +96,7 @@ class Concerto(App):
         # Connect discord rich presence
         presence.connect()
         presence.menu()
-
+        
         # Execute launch params
         if len(sys.argv) > 1:
             params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
