@@ -10,7 +10,7 @@ else: #not frozen
 if " " in PATH: #if there is a space in the path use the local folder as a bandaid. Only useful for ptyprocess.
     PROCPATH = PATH
 else:
-    PROCPATH = PATH
+    PROCPATH = ""
 import configparser
 from kivy.config import Config
 from kivy.resources import resource_add_path
