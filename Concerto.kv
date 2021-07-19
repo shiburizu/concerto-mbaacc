@@ -879,6 +879,28 @@
                 self.background_color = (255, 0, 0, 0.2)
             size_hint: (0.5,0.4)
             pos_hint: {'center_x': 0.5}
+        Button:
+            id: p1_char_guide
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            background_color: (255, 0, 0, 0.2)
+            outline_width: 1
+            on_press: 
+                self.background_color = (100, 0, 0, 0.9)
+            on_release: 
+                self.background_color = (255, 0, 0, 0.2)
+            size_hint: (0.5,0.4)
+            pos_hint: {'center_x': 0.25}
+        Button:
+            id: p2_char_guide
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            background_color: (255, 0, 0, 0.2)
+            outline_width: 1
+            on_press: 
+                self.background_color = (100, 0, 0, 0.9)
+            on_release: 
+                self.background_color = (255, 0, 0, 0.2)
+            size_hint: (0.5,0.4)
+            pos_hint: {'center_x': 0.75}
 
 <FrameModal>:
     frame_txt: frame_txt

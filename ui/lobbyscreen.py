@@ -1,3 +1,4 @@
+from mbaacc import MOON
 import time
 import requests
 import threading
@@ -10,6 +11,48 @@ from kivy.uix.screenmanager import Screen
 from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
 import presence
+import webbrowser
+
+CHARACTER_WIKI = {
+    0 : "Sion_Eltnam_Atlasia",
+    1 : "Arcueid_Brunestud",
+    2 : "Ciel",
+    3 : "Akiha_Tohno",
+    4 : "Hisui_%26_Kohaku",
+    5 : "Hisui",
+    6 : "Kohaku",
+    7 : "Shiki_Tohno",
+    8 : "Miyako_Arima",
+    9 : "Warachia",
+    10 : "Nero_Chaos",
+    11 : "Sion_TATARI",
+    12 : "Red_Arcueid",
+    13 : "Akiha_Vermillion",
+    14 : "Mech-Hisui",
+    15 : "Shiki_Nanaya",
+    17 : "Satsuki_Yumiduka",
+    18 : "Len",
+    19 : "Powerd_Ciel",
+    20 : "Neco-Arc",
+    22 : "Aoko_Aozaki",
+    23 : "White_Len",
+    25 : "Neco-Arc_Chaos",
+    28 : "Kouma_Kishima",
+    29 : "Akiha_Tohno_(Seifuku)",
+    30 : "Riesbyfe_Stridberg",
+    31 : "Roa",
+    32 : "Dust of Osiris", # TODO "Is it neccesary if boss characters are never selectable? Why only Dust and not every other boss then?
+    33 : "Shiki_Ryougi",
+    34 : "Neco_%26_Mech",
+    35 : "Koha_%26_Mech",
+    51 : "Archetype:_Earth"
+}
+
+MOON_WIKI = {
+    0 : 'Crescent_Moon',
+    1 : 'Full_Moon',
+    2 : 'Half_Moon'
+}
 
 
 class LobbyScreen(Screen):
@@ -267,7 +310,7 @@ class LobbyScreen(Screen):
             popup.open()
         # Set Rich Presence to main menu again
         presence.menu()
-
+    
     def send_challenge(self, obj, name, id, *args):
         self.watch_player = None
         for k,v in self.widget_index.items():
@@ -283,6 +326,12 @@ class LobbyScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        popup.p1_char_guide.text = 'Player char/moon guide'
+        popup.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki(self,"p1")))
+        popup.p2_char_guide.text = 'Opponent char/moon guide'
+        popup.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki(self,"p2")))
         self.active_pop = popup
         popup.open()
         caster = threading.Thread(
@@ -430,3 +479,33 @@ class LobbyScreen(Screen):
         if self.active_pop != None:
             self.active_pop.dismiss()
         self.active_pop = None
+    
+    def open_char_wiki(self,player):
+        url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood'
+
+        val = url_wiki 
+        
+        if(self.stats):
+            
+            if player == 'p1':
+                char_key = self.stats.get("p1char")
+                char = CHARACTER_WIKI.get(char_key)
+
+                moon_key = self.stats.get("p1moon")
+                moon  = MOON_WIKI.get(moon_key)
+            if player == 'p2':
+                char_key = self.stats.get("p2char")
+                char = CHARACTER_WIKI.get(char_key)
+
+                moon_key = self.stats.get("p2moon")
+                moon  = MOON_WIKI.get(moon_key)
+
+            if( char and char != "Dust of Osiris"):
+                val = val + '/' + char 
+                
+                if  moon :
+                    val = val +  '/' + moon
+
+            webbrowser.open(val)
+        else:
+            webbrowser.open(val)
