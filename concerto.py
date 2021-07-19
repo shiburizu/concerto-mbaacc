@@ -1,9 +1,4 @@
-import logging
-import os,sys
-if getattr(sys,'frozen', False): #frozen exe
-    logging.basicConfig(filename= os.path.dirname(sys.argv[0]) + '\concerto.log', level=logging.DEBUG)
-else: #not frozen
-    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
+import sys
 from config import *  # App config functions
 # System
 import requests

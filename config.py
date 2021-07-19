@@ -1,11 +1,14 @@
 import os
 import sys
+import logging
 if getattr(sys,'frozen', False): #frozen exe
     PATH = os.path.dirname(sys.argv[0]) + '\\'
+    logging.basicConfig(filename= os.path.dirname(sys.argv[0]) + '\concerto.log', level=logging.DEBUG)
 else: #not frozen
     PATH = os.path.dirname(os.path.abspath(__file__)) + '\\'
+    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
 if " " in PATH: #if there is a space in the path use the local folder as a bandaid. Only useful for ptyprocess.
-    PROCPATH = ""
+    PROCPATH = PATH
 else:
     PROCPATH = PATH
 import configparser

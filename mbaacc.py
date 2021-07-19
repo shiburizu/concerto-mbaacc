@@ -100,7 +100,9 @@ class loghelper():
         dateTimeObj.strftime("%d-%b-%Y-%H-%M-%S") + '.txt'
 
     def write(self, s):
-        with open(PATH + '\\' + self.timestampStr, 'a') as log:
+        if not os.path.isdir(PATH + '\\concerto-logs'):
+            os.mkdir(PATH + '\\concerto-logs')
+        with open(PATH + 'concerto-logs\\' + self.timestampStr, 'a') as log:
             log.write(s)
 
 
