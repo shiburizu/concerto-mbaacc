@@ -100,7 +100,9 @@ class loghelper():
         dateTimeObj.strftime("%d-%b-%Y-%H-%M-%S") + '.txt'
 
     def write(self, s):
-        with open(PATH + '\\' + self.timestampStr, 'a') as log:
+        if not os.path.isdir(PATH + 'concerto-logs'):
+            os.mkdir(PATH + 'concerto-logs')
+        with open(PATH + 'concerto-logs\\' + self.timestampStr, 'a') as log:
             log.write(s)
 
 
@@ -152,9 +154,9 @@ class Caster():
         self.app.offline_mode = None
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -229,7 +231,7 @@ class Caster():
         self.kill_caster()
         self.app.offline_mode = None
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip, cwd = PATH)
+            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -304,7 +306,7 @@ class Caster():
     def watch(self, ip, sc, *args):
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip, cwd = PATH)
+            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -352,9 +354,9 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port) 
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port) 
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -378,7 +380,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe')
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -403,7 +405,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe')
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -426,7 +428,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe')
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -449,7 +451,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn('cccaster.v3.0.exe')
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -470,7 +472,7 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn('MBAA.exe', cwd = PATH)
+        self.aproc = PtyProcess.spawn('MBAA.exe')
         self.flag_offline(sc,stats=False)
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
@@ -538,15 +540,21 @@ class Caster():
                             presence.broadcast_game(mode, self.stats["p1char"], p1_char, self.stats["p2char"], p2_char)
                     else:
                         if self.app.mode.lower() == 'public lobby':
-                            if self.app.offline_mode:
-                                presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], self.stats["p1moon"],lobby_id=self.app.LobbyScreen.code)
+                            if self.app.offline_mode != None:
+                                if self.app.offline_mode.lower() == 'training' or self.app.offline_mode.lower() == 'replay theater':
+                                    presence.single_game(self.app.offline_mode, p1_char, self.stats["p1char"], self.stats["p1moon"],lobby_id=self.app.LobbyScreen.code)
+                                else:
+                                    presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"],lobby_id=self.app.LobbyScreen.code)
                             else:
-                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, p1_char, self.stats["p1char"], self.stats["p1moon"])
+                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"])
                         else:
-                            if self.app.offline_mode:
-                                presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], self.stats["p1moon"])
+                            if self.app.offline_mode != None:
+                                if self.app.offline_mode.lower() == 'training' or self.app.offline_mode.lower() == 'replay theater':
+                                    presence.single_game(self.app.offline_mode, p1_char, self.stats["p1char"], self.stats["p1moon"])
+                                else:
+                                    presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"])
                             else:
-                                presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, p1_char, self.stats["p1char"], self.stats["p1moon"])
+                                presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"])
                     state = self.stats["state"]
                 # Check if in character select once
                 elif self.stats["state"] == 20 and self.stats["state"] != state:

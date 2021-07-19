@@ -15,6 +15,7 @@ class OnlineScreen(Screen):
         self.broadcast_pop = None
         self.app = CApp
         self.error = False
+        self.opponent = None
 
     def direct(self):
         self.direct_pop = DirectModal()
@@ -78,7 +79,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
-        self.app.mode = 'Online Direct Match'
+        self.app.mode = 'Direct Match'
         self.active_pop = popup
         popup.open()
 
@@ -113,6 +114,7 @@ class OnlineScreen(Screen):
 
     def set_frames(self, name, delay, ping, target=None, mode="Versus", rounds=2): #t is used by Lobby frameset, placed here as a dummy
         popup = FrameModal()
+        self.opponent = name
         if rounds != 0:
             rounds = ", %s rounds per game" % rounds
         else:
@@ -146,6 +148,7 @@ class OnlineScreen(Screen):
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
     def dismiss(self, obj, p, *args):
         self.app.game.kill_caster()
+        self.opponent = None
         p.dismiss()
         if self.active_pop != None:
             self.active_pop.dismiss()

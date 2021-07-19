@@ -1,9 +1,4 @@
-import logging
-import os,sys
-if getattr(sys,'frozen', False): #frozen exe
-    logging.basicConfig(filename= os.path.dirname(sys.argv[0]) + '\concerto.log', level=logging.DEBUG)
-else: #not frozen
-    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
+import sys
 from config import *  # App config functions
 # System
 import requests
@@ -76,8 +71,10 @@ class Concerto(App):
                 self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
 
-        logging.warning('Concerto: PATH is %s' % sys.argv[0])
-            
+        logging.warning('Concerto: argv is %s' % sys.argv[0])
+        s = PATH
+        logging.warning('Concerto: PATH is %s' % s)
+
         if caster_config is None:
             e.append('cccaster/config.ini not found.')
             e.append('Please fix the above problems and restart Concerto.')
@@ -94,7 +91,7 @@ class Concerto(App):
         # Connect discord rich presence
         presence.connect()
         presence.menu()
-
+        
         # Execute launch params
         if len(sys.argv) > 1:
             params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
