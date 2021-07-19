@@ -154,9 +154,9 @@ class Caster():
         self.app.offline_mode = None
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -t %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -t %s' % port, cwd = PROCPATH) 
             else:
-                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n %s' % port, cwd = PROCPATH) 
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -231,7 +231,7 @@ class Caster():
         self.kill_caster()
         self.app.offline_mode = None
         try:
-            self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n %s' % ip, cwd = PATH)
+            self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n %s' % ip, cwd = PROCPATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -306,7 +306,7 @@ class Caster():
     def watch(self, ip, sc, *args):
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -s %s' % ip, cwd = PATH)
+            self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -s %s' % ip, cwd = PROCPATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -354,9 +354,9 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -b -t %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -b -t %s' % port, cwd = PROCPATH) 
             else:
-                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -b %s' % port, cwd = PATH) 
+                self.aproc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe -n -b %s' % port, cwd = PROCPATH) 
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -380,7 +380,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PROCPATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -405,7 +405,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PROCPATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -428,7 +428,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PROCPATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -451,7 +451,7 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PATH)
+            proc = PtyProcess.spawn(PROCPATH + 'cccaster.v3.0.exe', cwd = PROCPATH)
         except FileNotFoundError:
             sc.error_message(['cccaster.v3.0.exe not found.'])
             return None
@@ -472,7 +472,7 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn(PROCPATH + 'MBAA.exe', cwd = PATH)
+        self.aproc = PtyProcess.spawn(PROCPATH + 'MBAA.exe', cwd = PROCPATH)
         self.flag_offline(sc,stats=False)
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game

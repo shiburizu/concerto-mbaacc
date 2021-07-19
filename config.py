@@ -7,10 +7,11 @@ if getattr(sys,'frozen', False): #frozen exe
 else: #not frozen
     PATH = os.path.dirname(os.path.abspath(__file__)) + '\\'
     logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
-if " " in PATH and len(sys.argv) > 1: #if there is a space (and we're being passed arguments from command line) in the path use the local folder as a bandaid. Only useful for ptyprocess.
+if " " in PATH: #if there is a space in the path use the local folder as a bandaid. Only useful for ptyprocess.
     PROCPATH = ""
 else:
     PROCPATH = PATH
+print('PROCPATH is %s' % PROCPATH)
 import configparser
 from kivy.config import Config
 from kivy.resources import resource_add_path
@@ -81,4 +82,4 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
 VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"
-CURRENT_VERSION = '7-17-2021'
+CURRENT_VERSION = '7-19-2021'
