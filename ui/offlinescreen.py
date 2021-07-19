@@ -40,7 +40,6 @@ class OfflineScreen(Screen):
         popup.close_btn.text = "Stand by..."
         popup.close_btn.disabled = True
         popup.open()
-        self.app.mode = mode
         self.app.offline_mode = mode
         self.active_pop = popup
     

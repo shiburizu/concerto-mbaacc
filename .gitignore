@@ -6,6 +6,7 @@ cccaster.v3.0.exe
 concerto.ini
 Concerto_*.txt
 Information/
+concerto-logs/
 GRP/
 *.dat
 *.p
