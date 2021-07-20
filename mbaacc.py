@@ -497,7 +497,7 @@ class Caster():
                 break
         sc.active_pop.dismiss()
 
-    def update_stats(self):
+    def update_stats(self,once=False):
         # Used to update presence only on state change 
         state = None
         while True:
@@ -529,8 +529,7 @@ class Caster():
                 if self.stats["state"] == 1 and self.stats["state"] != state:
                     p1_char = "%s-" % MOON[self.stats["p1moon"]] + CHARACTER[self.stats["p1char"]]
                     p2_char = "%s-" % MOON[self.stats["p2moon"]] + CHARACTER[self.stats["p2char"]]
-                    if self.broadcasting: #to be expanded upon
-                        
+                    if self.broadcasting:
                         mode = self.app.offline_mode
                         if mode.lower() == 'spectating':
                             mode = "Spectating %s vs %s" % (p1_char, p2_char)
@@ -563,7 +562,10 @@ class Caster():
                     else:
                         presence.character_select(self.app.mode)
                     state = self.stats["state"]
-            time.sleep(2)
+            if once:
+                break
+            else:
+                time.sleep(2)
 
     def read_memory(self,addr):
         try:

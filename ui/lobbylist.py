@@ -102,11 +102,17 @@ class LobbyList(Screen):
                 }
                 a = requests.get(url=LOBBYURL, params=p).json()
                 self.lobby_view.clear_widgets()
-                for i in a['lobbies']:
+                if a['lobbies'] != []:
+                    for i in a['lobbies']:
+                        b = DummyBtn()
+                        b.halign = 'left'
+                        b.text = "ID %s: %s players" % (i[0], i[1])
+                        b.bind(on_release=partial(self.join, code=i[0],pub=True))
+                        self.lobby_view.add_widget(b)
+                else:
                     b = DummyBtn()
                     b.halign = 'left'
-                    b.text = "ID %s: %s players" % (i[0], i[1])
-                    b.bind(on_release=partial(self.join, code=i[0],pub=True))
+                    b.text = "No public lobbies found. Why not create one?"
                     self.lobby_view.add_widget(b)
                 if self.app.sm.current != 'LobbyList':
                     Clock.schedule_once(lambda dt: self.switch_to_list(),0)

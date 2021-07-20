@@ -102,7 +102,7 @@ class LobbyScreen(Screen):
         elif type.lower() == 'private':
             self.app.mode = 'Private Lobby'
             presence.private_lobby()
-
+        self.app.game.update_stats(once=True)
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
             if 'c' not in self.widget_index:
@@ -278,6 +278,7 @@ class LobbyScreen(Screen):
             except:
                 if self.get_attempts < 2:
                     self.get_attempts += 1
+                    self.auto_refresh()
                 else:
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
 
@@ -310,7 +311,12 @@ class LobbyScreen(Screen):
             popup.open()
         # Set Rich Presence to main menu again
         presence.menu()
+<<<<<<< HEAD
     
+=======
+        self.app.game.update_stats(once=True)
+
+>>>>>>> 1c5213d4b8a2c148a8685c7862e67b850a2b2f68
     def send_challenge(self, obj, name, id, *args):
         self.watch_player = None
         for k,v in self.widget_index.items():
