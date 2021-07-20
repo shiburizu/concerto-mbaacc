@@ -150,146 +150,152 @@ class Caster():
         return False
 
     def host(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
-        self.kill_caster()
-        self.app.offline_mode = None
         try:
-            if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
-            else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
-        except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
-            return None
-        # Stats
-        threading.Thread(target=self.update_stats,daemon=True).start()
-        logger.write('\n== Host ==\n')
-        while self.aproc.isalive(): # find IP and port combo for host
-            t = self.aproc.read()
-            ip = re.findall(
-                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
-            if ip != []:
-                self.adr = str(ip[0])
-                sc.set_ip() #tell UI we have the IP address
-                break
-            elif self.check_msg(t) != []:
-                sc.error_message(self.check_msg(t))
-                self.kill_caster()
-                return None
-        logger.write('IP: %s\n' % self.adr)
-        cur_con = "" #current Caster read
-        last_con = "" #last Caster read
-        con = "" #cumulative string of all cur_con reads
-        while self.aproc.isalive():
-            cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            con += last_con + cur_con #con is what we send to validate_read
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if self.playing == False and self.rs == -1 and self.ds == -1: #break self.playing is True
-                n = self.validate_read(con)
-                if n != False:
-                    logger.write('\n=================================\n')
-                    logger.write(str(con.split()))
-                    if int(n[-2]) - int(n[-1]) < 0: # last item should be rollback frames, 2nd to last is network delay
-                        self.ds = 0
-                    else:
-                        self.ds = int(n[-2]) - int(n[-1])
-                    self.rs = int(n[-1])
-                    r = []
-                    name = False  # try to read names from caster output
-                    for x in reversed(con.split()):
-                        if name == False and (x == "connected" or x == "conected"):
-                            name = True
-                        elif name == True and x == '*':
-                            break
-                        elif name == True and x.replace('*', '') != '':
-                            r.insert(0, x)
-                    # find all floats in caster output and use the last one [-1] to make sure we get caster text
-                    p = re.findall('\d+\.\d+', con)
-                    m = ""
-                    rd = 2
-                    if "Versus" in con:
-                        m = "Versus"
-                        rd = n[-3]
-                    elif "Training" in con:
-                        m = "Training"
-                        rd = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=rd) #trigger frame delay settings in UI
-                    break
+            self.kill_caster()
+            self.app.offline_mode = None
+            try:
+                if mode == "Training":
+                    self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
                 else:
-                    if self.check_msg(con) != []:
-                        sc.error_message(self.check_msg(con))
-                        self.kill_caster()
-                        self.aproc = None
+                    self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
+            except FileNotFoundError:
+                sc.error_message(['cccaster.v3.0.exe not found.'])
+                return None
+            # Stats
+            threading.Thread(target=self.update_stats,daemon=True).start()
+            logger.write('\n== Host ==\n')
+            while self.aproc.isalive(): # find IP and port combo for host
+                t = self.aproc.read()
+                ip = re.findall(
+                    r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
+                if ip != []:
+                    self.adr = str(ip[0])
+                    sc.set_ip() #tell UI we have the IP address
+                    break
+                elif self.check_msg(t) != []:
+                    sc.error_message(self.check_msg(t))
+                    self.kill_caster()
+                    return None
+            logger.write('IP: %s\n' % self.adr)
+            cur_con = "" #current Caster read
+            last_con = "" #last Caster read
+            con = "" #cumulative string of all cur_con reads
+            while self.aproc.isalive():
+                cur_con = ansi_escape.sub('', str(self.aproc.read()))
+                con += last_con + cur_con #con is what we send to validate_read
+                logger.write('\n=================================\n')
+                logger.write(str(con.split()))
+                if self.playing == False and self.rs == -1 and self.ds == -1: #break self.playing is True
+                    n = self.validate_read(con)
+                    if n != False:
+                        logger.write('\n=================================\n')
+                        logger.write(str(con.split()))
+                        if int(n[-2]) - int(n[-1]) < 0: # last item should be rollback frames, 2nd to last is network delay
+                            self.ds = 0
+                        else:
+                            self.ds = int(n[-2]) - int(n[-1])
+                        self.rs = int(n[-1])
+                        r = []
+                        name = False  # try to read names from caster output
+                        for x in reversed(con.split()):
+                            if name == False and (x == "connected" or x == "conected"):
+                                name = True
+                            elif name == True and x == '*':
+                                break
+                            elif name == True and x.replace('*', '') != '':
+                                r.insert(0, x)
+                        # find all floats in caster output and use the last one [-1] to make sure we get caster text
+                        p = re.findall('\d+\.\d+', con)
+                        m = ""
+                        rd = 2
+                        if "Versus" in con:
+                            m = "Versus"
+                            rd = n[-3]
+                        elif "Training" in con:
+                            m = "Training"
+                            rd = 0
+                        sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=rd) #trigger frame delay settings in UI
                         break
-                    elif last_con != cur_con:
-                        last_con = cur_con
-                        continue
-            else:
-                break
+                    else:
+                        if self.check_msg(con) != []:
+                            sc.error_message(self.check_msg(con))
+                            self.kill_caster()
+                            self.aproc = None
+                            break
+                        elif last_con != cur_con:
+                            last_con = cur_con
+                            continue
+                else:
+                    break
+        except EOFError:
+            pass
 
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
-        self.kill_caster()
-        self.app.offline_mode = None
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
-        except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
-            return None
-        # Stats
-        threading.Thread(target=self.update_stats,daemon=True).start()
-        cur_con = ""
-        last_con = ""
-        con = ""
-        logger.write('\n== Join %s ==\n' % ip)
-        while self.aproc.isalive():
-            cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            con += last_con + cur_con
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if self.playing == False and self.rs == -1 and self.ds == -1:
-                n = self.validate_read(con)
-                if n != False:
-                    logger.write('\n=================================\n')
-                    logger.write(str(con.split()))
-                    if int(n[-2]) - int(n[-1]) < 0:
-                        self.ds = 0
+            self.kill_caster()
+            self.app.offline_mode = None
+            try:
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
+            except FileNotFoundError:
+                sc.error_message(['cccaster.v3.0.exe not found.'])
+                return None
+            # Stats
+            threading.Thread(target=self.update_stats,daemon=True).start()
+            cur_con = ""
+            last_con = ""
+            con = ""
+            logger.write('\n== Join %s ==\n' % ip)
+            while self.aproc.isalive():
+                cur_con = ansi_escape.sub('', str(self.aproc.read()))
+                con += last_con + cur_con
+                logger.write('\n=================================\n')
+                logger.write(str(con.split()))
+                if self.playing == False and self.rs == -1 and self.ds == -1:
+                    n = self.validate_read(con)
+                    if n != False:
+                        logger.write('\n=================================\n')
+                        logger.write(str(con.split()))
+                        if int(n[-2]) - int(n[-1]) < 0:
+                            self.ds = 0
+                        else:
+                            self.ds = int(n[-2]) - int(n[-1])
+                        self.rs = int(n[-1])
+                        r = []
+                        name = False 
+                        for x in con.split():
+                            if x == "to" and name == False:
+                                name= True
+                            elif x == '*' and name == True:
+                                break
+                            elif name == True and x.replace('*', '') != '':
+                                r.append(x)
+                        p = re.findall('\d+\.\d+', con)
+                        m = ""
+                        rd = 2
+                        if "Versus" in con:
+                            m = "Versus"
+                            rd = n[-3]
+                        elif "Training" in con:
+                            m = "Training"
+                            rd = 0
+                        sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=rd) #send t for Accept network request
+                        break
                     else:
-                        self.ds = int(n[-2]) - int(n[-1])
-                    self.rs = int(n[-1])
-                    r = []
-                    name = False 
-                    for x in con.split():
-                        if x == "to" and name == False:
-                            name= True
-                        elif x == '*' and name == True:
+                        if self.check_msg(con) != []:
+                            sc.error_message(self.check_msg(con))
+                            self.kill_caster()
                             break
-                        elif name == True and x.replace('*', '') != '':
-                            r.append(x)
-                    p = re.findall('\d+\.\d+', con)
-                    m = ""
-                    rd = 2
-                    if "Versus" in con:
-                        m = "Versus"
-                        rd = n[-3]
-                    elif "Training" in con:
-                        m = "Training"
-                        rd = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=rd) #send t for Accept network request
-                    break
+                        elif 'Spectating versus mode' in con:
+                            sc.error_message(['Host is already in a game!'])
+                            self.kill_caster()
+                            break
+                        elif last_con != cur_con:
+                            last_con = cur_con
+                            continue
                 else:
-                    if self.check_msg(con) != []:
-                        sc.error_message(self.check_msg(con))
-                        self.kill_caster()
-                        break
-                    elif 'Spectating versus mode' in con:
-                        sc.error_message(['Host is already in a game!'])
-                        self.kill_caster()
-                        break
-                    elif last_con != cur_con:
-                        last_con = cur_con
-                        continue
-            else:
-                break
+                    break
+        except EOFError:
+            pass
 
     def confirm_frames(self,rf,df):
         self.aproc.write('\x08')
@@ -304,77 +310,83 @@ class Caster():
         self.playing = True
 
     def watch(self, ip, sc, *args):
-        self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
-        except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
-            return None
-        cur_con = ""
-        last_con = ""
-        con = ""
-        logger.write('\n== Watch %s ==\n' % ip)
-        self.broadcasting = True
-        threading.Thread(target=self.update_stats,daemon=True).start()
-        while self.aproc.isalive():
-            cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            con += last_con + cur_con
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if "fast-forward)" in con:
+            self.kill_caster()
+            try:
+                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
+            except FileNotFoundError:
+                sc.error_message(['cccaster.v3.0.exe not found.'])
+                return None
+            cur_con = ""
+            last_con = ""
+            con = ""
+            logger.write('\n== Watch %s ==\n' % ip)
+            self.broadcasting = True
+            threading.Thread(target=self.update_stats,daemon=True).start()
+            while self.aproc.isalive():
+                cur_con = ansi_escape.sub('', str(self.aproc.read()))
+                con += last_con + cur_con
                 logger.write('\n=================================\n')
                 logger.write(str(con.split()))
-                self.aproc.write('1')  # start spectating, find names after
-                r = []
-                startWrite = False
-                for x in reversed(con.split()):
-                    if startWrite is False and "fast-forward" not in x:
-                        pass
-                    elif "fast-forward)" in x:
-                        startWrite = True
-                        r.insert(0, x)
-                    elif x == '*' and len(r) > 0:
-                        if r[0] == "Spectating":
-                            break
-                    elif x != '*' and x.replace('*', '') != '':
-                        r.insert(0, x)
-                sc.active_pop.modal_txt.text = ' '.join(r)
-                # replace connecting text with match name in caster
-                break
-            else:
-                if self.check_msg(con) != []:
-                    sc.error_message(self.check_msg(con))
-                    self.kill_caster()
+                if "fast-forward)" in con:
+                    logger.write('\n=================================\n')
+                    logger.write(str(con.split()))
+                    self.aproc.write('1')  # start spectating, find names after
+                    r = []
+                    startWrite = False
+                    for x in reversed(con.split()):
+                        if startWrite is False and "fast-forward" not in x:
+                            pass
+                        elif "fast-forward)" in x:
+                            startWrite = True
+                            r.insert(0, x)
+                        elif x == '*' and len(r) > 0:
+                            if r[0] == "Spectating":
+                                break
+                        elif x != '*' and x.replace('*', '') != '':
+                            r.insert(0, x)
+                    sc.active_pop.modal_txt.text = ' '.join(r)
+                    # replace connecting text with match name in caster
                     break
-                elif last_con != cur_con:
-                    last_con = cur_con
-                    continue
+                else:
+                    if self.check_msg(con) != []:
+                        sc.error_message(self.check_msg(con))
+                        self.kill_caster()
+                        break
+                    elif last_con != cur_con:
+                        last_con = cur_con
+                        continue
+        except EOFError:
+            pass
 
     def broadcast(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
-        self.kill_caster()
         try:
-            if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port) 
-            else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port) 
-        except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
-            return None
-        logger.write('\n== Broadcast %s ==\n' % mode)
-        self.broadcasting = True
-        threading.Thread(target=self.update_stats,daemon=True).start()
-        while self.aproc.isalive(): # find IP and port combo for host
-            t = self.aproc.read()
-            ip = re.findall(
-                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
-            if ip != []:
-                self.adr = str(ip[0])
-                sc.set_ip()
-                break
-            elif self.check_msg(t) != []:
-                sc.error_message(self.check_msg(t))
-                self.kill_caster()
+            self.kill_caster()
+            try:
+                if mode == "Training":
+                    self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port) 
+                else:
+                    self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port) 
+            except FileNotFoundError:
+                sc.error_message(['cccaster.v3.0.exe not found.'])
                 return None
+            logger.write('\n== Broadcast %s ==\n' % mode)
+            self.broadcasting = True
+            threading.Thread(target=self.update_stats,daemon=True).start()
+            while self.aproc.isalive(): # find IP and port combo for host
+                t = self.aproc.read()
+                ip = re.findall(
+                    r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
+                if ip != []:
+                    self.adr = str(ip[0])
+                    sc.set_ip()
+                    break
+                elif self.check_msg(t) != []:
+                    sc.error_message(self.check_msg(t))
+                    self.kill_caster()
+                    return None
+        except EOFError:
+            pass
 
     def training(self,sc):
         self.kill_caster()
