@@ -326,12 +326,6 @@ class LobbyScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
-        popup.p1_char_guide.text = 'Player char/moon guide'
-        popup.p1_char_guide.bind(on_release=partial(
-            self.open_char_wiki(self,"p1")))
-        popup.p2_char_guide.text = 'Opponent char/moon guide'
-        popup.p2_char_guide.bind(on_release=partial(
-            self.open_char_wiki(self,"p2")))
         self.active_pop = popup
         popup.open()
         caster = threading.Thread(
@@ -378,6 +372,7 @@ class LobbyScreen(Screen):
             self.opponent = n
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
+            self.fill_wiki_button(self)
             p.dismiss()
             if t: #if accepting, run MBAA check
                 threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
@@ -480,6 +475,15 @@ class LobbyScreen(Screen):
             self.active_pop.dismiss()
         self.active_pop = None
     
+    def fill_wiki_button(self):
+        self.active_pop.p1_char_guide.text = 'P1 char/moon guide'
+        self.active_pop.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki(self,"p1")))
+        
+        self.active_pop.p2_char_guide.text = 'P2 char/moon guide'
+        self.active_pop.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki(self,"p2")))
+        
     def open_char_wiki(self,player):
         url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood'
 
@@ -502,7 +506,7 @@ class LobbyScreen(Screen):
 
             if( char and char != "Dust of Osiris"):
                 val = val + '/' + char 
-                
+
                 if  moon :
                     val = val +  '/' + moon
 
