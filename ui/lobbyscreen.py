@@ -235,6 +235,7 @@ class LobbyScreen(Screen):
             except:
                 if self.get_attempts < 2:
                     self.get_attempts += 1
+                    self.auto_refresh()
                 else:
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
 
