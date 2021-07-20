@@ -68,7 +68,7 @@ class Concerto(App):
             try:
                 winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
             except:
-                self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
+                self.MainScreen.ids['welcome'].text = 'To join lobbies via Discord/invite links run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
 
         logging.warning('Concerto: argv is %s' % sys.argv[0])

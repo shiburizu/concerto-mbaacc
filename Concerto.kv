@@ -210,8 +210,7 @@
                     halign: 'right'
                     valign: 'middle'
                     background_color: (0,0,0,0)
-                    on_release:
-                        pyperclip.copy('https://concerto-mbaacc.herokuapp.com/i/%s' % root.code)
+                    on_release: root.invite_link()
             ScrollView:
                 size_hint: (1,0.9)
                 do_scroll_x: False

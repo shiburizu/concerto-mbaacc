@@ -43,7 +43,7 @@ class LobbyScreen(Screen):
         if first:
             self.player_id = j['msg']
             self.code = j['id']
-            self.lobby_code.text = "%s Lobby Code: %s" % (type, self.code)
+            self.lobby_code.text = "[%s Lobby Code: %s]" % (type, self.code)
             self.widget_index = {}
             self.player_list.clear_widgets()
             self.match_list.clear_widgets()
@@ -198,6 +198,7 @@ class LobbyScreen(Screen):
                 self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
             else:
                 self.app.update_lobby_button('LOBBY %s ' % self.code)
+        self.get_attempts = 0
 
     def follow_player(self,obj,i):
         w = self.widget_index.get(i).ids['WatchBtn']
@@ -231,7 +232,7 @@ class LobbyScreen(Screen):
                     time.sleep(2)
                     self.auto_refresh()
                 else:
-                    self.exit(msg='Bad response from server.')
+                    self.exit(msg=r['msg'])
             except:
                 if self.get_attempts < 2:
                     self.get_attempts += 1
@@ -432,3 +433,14 @@ class LobbyScreen(Screen):
         if self.active_pop != None:
             self.active_pop.dismiss()
         self.active_pop = None
+
+    def invite_link(self,*args):
+        pyperclip.copy('https://invite.meltyblood.club/%s' % self.code)
+        threading.Thread(target=self.invite_ui).start()
+
+    def invite_ui(self):
+        if self.lobby_code.text != 'Link copied to clipboard':
+            t = self.lobby_code.text
+            self.lobby_code.text = 'Link copied to clipboard'
+            time.sleep(2)
+            self.lobby_code.text = t
