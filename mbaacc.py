@@ -228,7 +228,7 @@ class Caster():
                 else:
                     break
         except EOFError:
-            pass
+            self.kill_caster()
 
     def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
         try:
@@ -295,7 +295,7 @@ class Caster():
                 else:
                     break
         except EOFError:
-            pass
+            self.kill_caster()
 
     def confirm_frames(self,rf,df):
         self.aproc.write('\x08')
@@ -357,7 +357,7 @@ class Caster():
                         last_con = cur_con
                         continue
         except EOFError:
-            pass
+            self.kill_caster()
 
     def broadcast(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
         try:
@@ -386,7 +386,7 @@ class Caster():
                     self.kill_caster()
                     return None
         except EOFError:
-            pass
+            self.kill_caster()
 
     def training(self,sc):
         self.kill_caster()
