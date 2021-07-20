@@ -10,6 +10,7 @@ from kivy.uix.screenmanager import Screen
 from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
 import presence
+import logging
 
 
 class LobbyScreen(Screen):
@@ -234,6 +235,7 @@ class LobbyScreen(Screen):
                 else:
                     self.exit(msg=r['msg'])
             except:
+                logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
                 if self.get_attempts < 2:
                     self.get_attempts += 1
                     self.auto_refresh()
