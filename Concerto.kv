@@ -1,6 +1,7 @@
 #:import webbrowser webbrowser
 #:import threading threading
 #:import res kivy.resources
+#:import pyperclip pyperclip
 
 <MenuBtn@Button>
     text_size: self.size
@@ -201,15 +202,16 @@
                     text: 'LEAVE'
                     on_release: 
                         root.exit()
-                Label:
+                DummyBtn:
                     id: lobby_code
                     text: 'Lobby ID: 1234'
-                    outline_width: 2
                     padding_x: 25
-                    font_name: 'res/texgyreheros-bolditalic.otf'
                     text_size: self.size
                     halign: 'right'
                     valign: 'middle'
+                    background_color: (0,0,0,0)
+                    on_release:
+                        pyperclip.copy('https://concerto-mbaacc.herokuapp.com/i/%s' % root.code)
             ScrollView:
                 size_hint: (1,0.9)
                 do_scroll_x: False
