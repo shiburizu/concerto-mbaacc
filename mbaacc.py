@@ -541,6 +541,10 @@ class Caster():
                 if self.stats["state"] == 1 and self.stats["state"] != state:
                     p1_char = "%s-" % MOON[self.stats["p1moon"]] + CHARACTER[self.stats["p1char"]]
                     p2_char = "%s-" % MOON[self.stats["p2moon"]] + CHARACTER[self.stats["p2char"]]
+                    print(p1_char)
+                    print(p2_char)
+                    print(self.stats["p1char"])
+                    print(self.stats["p2char"])
                     if self.broadcasting:
                         mode = self.app.offline_mode
                         if mode.lower() == 'spectating':
@@ -557,7 +561,7 @@ class Caster():
                                 else:
                                     presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"],lobby_id=self.app.LobbyScreen.code)
                             else:
-                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"])
+                                presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
                         else:
                             if self.app.offline_mode != None:
                                 if self.app.offline_mode.lower() == 'training' or self.app.offline_mode.lower() == 'replay theater':
@@ -565,7 +569,10 @@ class Caster():
                                 else:
                                     presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"])
                             else:
-                                presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"])
+                                if self.app.mode.lower() == 'private lobby':
+                                    presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
+                                else:
+                                    presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
                     state = self.stats["state"]
                 # Check if in character select once
                 elif self.stats["state"] == 20 and self.stats["state"] != state:
