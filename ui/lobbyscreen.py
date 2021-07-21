@@ -40,6 +40,15 @@ class LobbyScreen(Screen):
 
     def create(self, j, first=False, type=""):  # json response object
         print(j)
+        #this does not use self.type because it should only run once per lobby.
+        #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
+        #self.type is used for update_stats in the Caster function to signal info to the presence.
+        if type.lower() == 'public':
+            self.app.mode = 'Public Lobby'
+            presence.public_lobby(self.code)
+        elif type.lower() == 'private':
+            self.app.mode = 'Private Lobby'
+            presence.private_lobby()
         newSound = False
         if first:
             self.player_id = j['msg']
@@ -50,17 +59,9 @@ class LobbyScreen(Screen):
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
             self.type = type
+            self.app.game.update_stats(once=True)
         challenging_ids = []
-        #this does not use self.type because it should only run once per lobby.
-        #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
-        #self.type is used for update_stats in the Caster function to signal info to the presence.
-        if type.lower() == 'public':
-            self.app.mode = 'Public Lobby'
-            presence.public_lobby(self.code)
-        elif type.lower() == 'private':
-            self.app.mode = 'Private Lobby'
-            presence.private_lobby()
-        self.app.game.update_stats(once=True)
+        
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
             if 'c' not in self.widget_index:
