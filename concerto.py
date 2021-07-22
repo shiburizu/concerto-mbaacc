@@ -22,6 +22,7 @@ from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen,
 class Concerto(App):
     def __init__(self, **kwargs):
         super(Concerto, self).__init__(**kwargs)
+        self.discord = False #Discord support flag
         self.mode = 'Menu' # current mode selection
         self.offline_mode = None #secondary Offline activity, mostly for lobby
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
@@ -68,7 +69,7 @@ class Concerto(App):
             try:
                 winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
             except:
-                self.MainScreen.ids['welcome'].text = 'To join public lobbies via Discord run Concerto as admin once.'
+                self.MainScreen.ids['welcome'].text = 'To join lobbies via Discord/invite links run Concerto as admin once.'
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
 
         logging.warning('Concerto: argv is %s' % sys.argv[0])
@@ -87,10 +88,11 @@ class Concerto(App):
                 self.sound.muted = True
             else:
                 self.sound.cut_bgm()
-
-        # Connect discord rich presence
-        presence.connect()
-        presence.menu()
+            if app_config['settings']['discord'] == '1':
+                self.discord = True
+                # Connect discord rich presence
+                presence.connect()
+                presence.menu()
         
         # Execute launch params
         if len(sys.argv) > 1:
@@ -101,6 +103,13 @@ class Concerto(App):
                 self.OnlineScreen.join(ip=params[1])
             elif params[0] == 'watch':
                 self.OnlineScreen.watch(ip=params[1])
+
+    def on_stop(self,*args):
+        self.game.kill_caster()
+        if self.LobbyScreen.code != None:
+            self.LobbyScreen.exit()
+        if self.discord is True:
+            presence.close()
 
     def lobby_button(self, *args):
         lst = [
@@ -195,15 +204,9 @@ class Concerto(App):
                     
 def run():
     CApp = Concerto()
-    try:
-        CApp.run()
-    finally:
-        CApp.game.kill_caster()
-        # close rich presence connection
-        presence.close()
-        if CApp.LobbyScreen.code != None:
-            CApp.LobbyScreen.exit()
-
+    CApp.run()
+        
+        
 
 if __name__ == '__main__':
     run()

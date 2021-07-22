@@ -22,6 +22,11 @@ class OptionScreen(Screen):
             else:
                 self.ids['mute_bgm'].active = False
 
+            if app_config['settings']['discord'] == '1':
+                self.ids['discord'].active = True
+            else:
+                self.ids['discord'].active = False
+
             self.ids['display_name'].text = caster_config['settings']['displayName']
             if self.ids['lobbyAnchor'].children != []:
                 self.ids['display_name'].disabled = True
@@ -56,6 +61,7 @@ class OptionScreen(Screen):
                 self.ids['caster_updates'].active = True
             else:
                 self.ids['caster_updates'].active = False
+
             self.app.sm.current = 'Options'
         except KeyError:
             self.app.MainScreen.error_message(['Invalid config files. Please back up your settings, delete cccaster/config.ini and concerto.ini and restart Concerto.'])
@@ -155,6 +161,11 @@ class OptionScreen(Screen):
                             self.app.sound.muted = False
                             if self.app.sound.bgm.state == 'stop':
                                     self.app.sound.cut_bgm() 
+                    elif "discord" in i:
+                        if self.ids['discord'].active is True:
+                            config_file[n] = "discord=1\n"
+                        else:
+                            config_file[n] = "discord=0\n"
                     n += 1
                 out = open(PATH + 'concerto.ini','w')
                 out.writelines(config_file)

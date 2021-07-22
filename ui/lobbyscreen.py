@@ -11,6 +11,7 @@ from kivy.uix.screenmanager import Screen
 from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
 import presence
+import logging
 import webbrowser
 
 CHARACTER_WIKI = {
@@ -82,27 +83,29 @@ class LobbyScreen(Screen):
 
     def create(self, j, first=False, type=""):  # json response object
         print(j)
+        #this does not use self.type because it should only run once per lobby.
+        #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
+        #self.type is used for update_stats in the Caster function to signal info to the presence.
         newSound = False
         if first:
             self.player_id = j['msg']
             self.code = j['id']
-            self.lobby_code.text = "%s Lobby Code: %s" % (type, self.code)
+            self.lobby_code.text = "[%s Lobby Code: %s]" % (type, self.code)
             self.widget_index = {}
             self.player_list.clear_widgets()
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
             self.type = type
+            if self.app.discord is True:
+                if type.lower() == 'public':
+                    self.app.mode = 'Public Lobby'
+                    presence.public_lobby(self.code)
+                elif type.lower() == 'private':
+                    self.app.mode = 'Private Lobby'
+                    presence.private_lobby()
+                self.app.game.update_stats(once=True)
         challenging_ids = []
-        #this does not use self.type because it should only run once per lobby.
-        #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
-        #self.type is used for update_stats in the Caster function to signal info to the presence.
-        if type.lower() == 'public':
-            self.app.mode = 'Public Lobby'
-            presence.public_lobby(self.code)
-        elif type.lower() == 'private':
-            self.app.mode = 'Private Lobby'
-            presence.private_lobby()
-        self.app.game.update_stats(once=True)
+        
         # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
             if 'c' not in self.widget_index:
@@ -241,6 +244,7 @@ class LobbyScreen(Screen):
                 self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
             else:
                 self.app.update_lobby_button('LOBBY %s ' % self.code)
+        self.get_attempts = 0
 
     def follow_player(self,obj,i):
         w = self.widget_index.get(i).ids['WatchBtn']
@@ -258,7 +262,9 @@ class LobbyScreen(Screen):
             w.text = 'FOLLOW'
 
     def auto_refresh(self):
-        if self.lobby_thread_flag == 0:
+        while True:
+            if self.lobby_thread_flag != 0:
+                break
             p = {
                 'action': 'status',
                 'id': self.code,
@@ -268,17 +274,15 @@ class LobbyScreen(Screen):
             print(p)
             try:
                 r = requests.get(url=LOBBYURL, params=p).json()
-                print(r)
                 if r['msg'] == 'OK':
                     self.create(r)
                     time.sleep(2)
-                    self.auto_refresh()
                 else:
-                    self.exit(msg='Bad response from server.')
+                    self.exit(msg=r['msg'])
             except:
+                logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
                 if self.get_attempts < 2:
                     self.get_attempts += 1
-                    self.auto_refresh()
                 else:
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
 
@@ -310,7 +314,8 @@ class LobbyScreen(Screen):
             popup.close_btn.bind(on_release=popup.dismiss)
             popup.open()
         # Set Rich Presence to main menu again
-        presence.menu()
+        if self.app.discord is True:
+            presence.menu()
         self.app.game.update_stats(once=True)
 
     def send_challenge(self, obj, name, id, *args):
@@ -515,3 +520,14 @@ class LobbyScreen(Screen):
             webbrowser.open(val)
         else:
             webbrowser.open(val)
+
+    def invite_link(self,*args):
+        pyperclip.copy('https://invite.meltyblood.club/%s' % self.code)
+        threading.Thread(target=self.invite_ui).start()
+
+    def invite_ui(self):
+        if self.lobby_code.text != 'Link copied to clipboard':
+            t = self.lobby_code.text
+            self.lobby_code.text = 'Link copied to clipboard'
+            time.sleep(2)
+            self.lobby_code.text = t

@@ -205,13 +205,12 @@
                 DummyBtn:
                     id: lobby_code
                     text: 'Lobby ID: 1234'
-                    padding_x: 25
+                    padding_x: 15
                     text_size: self.size
                     halign: 'right'
                     valign: 'middle'
                     background_color: (0,0,0,0)
-                    on_release:
-                        pyperclip.copy('https://concerto-mbaacc.herokuapp.com/i/%s' % root.code)
+                    on_release: root.invite_link()
             ScrollView:
                 size_hint: (1,0.9)
                 do_scroll_x: False
@@ -619,6 +618,11 @@
                             text: 'Mute all music'
                         CheckBox:
                             id: mute_bgm
+                    OptionRow:
+                        Label:
+                            text: 'Discord Integration (requires restart)'
+                        CheckBox:
+                            id: discord
                     DummyBtn:
                         text: 'CCCaster Options'
                     OptionRow:
