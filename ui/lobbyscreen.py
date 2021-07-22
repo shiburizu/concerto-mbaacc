@@ -43,12 +43,6 @@ class LobbyScreen(Screen):
         #this does not use self.type because it should only run once per lobby.
         #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
         #self.type is used for update_stats in the Caster function to signal info to the presence.
-        if type.lower() == 'public':
-            self.app.mode = 'Public Lobby'
-            presence.public_lobby(self.code)
-        elif type.lower() == 'private':
-            self.app.mode = 'Private Lobby'
-            presence.private_lobby()
         newSound = False
         if first:
             self.player_id = j['msg']
@@ -59,6 +53,12 @@ class LobbyScreen(Screen):
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
             self.type = type
+            if type.lower() == 'public':
+                self.app.mode = 'Public Lobby'
+                presence.public_lobby(self.code)
+            elif type.lower() == 'private':
+                self.app.mode = 'Private Lobby'
+                presence.private_lobby()
             self.app.game.update_stats(once=True)
         challenging_ids = []
         

@@ -40,10 +40,7 @@ def generic(mode):
         logging.warning('Concerto: DISCORD: %s' % sys.exc_info()[0])
 
 def public_lobby(id):
-    try:
-        RPC.update(state='Idle', start=int(time.time()), details='Public Lobby #%s' % id, large_image='concerto_icon', buttons=[{'label': 'Join Lobby', 'url': 'concerto://lobby:' + str(id)}])
-    except:
-        logging.warning('Concerto: DISCORD: %s' % sys.exc_info()[0])
+    RPC.update(state='Idle', start=int(time.time()), details='Public Lobby #%s' % id, large_image='concerto_icon', buttons=[{'label': 'Join Lobby', 'url': 'concerto://lobby:' + str(id)}])
 
 def private_lobby():
     try:
@@ -58,10 +55,7 @@ def online_game(mode, opponent_name, char1_name, char1_id, char2_name, char2_id)
         logging.warning('Concerto: DISCORD: %s' % sys.exc_info()[0])
 
 def public_lobby_game(lobby_id, opponent_name, char1_name, char1_id, char2_name, char2_id):
-    try:
-        RPC.update(state='Playing vs ' + opponent_name, start=int(time.time()), details='Public Lobby #%s' % lobby_id, large_image='char_' + str(char1_id), large_text=char1_name, small_image='char_' + str(char2_id), small_text='char_' + str(char2_name), buttons=[{'label': 'Join Lobby', 'url': 'concerto://lobby:' + str(lobby_id)}])
-    except:
-        logging.warning('Concerto: DISCORD: %s' % sys.exc_info()[0])
+    RPC.update(state='Playing vs ' + opponent_name, start=int(time.time()), details='Public Lobby #%s' % lobby_id, large_image='char_' + str(char1_id), large_text=char1_name, small_image='char_' + str(char2_id), small_text='char_' + str(char2_name), buttons=[{'label': 'Join Lobby', 'url': 'concerto://lobby:' + str(lobby_id)}])
 
 def broadcast_game(mode, char1_id, tooltip_1, char2_id, tooltip_2, lobby_id=None):
     try:

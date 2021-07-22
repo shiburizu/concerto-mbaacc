@@ -102,6 +102,12 @@ class Concerto(App):
             elif params[0] == 'watch':
                 self.OnlineScreen.watch(ip=params[1])
 
+    def on_stop(self,*args):
+        self.game.kill_caster()
+        if self.LobbyScreen.code != None:
+            self.LobbyScreen.exit()
+        presence.close()
+
     def lobby_button(self, *args):
         lst = [
             self.MainScreen.ids['lobbyAnchor'],
@@ -195,15 +201,9 @@ class Concerto(App):
                     
 def run():
     CApp = Concerto()
-    try:
-        CApp.run()
-    finally:
-        CApp.game.kill_caster()
-        # close rich presence connection
-        presence.close()
-        if CApp.LobbyScreen.code != None:
-            CApp.LobbyScreen.exit()
-
+    CApp.run()
+        
+        
 
 if __name__ == '__main__':
     run()
