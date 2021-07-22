@@ -492,33 +492,40 @@ class LobbyScreen(Screen):
             self.open_char_wiki(self,"p2")))
         
     def open_char_wiki(self,player):
-        url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood'
+        url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
 
         val = url_wiki 
-        
-        if(self.stats):
-            
-            if player == 'p1':
-                char_key = self.stats.get("p1char")
-                char = CHARACTER_WIKI.get(char_key)
+        try:
+            if(self.stats):
+                
+                if player == 'p1':
+                    try:
+                        char_key = self.stats.get("p1char")
+                        char = CHARACTER_WIKI.get(char_key)
+                        moon_key = self.stats.get("p1moon")
+                        moon  = MOON_WIKI.get(moon_key)
+                    except:
+                        webbrowser.open(val)
+                    
+                if player == 'p2':
+                    try:
+                        char_key = self.stats.get("p2char")
+                        char = CHARACTER_WIKI.get(char_key)
+                        moon_key = self.stats.get("p2moon")
+                        moon  = MOON_WIKI.get(moon_key)
+                    except:
+                        webbrowser.open(val)
 
-                moon_key = self.stats.get("p1moon")
-                moon  = MOON_WIKI.get(moon_key)
-            if player == 'p2':
-                char_key = self.stats.get("p2char")
-                char = CHARACTER_WIKI.get(char_key)
+                if( char and char != "Dust of Osiris"):
+                    val = val + '/' + char 
 
-                moon_key = self.stats.get("p2moon")
-                moon  = MOON_WIKI.get(moon_key)
+                    if  moon :
+                        val = val +  '/' + moon
 
-            if( char and char != "Dust of Osiris"):
-                val = val + '/' + char 
-
-                if  moon :
-                    val = val +  '/' + moon
-
-            webbrowser.open(val)
-        else:
+                webbrowser.open(val)
+            else:
+                webbrowser.open(val)
+        except:
             webbrowser.open(val)
 
     def invite_link(self,*args):
