@@ -64,15 +64,31 @@ caster_config = configparser.ConfigParser()
 caster_config.read_string('[settings]\n' + config_string)
 #Concerto ini default settings
 if os.path.exists(PATH + 'concerto.ini'):
+    opt = [
+        'netplay_port',
+        'mute_alerts',
+        'mute_bgm',
+        'discord'
+    ]
+    with open(PATH + 'concerto.ini') as f:
+        for i in f.readlines():
+            for x in opt:
+                if x in i:
+                    opt.remove(x)
+    if len(opt) != 0:
+        with open(PATH + 'concerto.ini','a') as f:
+            for i in opt:
+                f.write('\n%s=0\n' % i)
+            f.close()
     with open(PATH + 'concerto.ini') as f:
         config_string = f.read()
 else:
     with open(PATH + 'concerto.ini', 'w') as f:
-        f.write('[settings]\n')
-        f.write('netplay_port = 0\n')
-        f.write('mute_alerts = 0\n')
-        f.write('mute_bgm = 0\n')
-        f.write('discord = 0\n')
+        f.write('[settings]')
+        f.write('\nnetplay_port = 0\n')
+        f.write('\nmute_alerts = 0\n')
+        f.write('\nmute_bgm = 0\n')
+        f.write('\ndiscord = 0\n')
         f.close()
     with open(PATH + 'concerto.ini','r') as f:
         config_string = f.read()
