@@ -22,6 +22,7 @@ from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen,
 class Concerto(App):
     def __init__(self, **kwargs):
         super(Concerto, self).__init__(**kwargs)
+        self.discord = False #Discord support flag
         self.mode = 'Menu' # current mode selection
         self.offline_mode = None #secondary Offline activity, mostly for lobby
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
@@ -87,10 +88,11 @@ class Concerto(App):
                 self.sound.muted = True
             else:
                 self.sound.cut_bgm()
-
-        # Connect discord rich presence
-        presence.connect()
-        presence.menu()
+            if app_config['settings']['discord'] == '1':
+                self.discord = True
+                # Connect discord rich presence
+                presence.connect()
+                presence.menu()
         
         # Execute launch params
         if len(sys.argv) > 1:
@@ -106,7 +108,8 @@ class Concerto(App):
         self.game.kill_caster()
         if self.LobbyScreen.code != None:
             self.LobbyScreen.exit()
-        presence.close()
+        if self.discord is True:
+            presence.close()
 
     def lobby_button(self, *args):
         lst = [

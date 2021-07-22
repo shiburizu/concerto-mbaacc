@@ -72,6 +72,7 @@ else:
         f.write('netplay_port = 0\n')
         f.write('mute_alerts = 0\n')
         f.write('mute_bgm = 0\n')
+        f.write('discord = 0\n')
         f.close()
     with open(PATH + 'concerto.ini','r') as f:
         config_string = f.read()

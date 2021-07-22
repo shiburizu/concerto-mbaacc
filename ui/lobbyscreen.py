@@ -53,13 +53,14 @@ class LobbyScreen(Screen):
             self.match_list.clear_widgets()
             self.challenge_list.clear_widgets()
             self.type = type
-            if type.lower() == 'public':
-                self.app.mode = 'Public Lobby'
-                presence.public_lobby(self.code)
-            elif type.lower() == 'private':
-                self.app.mode = 'Private Lobby'
-                presence.private_lobby()
-            self.app.game.update_stats(once=True)
+            if self.app.discord is True:
+                if type.lower() == 'public':
+                    self.app.mode = 'Public Lobby'
+                    presence.public_lobby(self.code)
+                elif type.lower() == 'private':
+                    self.app.mode = 'Private Lobby'
+                    presence.private_lobby()
+                self.app.game.update_stats(once=True)
         challenging_ids = []
         
         # TODO: come up with a solution for players with identical names (this does not affect the server )
@@ -270,7 +271,8 @@ class LobbyScreen(Screen):
             popup.close_btn.bind(on_release=popup.dismiss)
             popup.open()
         # Set Rich Presence to main menu again
-        presence.menu()
+        if self.app.discord is True:
+            presence.menu()
         self.app.game.update_stats(once=True)
 
     def send_challenge(self, obj, name, id, *args):

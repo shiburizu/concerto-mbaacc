@@ -512,6 +512,8 @@ class Caster():
     def update_stats(self,once=False):
         # Used to update presence only on state change 
         state = None
+        if self.app.discord is False:
+            return None
         while True:
             if self.aproc is None:
                 break
@@ -606,16 +608,17 @@ class Caster():
         self.broadcasting = False
         self.playing = False
         self.pid = None
-        if self.app.LobbyScreen.type != None:
-            if self.app.LobbyScreen.type.lower() == 'public':
-                self.app.mode = 'Public Lobby'
-                presence.public_lobby(self.app.LobbyScreen.code)
-            elif self.app.LobbyScreen.type.lower() == 'private':
-                self.app.mode = 'Private Lobby'
-                presence.private_lobby()
-        else:
-            self.app.mode = 'Menu'
-            presence.menu()
+        if self.app.discord is True:
+            if self.app.LobbyScreen.type != None:
+                if self.app.LobbyScreen.type.lower() == 'public':
+                    self.app.mode = 'Public Lobby'
+                    presence.public_lobby(self.app.LobbyScreen.code)
+                elif self.app.LobbyScreen.type.lower() == 'private':
+                    self.app.mode = 'Private Lobby'
+                    presence.private_lobby()
+            else:
+                self.app.mode = 'Menu'
+                presence.menu()
 
     def check_msg(self,s):
         e = []
