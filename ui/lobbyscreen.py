@@ -218,7 +218,9 @@ class LobbyScreen(Screen):
             w.text = 'FOLLOW'
 
     def auto_refresh(self):
-        if self.lobby_thread_flag == 0:
+        while True:
+            if self.lobby_thread_flag != 0:
+                break
             p = {
                 'action': 'status',
                 'id': self.code,
@@ -228,18 +230,15 @@ class LobbyScreen(Screen):
             print(p)
             try:
                 r = requests.get(url=LOBBYURL, params=p).json()
-                print(r)
                 if r['msg'] == 'OK':
                     self.create(r)
                     time.sleep(2)
-                    self.auto_refresh()
                 else:
                     self.exit(msg=r['msg'])
             except:
                 logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
                 if self.get_attempts < 2:
                     self.get_attempts += 1
-                    self.auto_refresh()
                 else:
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
 
