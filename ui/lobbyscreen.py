@@ -1,5 +1,6 @@
+from json.decoder import JSONDecodeError
 import time
-import requests
+import requests, json
 import threading
 import pyperclip
 import subprocess
@@ -219,6 +220,7 @@ class LobbyScreen(Screen):
             w.text = 'FOLLOW'
 
     def auto_refresh(self):
+        clean = False
         while True:
             if self.lobby_thread_flag != 0:
                 break
@@ -231,17 +233,29 @@ class LobbyScreen(Screen):
             print(p)
             try:
                 r = requests.get(url=LOBBYURL, params=p).json()
-                if r['msg'] == 'OK':
-                    self.create(r)
-                    time.sleep(2)
-                else:
-                    self.exit(msg=r['msg'])
-            except:
-                logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
+            except (ConnectionError,JSONDecodeError):
                 if self.get_attempts < 2:
                     self.get_attempts += 1
                 else:
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
+            else:
+                try:
+                    if r['msg'] == 'OK':
+                        if clean:
+                            self.create(r,first=True)
+                        else:
+                            self.create(r)
+                        clean = False
+                        time.sleep(2)
+                    else:
+                        self.exit(msg=r['msg'])
+                except:
+                    logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
+                    if self.get_attempts < 2:
+                        self.get_attempts += 1
+                        clean = True
+                    else:
+                        self.exit(msg='Error: %s' % sys.exc_info()[0])
 
     def exit(self,msg=None):
         self.lobby_thread_flag = 1
