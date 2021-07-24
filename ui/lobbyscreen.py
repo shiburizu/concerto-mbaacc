@@ -202,7 +202,6 @@ class LobbyScreen(Screen):
                 self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
             else:
                 self.app.update_lobby_button('LOBBY %s ' % self.code)
-        self.get_attempts = 0
 
     def follow_player(self,obj,i):
         w = self.widget_index.get(i).ids['WatchBtn']
@@ -238,6 +237,7 @@ class LobbyScreen(Screen):
                     self.get_attempts += 1
                 else:
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
+                    break
             else:
                 try:
                     if r['msg'] == 'OK':
@@ -245,10 +245,9 @@ class LobbyScreen(Screen):
                             self.create(r,first=True)
                         else:
                             self.create(r)
-                        clean = False
-                        time.sleep(2)
                     else:
                         self.exit(msg=r['msg'])
+                        break
                 except:
                     logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
                     if self.get_attempts < 2:
@@ -256,6 +255,12 @@ class LobbyScreen(Screen):
                         clean = True
                     else:
                         self.exit(msg='Error: %s' % sys.exc_info()[0])
+                        break
+                else:
+                    clean = False
+                    self.get_attempts = 0
+                finally:
+                    time.sleep(2)
 
     def exit(self,msg=None):
         self.lobby_thread_flag = 1
