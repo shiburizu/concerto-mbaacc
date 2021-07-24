@@ -862,6 +862,8 @@
 <GameModal>:
     modal_txt: modal_txt
     close_btn: close_btn
+    p1_char_guide: p1_char_guide
+    p2_char_guide: p2_char_guide
     size_hint: None,None
     size: 400,180
     auto_dismiss: False 
@@ -888,6 +890,7 @@
             pos_hint: {'center_x': 0.5}
         Button:
             id: p1_char_guide
+            visible: False
             font_name: 'res/texgyreheros-bolditalic.otf'
             background_color: (255, 0, 0, 0.2)
             outline_width: 1
@@ -899,6 +902,7 @@
             pos_hint: {'center_x': 0.25}
         Button:
             id: p2_char_guide
+            visible: False
             font_name: 'res/texgyreheros-bolditalic.otf'
             background_color: (255, 0, 0, 0.2)
             outline_width: 1

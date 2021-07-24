@@ -379,7 +379,18 @@ class LobbyScreen(Screen):
             self.opponent = n
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
-            self.fill_wiki_button(self)
+
+            self.active_pop.p1_char_guide.text = 'P1 Guide'
+            self.active_pop.p1_char_guide.visible = True
+            self.active_pop.p1_char_guide.bind(on_release=partial(
+                self.open_char_wiki, "p1"))
+
+            self.active_pop.p2_char_guide.text = 'P2 Guide'
+            self.active_pop.p2_char_guide.visible = True
+            self.active_pop.p2_char_guide.bind(on_release=partial(
+                self.open_char_wiki, "p2"))
+            
+            #self.fill_wiki_button(self)
             p.dismiss()
             if t: #if accepting, run MBAA check
                 threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
@@ -428,6 +439,17 @@ class LobbyScreen(Screen):
         popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+
+        popup.p1_char_guide.text = 'P1 Guide'
+        popup.p1_char_guide.visible = True
+        popup.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p1"))
+
+        popup.p2_char_guide.text = 'P2 Guide'
+        popup.p2_char_guide.visible = True
+        popup.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p2"))
+        
         popup.open()
         self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         caster.start()
@@ -483,35 +505,35 @@ class LobbyScreen(Screen):
         self.active_pop = None
     
     def fill_wiki_button(self):
-        self.active_pop.p1_char_guide.text = 'P1 char/moon guide'
+        self.active_pop.p1_char_guide.text = 'P1 Guide'
         self.active_pop.p1_char_guide.bind(on_release=partial(
-            self.open_char_wiki(self,"p1")))
+            self.open_char_wiki, "p1"))
         
-        self.active_pop.p2_char_guide.text = 'P2 char/moon guide'
+        self.active_pop.p2_char_guide.text = 'P2 Guide'
         self.active_pop.p2_char_guide.bind(on_release=partial(
-            self.open_char_wiki(self,"p2")))
+            self.open_char_wiki, "p2"))
         
     def open_char_wiki(self,player):
         url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
 
         val = url_wiki 
         try:
-            if(self.stats):
+            if(self.app.game.stats):
                 
                 if player == 'p1':
                     try:
-                        char_key = self.stats.get("p1char")
+                        char_key = self.app.game.stats["p1char"]
                         char = CHARACTER_WIKI.get(char_key)
-                        moon_key = self.stats.get("p1moon")
+                        moon_key = self.app.game.stats["p1moon"]
                         moon  = MOON_WIKI.get(moon_key)
                     except:
                         webbrowser.open(val)
                     
                 if player == 'p2':
                     try:
-                        char_key = self.stats.get("p2char")
+                        char_key = self.app.game.stats["p2char"]
                         char = CHARACTER_WIKI.get(char_key)
-                        moon_key = self.stats.get("p2moon")
+                        moon_key = self.app.game.stats["p2moon"]
                         moon  = MOON_WIKI.get(moon_key)
                     except:
                         webbrowser.open(val)

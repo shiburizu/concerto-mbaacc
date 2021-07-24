@@ -4,6 +4,48 @@ from kivy.uix.screenmanager import Screen
 from ui.modals import *
 import config
 import re
+import webbrowser
+
+CHARACTER_WIKI = {
+    0 : "Sion_Eltnam_Atlasia",
+    1 : "Arcueid_Brunestud",
+    2 : "Ciel",
+    3 : "Akiha_Tohno",
+    4 : "Hisui_%26_Kohaku",
+    5 : "Hisui",
+    6 : "Kohaku",
+    7 : "Shiki_Tohno",
+    8 : "Miyako_Arima",
+    9 : "Warachia",
+    10 : "Nero_Chaos",
+    11 : "Sion_TATARI",
+    12 : "Red_Arcueid",
+    13 : "Akiha_Vermillion",
+    14 : "Mech-Hisui",
+    15 : "Shiki_Nanaya",
+    17 : "Satsuki_Yumiduka",
+    18 : "Len",
+    19 : "Powerd_Ciel",
+    20 : "Neco-Arc",
+    22 : "Aoko_Aozaki",
+    23 : "White_Len",
+    25 : "Neco-Arc_Chaos",
+    28 : "Kouma_Kishima",
+    29 : "Akiha_Tohno_(Seifuku)",
+    30 : "Riesbyfe_Stridberg",
+    31 : "Roa",
+    32 : "Dust of Osiris", # TODO "Is it neccesary if boss characters are never selectable? Why only Dust and not every other boss then?
+    33 : "Shiki_Ryougi",
+    34 : "Neco_%26_Mech",
+    35 : "Koha_%26_Mech",
+    51 : "Archetype:_Earth"
+}
+
+MOON_WIKI = {
+    0 : 'Crescent_Moon',
+    1 : 'Full_Moon',
+    2 : 'Half_Moon'
+}
 
 class OnlineScreen(Screen):
     
@@ -44,6 +86,19 @@ class OnlineScreen(Screen):
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
         self.app.mode = 'Direct Match'
+        
+        popup.p1_char_guide.text = 'P1 Guide'
+        popup.p1_char_guide.visible = True
+        popup.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p1"))
+
+        popup.p2_char_guide.text = 'P2 Guide'
+        popup.p2_char_guide.visible = True
+        popup.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p2"))
+        
+        #self.fill_wiki_button(self)
+        
         self.active_pop = popup
         popup.open()
 
@@ -56,6 +111,19 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        
+        popup.p1_char_guide.text = 'P1 Guide'
+        popup.p1_char_guide.visible = True
+        popup.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p1"))
+
+        popup.p2_char_guide.text = 'P2 Guide'
+        popup.p2_char_guide.visible = True
+        popup.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p2"))
+        
+        #self.fill_wiki_button(self)
+        
         self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
         self.active_pop = popup
         popup.open()
@@ -79,6 +147,18 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+
+        popup.p1_char_guide.text = 'P1 Guide'
+        popup.p1_char_guide.visible = True
+        popup.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p1"))
+
+        popup.p2_char_guide.text = 'P2 Guide'
+        popup.p2_char_guide.visible = True
+        popup.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p2"))
+#        self.fill_wiki_button(self)
+
         self.app.mode = 'Direct Match'
         self.active_pop = popup
         popup.open()
@@ -100,6 +180,18 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        
+        popup.p1_char_guide.text = 'P1 Guide'
+        popup.p1_char_guide.visible = True
+        popup.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p1"))
+
+        popup.p2_char_guide.text = 'P2 Guide'
+        popup.p2_char_guide.visible = True
+        popup.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p2"))
+        #self.fill_wiki_button(self)
+
         self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         popup.open()
 
@@ -108,6 +200,18 @@ class OnlineScreen(Screen):
             self.app.game.confirm_frames(int(r.text),int(d.text))
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
+
+            self.active_pop.p1_char_guide.text = 'P1 Guide'
+            self.active_pop.p1_char_guide.visible = True
+            self.active_pop.p1_char_guide.bind(on_release=partial(
+                self.open_char_wiki, "p1"))
+
+            self.active_pop.p2_char_guide.text = 'P2 Guide'
+            self.active_pop.p2_char_guide.visible = True
+            self.active_pop.p2_char_guide.bind(on_release=partial(
+                self.open_char_wiki, "p2"))
+            
+            #self.fill_wiki_button(self)    #TODO Fill popup for the wiki buttons here?
             p.dismiss()
         except ValueError:
             pass
@@ -136,6 +240,9 @@ class OnlineScreen(Screen):
             popup.modal_txt.text += i + '\n'
         popup.close_btn.bind(on_release=partial(self.dismiss_error,p = popup))
         popup.close_btn.text = "Close"
+
+        #self.fill_wiki_button(self)
+        
         if self.active_pop:
             self.active_pop.dismiss()
         self.active_pop = None
@@ -153,3 +260,46 @@ class OnlineScreen(Screen):
         if self.active_pop != None:
             self.active_pop.dismiss()
         self.active_pop = None
+
+    
+    def fill_wiki_button(self):
+        self.active_pop.p1_char_guide.text = 'P1 Guide'
+        self.active_pop.p1_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p1"))
+        
+        self.active_pop.p2_char_guide.text = 'P2 Guide'
+        self.active_pop.p2_char_guide.bind(on_release=partial(
+            self.open_char_wiki, "p2"))
+        
+    def open_char_wiki(self, *args):
+        url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
+        val = url_wiki 
+        try:
+            if(self.app.game.stats and args[1]):
+                
+                if args[1] == 'p1':
+                    try:
+                        char_key = self.app.game.stats["p1char"]
+                        char = CHARACTER_WIKI.get(char_key)
+                        moon_key = self.app.game.stats["p1moon"]
+                        moon  = MOON_WIKI.get(moon_key)
+                    except:
+                        webbrowser.open(val)
+                    
+                if args[1] == 'p2':
+                    try:
+                        char_key = self.app.game.stats["p2char"]
+                        char = CHARACTER_WIKI.get(char_key)
+                        moon_key = self.app.game.stats["p2moon"]
+                        moon  = MOON_WIKI.get(moon_key)
+                    except:
+                        webbrowser.open(val)
+                if( char and char != "Dust of Osiris"):
+                    val = val + '/' + char 
+                    if  moon :
+                        val = val +  '/' + moon
+                webbrowser.open(val)
+            else:
+                webbrowser.open(val)
+        except:
+            webbrowser.open(val)
