@@ -3,6 +3,7 @@ from ui.modals import GameModal
 from functools import partial
 import threading
 import webbrowser
+import logging
 
 
 CHARACTER_WIKI = {
@@ -127,32 +128,37 @@ class OfflineScreen(Screen):
         
     def open_char_wiki(self, *args):
         url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
+
         val = url_wiki 
+        logging.warning("Inside open_char_wiki, current val = " + val)
         try:
-            if(self.app.game.stats and args[1]):
-                
-                if args[1] == 'p1':
-                    try:
-                        char_key = self.app.game.stats["p1char"]
-                        char = CHARACTER_WIKI.get(char_key)
-                        moon_key = self.app.game.stats["p1moon"]
-                        moon  = MOON_WIKI.get(moon_key)
-                    except:
-                        webbrowser.open(val)
+            if(self.app.game.stats):
+                logging.warning("Passed the first if" + str(self.app.game.stats) + "|| Argument/PLayer "+ str(args[1]))
+                if args[1] == 'p1' or args[0] == 'p1':
+                    logging.warning("INside If args p1 " + str(self.app.game.stats) + "|| Argument/PLayer "+ str(args[1]))
+                    char_key = self.app.game.stats['p1char']
+                    char = CHARACTER_WIKI.get(char_key)
+                    logging.warning("Char key of p1 : " + str(char_key) +"Char of p1 : " + str(char) )
+                    moon_key = self.app.game.stats['p1moon']
+                    moon  = MOON_WIKI.get(moon_key)
+                    logging.warning("Moob key of p1 : " + str(moon_key) +"Moon of p2 : "+ str(moon))                    
+                    logging.warning("Passed the memory checks of p1" + str(self.app.game.stats) + "\n || char key : " + str(char_key) + "|| char: " + str(char) + "|| moon_key:" + str(moon_key) + "|| moon: " + str(moon))
+                if args[1] == 'p2' or args[0] == 'p2':
+                    logging.warning("INside If args p2 " + str(self.app.game.stats) + "|| Argument/PLayer "+ str(args[1]))                    
+                    char_key = self.app.game.stats['p2char']
+                    char = CHARACTER_WIKI.get(char_key)
+                    logging.warning("Char key of p2 : " + str(char_key) +"Char of p2 : "+ str(char))
+                    moon_key = self.app.game.stats['p2moon']
+                    moon  = MOON_WIKI.get(moon_key)
+                    logging.warning("Moon key of p2 : " + str(moon_key) +"Moon of p2 : "+ str(moon))                    
+                    logging.warning("Passed the memory checks p2" + str(self.app.game.stats) + "\n || char key : "+ str(char_key) + "|| char: " + str(char) + "|| moon_key:" + str(moon_key) + "|| moon: " + str(moon))
                     
-                if args[1] == 'p2':
-                    try:
-                        char_key = self.app.game.stats["p2char"]
-                        char = CHARACTER_WIKI.get(char_key)
-                        moon_key = self.app.game.stats["p2moon"]
-                        moon  = MOON_WIKI.get(moon_key)
-                    except:
-                        webbrowser.open(val)
-                if( char and char != "Dust of Osiris"):
-                    val = val + '/' + char 
-                    if  moon :
-                        val = val +  '/' + moon
-                webbrowser.open(val)
+                logging.warning("Passed the memory checks of both players" + str(self.app.game.stats) + "|| char key : "+ str(char_key) + "|| char: " + str(char) + "|| moon_key:" + str(moon_key) + "|| moon: " + str(moon))
+                
+                val = str(val) + '/' + str(char) +  '/' + str(moon)
+
+                logging.warning("Everything worked!" + str(self.app.game.stats) + " || URL Link in val:  "+ str(val))
+                webbrowser.open(str(val))
             else:
                 webbrowser.open(val)
         except:
