@@ -3,7 +3,7 @@
 #:import res kivy.resources
 #:import pyperclip pyperclip
 
-<MenuBtn@Button>
+<MenuBtn>
     text_size: self.size
     halign: 'left'
     valign: 'middle'
@@ -16,9 +16,9 @@
     on_press: self.background_color = (255, 0, 0, 1)
     on_release: self.background_color = (1, 1 ,1 ,1)
     
-<PlayerRow@AnchorLayout>
+<PlayerRow>
     size_hint_y: None
-    height: 36
+    height: 32
     canvas.before:
         Color:
             rgba: (0,0,0,0.2)
@@ -52,24 +52,26 @@
             valign: 'center'
             padding_x: 10
 
-<DummyBtn@Button>
+<DummyBtn>
     text_size: self.size
     halign: 'center'
     valign: 'middle'
     size_hint_y: None
-    height: 36
+    height: 32
     padding_x: 50
     outline_width: 2
     font_name: 'res/texgyreheros-bolditalic.otf'
     background_color: (0,0,0,0.3)
 
-<LobbyBtn@Button>:
+<LobbyBtn>:
     text: 'LOBBY'
     size_hint_x: 0.25
-    size_hint_y: 0.1
+    size_hint_y: None
+    height: 36
     outline_width: 2
     font_name: 'res/texgyreheros-bolditalic.otf'
     background_color: (255, 0, 0, 0.2)
+    background_normal: ''
     on_release: 
         self.background_color = (255, 0, 0, 0.2)
     on_press: 
@@ -196,13 +198,17 @@
             source: 'res/bg.png'
         BoxLayout:
             orientation: 'vertical'
-            BoxLayout:
+            GridLayout:
+                rows: 1
                 size_hint: (1, 0.1)
                 MenuBtn:
+                    size_hint_x: 0.348
+                    padding_x: 25
                     text: 'LEAVE'
                     on_release: 
                         root.exit()
                 DummyBtn:
+                    size_hint_x: 0.58
                     id: lobby_code
                     text: 'Lobby ID: 1234'
                     padding_x: 15
@@ -220,28 +226,27 @@
                     size_hint_y: None
                     size_hint_x: 1
                     cols: 1
-                    spacing: [0,5]
                     GridLayout:
                         id: challenge_list
                         cols: 1
                         height: self.minimum_height
                         size_hint_x: 1
                         size_hint_y: None
-                        spacing: [0,5]
+                        spacing: [0,2]
                     GridLayout:
                         id: player_list
                         cols: 1
                         height: self.minimum_height
                         size_hint_x: 1
                         size_hint_y: None
-                        spacing: [0,5]
+                        spacing: [0,2]
                     GridLayout:
                         id: match_list
                         cols: 1
                         height: self.minimum_height
                         size_hint_x: 1
                         size_hint_y: None
-                        spacing: [0,5]    
+                        spacing: [0,2]    
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'
@@ -595,8 +600,8 @@
                 do_scroll_y: True
                 GridLayout:
                     cols: 1
-                    height: self.minimum_height
                     size_hint_y: None
+                    height: self.minimum_height
                     DummyBtn:
                         text: 'Tip: Press F4 during Training Mode to bind controls.'
                     DummyBtn:
