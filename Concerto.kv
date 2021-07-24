@@ -160,6 +160,7 @@
                     text: 'BACK'
                     on_release: 
                         app.sm.current = 'Main'
+                    size_hint_y: 1
             BoxLayout:
                 size_hint_y: 0.9
                 padding: 20,5
@@ -583,12 +584,15 @@
                     size_hint_x: 0.8
                     on_release: 
                         app.sm.current = 'Main'
+                    size_hint_y: 1
                 Button:
                     text: 'SAVE'
                     font_name: 'res/texgyreheros-bolditalic.otf'
                     size_hint_x: 0.2
                     outline_width: 2
                     background_color: (255, 0, 0, 0.2)
+                    background_normal: ''
+                    size_hint_y: 1
                     on_release: 
                         self.background_color = (255, 0, 0, 0.2)
                         root.save()
