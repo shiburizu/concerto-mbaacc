@@ -231,14 +231,14 @@ class LobbyScreen(Screen):
             try:
                 req = requests.get(url=LOBBYURL, params=p, timeout=5)
                 req.raise_for_status()
-            except (requests.exceptions.ConnectionError,requests.exceptions.Timeout):
-                logging.warning('LOBBY REFRESH: %s' % sys.exc_info()[0])
+            except (requests.exceptions.ConnectionError,requests.exceptions.Timeout) as e:
+                logging.warning('LOBBY REFRESH: %s' % e.__class__)
                 if self.get_attempts < 2:
                     self.get_attempts += 1
                     logging.warning('GET_ATTEMPTS: %s' % self.get_attempts)
                 else:
                     logging.warning('GET_ATTEMPTS: %s' % self.get_attempts)
-                    self.exit(msg='Error: %s' % sys.exc_info()[0])
+                    self.exit(msg='Error: %s' % e.__class__)
                     break
             else:
                 r = req.json()
