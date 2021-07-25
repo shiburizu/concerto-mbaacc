@@ -93,11 +93,11 @@ class Concerto(App):
                 # Connect discord rich presence
                 presence.connect()
                 presence.menu()
-        
         # Execute launch params
         if len(sys.argv) > 1:
             params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
             if params[0] == 'lobby':
+                # TODO version check before connecting to lobby
                 self.LobbyList.join(code=int(params[1]))
             elif params[0] == 'connect':
                 self.OnlineScreen.join(ip=params[1])

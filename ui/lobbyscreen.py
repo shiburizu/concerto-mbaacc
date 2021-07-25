@@ -1,6 +1,6 @@
 from json.decoder import JSONDecodeError
 import time
-import requests, json
+import requests
 import threading
 import pyperclip
 import subprocess
@@ -219,7 +219,6 @@ class LobbyScreen(Screen):
             w.text = 'FOLLOW'
 
     def auto_refresh(self):
-        clean = False
         while True:
             if self.lobby_thread_flag != 0:
                 break
@@ -229,39 +228,27 @@ class LobbyScreen(Screen):
                 'p': self.player_id,
                 'secret': self.secret
             }
-            print(p)
             try:
-                r = requests.get(url=LOBBYURL, params=p).json()
-            except (ConnectionError,JSONDecodeError):
+                req = requests.get(url=LOBBYURL, params=p, timeout=5)
+                req.raise_for_status()
+            except (requests.exceptions.ConnectionError,requests.exceptions.Timeout):
+                logging.warning('LOBBY REFRESH: %s' % sys.exc_info()[0])
                 if self.get_attempts < 2:
                     self.get_attempts += 1
+                    logging.warning('GET_ATTEMPTS: %s' % self.get_attempts)
                 else:
+                    logging.warning('GET_ATTEMPTS: %s' % self.get_attempts)
                     self.exit(msg='Error: %s' % sys.exc_info()[0])
                     break
             else:
-                try:
-                    if r['msg'] == 'OK':
-                        if clean:
-                            self.create(r,first=True)
-                        else:
-                            self.create(r)
-                    else:
-                        self.exit(msg=r['msg'])
-                        break
-                except:
-                    logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
-                    if self.get_attempts < 2:
-                        self.get_attempts += 1
-                        clean = True
-                    else:
-                        self.exit(msg='Error: %s' % sys.exc_info()[0])
-                        break
-                else:
-                    clean = False
-                    self.get_attempts = 0
-                finally:
+                r = req.json()
+                if r['msg'] == 'OK':
+                    self.create(r)
                     time.sleep(2)
-
+                else:
+                    self.exit(msg=r['msg'])
+                    break
+                
     def exit(self,msg=None):
         self.lobby_thread_flag = 1
         try:
