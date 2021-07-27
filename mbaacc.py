@@ -497,22 +497,27 @@ class Caster():
                 break
         sc.active_pop.dismiss()
 
+    def find_pid(self):
+        if not self.pid:
+            cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
+            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
+            try:
+                pid = task_data.replace("\"", "").split(",")[1]
+            except IndexError:
+                return False
+            else:
+                self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
+                return True
+        else:
+            return True
+    
     def update_stats(self,once=False):
         # Used to update presence only on state change 
         state = None
         while True:
             if self.aproc is None:
                 break
-            if self.pid is None:
-                cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
-                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-                try:
-                    pid = task_data.replace("\"", "").split(",")[1]
-                except IndexError:
-                    pass
-                else:
-                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
-            else:
+            if self.find_pid():
                 self.stats = {
                     "state": self.read_memory(0x54EEE8),
                     "p1char": self.read_memory(0x74D8FC),
@@ -573,8 +578,9 @@ class Caster():
 
     def read_memory(self,addr):
         try:
-            if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
-                return int.from_bytes(buf.raw, "big")
+            if self.find_pid():
+                if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
+                    return int.from_bytes(buf.raw, "big")
             return None
         except:
             logging.warning('READ MEMORY: %s' % sys.exc_info()[0])
