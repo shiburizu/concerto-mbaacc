@@ -4,6 +4,7 @@ from kivy.uix.screenmanager import Screen
 from ui.modals import *
 import config
 import re
+import requests
 
 class OnlineScreen(Screen):
     
@@ -29,10 +30,37 @@ class OnlineScreen(Screen):
         self.broadcast_pop.open()
 
     def lobby(self):
-        if config.caster_config['settings']['displayName'].strip() == '':
-            self.error_message(['Please go to Options and set a display name.'])
+        check = self.online_login()
+        if  check != []:
+            self.error_message(check)
         else:
             self.app.LobbyList.refresh()
+
+    def online_login(self): #version and name validation before going to screen, returns a list of problems if any
+        err = []
+        if config.caster_config['settings']['displayName'].strip() == '':
+            err.append('Please go to Options and set a display name.')
+            return err
+        elif len(config.caster_config['settings']['displayName']) > 16:
+            name = config.caster_config['settings']['displayName'][0:15].strip()
+        else:
+            name = config.caster_config['settings']['displayName'].strip()
+        params = {
+            'action' : 'login',
+            'version' : config.CURRENT_VERSION,
+            'name' : name
+        }
+        try:
+            req = requests.get(url=config.VERSIONURL,params=params,timeout=5)
+            req.raise_for_status()
+        except requests.exceptions.RequestException:
+            err.append('Unable to reach the login server.')
+        resp = req.json()
+        if resp['status'] != 'OK':
+            err.append(resp['msg'])
+        else:
+            self.app.player_name = name #assign name to be used everywhere
+        return err
 
     def host(self):
         caster = threading.Thread(
@@ -130,6 +158,8 @@ class OnlineScreen(Screen):
         popup.open()
 
     def error_message(self,e):
+        if self.app.sm.current != 'Online':
+            self.app.sm.current = 'Online'
         self.error = True
         popup = GameModal()
         for i in e:

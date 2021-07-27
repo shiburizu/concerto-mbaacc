@@ -57,6 +57,7 @@ class OptionScreen(Screen):
                 for i in config_file:
                     if "displayName" in i:
                         config_file[n] = "displayName=%s\n" % self.ids['display_name'].text.strip()
+                        self.app.player_name = self.ids['display_name'].text.strip()
                     elif "maxRealDelay" in i:
                         config_file[n] = "maxRealDelay=%s\n" % self.ids['max_delay'].text
                     elif "defaultRollback" in i:

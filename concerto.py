@@ -27,6 +27,7 @@ class Concerto(App):
         self.offline_mode = None #secondary Offline activity, mostly for lobby
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
         self.game = Caster(CApp=self)  # expects Caster object
+        self.player_name = 'Concerto Player' #static player name to use for online lobbies
 
     def build(self):
         self.sound = sound.Sound()
@@ -94,12 +95,16 @@ class Concerto(App):
                 presence.connect()
                 presence.menu()
             self.sound.mute_alerts = app_config['settings']['mute_alerts'] == '1'
+            self.player_name = caster_config['settings']['displayName']
         # Execute launch params
         if len(sys.argv) > 1:
             params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
             if params[0] == 'lobby':
-                # TODO version check before connecting to lobby
-                self.LobbyList.join(code=int(params[1]))
+                check = self.OnlineScreen.online_login()
+                if check != []:
+                    self.OnlineScreen.error_message(check)
+                else:
+                    self.LobbyList.join(code=int(params[1]))
             elif params[0] == 'connect':
                 self.OnlineScreen.join(ip=params[1])
             elif params[0] == 'watch':
