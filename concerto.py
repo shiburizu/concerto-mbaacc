@@ -93,6 +93,7 @@ class Concerto(App):
                 # Connect discord rich presence
                 presence.connect()
                 presence.menu()
+            self.sound.mute_alerts = app_config['settings']['mute_alerts'] == '1'
         # Execute launch params
         if len(sys.argv) > 1:
             params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
