@@ -328,6 +328,7 @@ class LobbyScreen(Screen):
         caster = threading.Thread(target=self.app.game.join, args=[
                                   ip, self, id], daemon=True)
         caster.start()
+        threading.Thread(target=self.send_pre_accept,args=[self.player_id,id]).start()
         popup = GameModal()
         popup.modal_txt.text = 'Connecting to %s' % name
         popup.close_btn.text = 'Stop Playing'
@@ -335,6 +336,18 @@ class LobbyScreen(Screen):
             self.dismiss, p=popup))
         self.active_pop = popup
         popup.open()
+
+    def send_pre_accept(self,id,target):
+        p = {
+            't': target,
+            'p': id,
+            'action': 'pre_accept',
+            'id': self.code,
+            'secret': self.secret
+        }
+        print(p)
+        c = requests.get(url=LOBBYURL, params=p).json()
+        print(c)
 
     def confirm(self, obj, r, d, p, n, t=None, *args):
         try:
