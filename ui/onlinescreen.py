@@ -182,9 +182,6 @@ class OnlineScreen(Screen):
             popup.modal_txt.text += i + '\n'
         popup.close_btn.bind(on_release=partial(self.dismiss_error,p = popup))
         popup.close_btn.text = "Close"
-
-        #self.fill_wiki_button(self)
-        
         if self.active_pop:
             self.active_pop.dismiss()
         self.active_pop = None

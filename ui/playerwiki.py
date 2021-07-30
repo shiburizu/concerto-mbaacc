@@ -64,10 +64,15 @@ def fill_wiki_button(self,popup):
     popup.p1_char_guide.text = 'P1 Guide'
     popup.p1_char_guide.bind(on_release=partial(
         open_char_wiki, self,"p1"))
-    
+    popup.p1_char_guide.disabled = False
+    popup.p1_char_guide.opacity = 1
+
     popup.p2_char_guide.text = 'P2 Guide'
     popup.p2_char_guide.bind(on_release=partial(
         open_char_wiki, self,"p2"))
+    popup.p2_char_guide.disabled = False
+    popup.p2_char_guide.opacity = 1
+    
     return popup
     
 def open_char_wiki(self, *args):

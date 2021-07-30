@@ -46,7 +46,6 @@ class OfflineScreen(Screen):
         popup = fill_wiki_button(self,popup)
         popup.open()
         self.app.offline_mode = mode
-        # self.fill_wiki_button()     #TODO Fill popup with the buttons for the wiki here?
         self.active_pop = popup
     
     def error_message(self,e):
