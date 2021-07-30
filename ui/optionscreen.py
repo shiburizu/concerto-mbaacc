@@ -11,57 +11,20 @@ class OptionScreen(Screen):
     def load(self):
         try:
             self.ids['netplay_port'].text = app_config['settings']['netplay_port']
-
-            if app_config['settings']['mute_alerts'] == '1':
-                self.ids['mute_alerts'].active = True
-            else:
-                self.ids['mute_alerts'].active = False
-
-            if app_config['settings']['mute_bgm'] == '1':
-                self.ids['mute_bgm'].active = True
-            else:
-                self.ids['mute_bgm'].active = False
-
-            if app_config['settings']['discord'] == '1':
-                self.ids['discord'].active = True
-            else:
-                self.ids['discord'].active = False
-
+            self.ids['mute_alerts'].active = app_config['settings']['mute_alerts'] == '1'
+            self.ids['mute_bgm'].active = app_config['settings']['mute_bgm'] == '1'
+            self.ids['discord'].active = app_config['settings']['discord'] == '1'
             self.ids['display_name'].text = caster_config['settings']['displayName']
-            if self.ids['lobbyAnchor'].children != []:
-                self.ids['display_name'].disabled = True
-            else:
-                self.ids['display_name'].disabled = False
+            self.ids['display_name'].disabled = self.ids['lobbyAnchor'].children != []
             self.ids['max_delay'].text = caster_config['settings']['maxRealDelay']
             self.ids['default_rollback'].text = caster_config['settings']['defaultRollback']
             self.ids['held_start'].text = caster_config['settings']['heldStartDuration']
             self.ids['versus_count'].value = int(caster_config['settings']['versusWinCount'])
-            
-            if caster_config['settings']['alertOnConnect'] == '2' or caster_config['settings']['alertOnConnect'] == '3':
-                self.ids['alert_connect'].active = True
-            else:
-                self.ids['alert_connect'].active = False
-
-            if caster_config['settings']['fullCharacterName'] == '1':
-                self.ids['full_names'].active = True
-            else:
-                self.ids['full_names'].active = False
-
-            if caster_config['settings']['replayRollbackOn'] == '1':
-                self.ids['replay_rollback'].active = True
-            else:
-                self.ids['replay_rollback'].active = False
-            
-            if caster_config['settings']['highCpuPriority'] == '1':
-                self.ids['cpu_priority'].active = True
-            else:
-                self.ids['cpu_priority'].active = False
-
-            if caster_config['settings']['autoCheckUpdates'] == '1':
-                self.ids['caster_updates'].active = True
-            else:
-                self.ids['caster_updates'].active = False
-
+            self.ids['alert_connect'].active = caster_config['settings']['alertOnConnect'] == '2' or caster_config['settings']['alertOnConnect'] == '3'
+            self.ids['full_names'].active = caster_config['settings']['fullCharacterName'] == '1'
+            self.ids['replay_rollback'].active = caster_config['settings']['replayRollbackOn'] == '1'
+            self.ids['cpu_priority'].active = caster_config['settings']['highCpuPriority'] == '1'
+            self.ids['caster_updates'].active = caster_config['settings']['autoCheckUpdates'] == '1'
             self.app.sm.current = 'Options'
         except KeyError:
             self.app.MainScreen.error_message(['Invalid config files. Please back up your settings, delete cccaster/config.ini and concerto.ini and restart Concerto.'])
@@ -94,6 +57,7 @@ class OptionScreen(Screen):
                 for i in config_file:
                     if "displayName" in i:
                         config_file[n] = "displayName=%s\n" % self.ids['display_name'].text.strip()
+                        self.app.player_name = self.ids['display_name'].text.strip()
                     elif "maxRealDelay" in i:
                         config_file[n] = "maxRealDelay=%s\n" % self.ids['max_delay'].text
                     elif "defaultRollback" in i:

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from mbaacc import MOON
+=======
+from json.decoder import JSONDecodeError
+>>>>>>> bae20bfa0f118b367889ff5bcddce089a4432120
 import time
 import requests
 import threading
@@ -244,7 +248,6 @@ class LobbyScreen(Screen):
                 self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
             else:
                 self.app.update_lobby_button('LOBBY %s ' % self.code)
-        self.get_attempts = 0
 
     def follow_player(self,obj,i):
         w = self.widget_index.get(i).ids['WatchBtn']
@@ -271,21 +274,27 @@ class LobbyScreen(Screen):
                 'p': self.player_id,
                 'secret': self.secret
             }
-            print(p)
             try:
-                r = requests.get(url=LOBBYURL, params=p).json()
+                req = requests.get(url=LOBBYURL, params=p, timeout=5)
+                req.raise_for_status()
+            except (requests.exceptions.ConnectionError,requests.exceptions.Timeout) as e:
+                logging.warning('LOBBY REFRESH: %s' % e.__class__)
+                if self.get_attempts < 2:
+                    self.get_attempts += 1
+                    logging.warning('GET_ATTEMPTS: %s' % self.get_attempts)
+                else:
+                    logging.warning('GET_ATTEMPTS: %s' % self.get_attempts)
+                    self.exit(msg='Error: %s' % e.__class__)
+                    break
+            else:
+                r = req.json()
                 if r['msg'] == 'OK':
                     self.create(r)
                     time.sleep(2)
                 else:
                     self.exit(msg=r['msg'])
-            except:
-                logging.warning('Concerto: Lobby Error: %s' % sys.exc_info()[0])
-                if self.get_attempts < 2:
-                    self.get_attempts += 1
-                else:
-                    self.exit(msg='Error: %s' % sys.exc_info()[0])
-
+                    break
+                
     def exit(self,msg=None):
         self.lobby_thread_flag = 1
         try:
@@ -365,6 +374,7 @@ class LobbyScreen(Screen):
         caster = threading.Thread(target=self.app.game.join, args=[
                                   ip, self, id], daemon=True)
         caster.start()
+        threading.Thread(target=self.send_pre_accept,args=[self.player_id,id]).start()
         popup = GameModal()
         popup.modal_txt.text = 'Connecting to %s' % name
         popup.close_btn.text = 'Stop Playing'
@@ -372,6 +382,18 @@ class LobbyScreen(Screen):
             self.dismiss, p=popup))
         self.active_pop = popup
         popup.open()
+
+    def send_pre_accept(self,id,target):
+        p = {
+            't': target,
+            'p': id,
+            'action': 'pre_accept',
+            'id': self.code,
+            'secret': self.secret
+        }
+        print(p)
+        c = requests.get(url=LOBBYURL, params=p).json()
+        print(c)
 
     def confirm(self, obj, r, d, p, n, t=None, *args):
         try:
@@ -400,26 +422,19 @@ class LobbyScreen(Screen):
     def wait_for_MBAA(self, t):
         while True:
             if self.app.game.playing is True and self.active_pop != None:
-                cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
-                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
-                try:
-                    task_data.replace("\"", "").split(",")[1]
-                except IndexError:
-                    pass
-                else:
-                    if self.app.game.read_memory(0x54EEE8) == 20: #wait for char select
-                        resp = {
-                            't': t,
-                            'p': self.player_id,
-                            'action': 'accept',
-                            'id': self.code,
-                            'secret': self.secret
-                        }
-                        print(resp)
-                        c = requests.get(url=LOBBYURL, params=resp).json()
-                        print(c)
-                        self.current_player = t
-                        break
+                if self.app.game.read_memory(0x54EEE8) == 20: #wait for char select
+                    resp = {
+                        't': t,
+                        'p': self.player_id,
+                        'action': 'accept',
+                        'id': self.code,
+                        'secret': self.secret
+                    }
+                    print(resp)
+                    c = requests.get(url=LOBBYURL, params=resp).json()
+                    print(c)
+                    self.current_player = t
+                    break
             else:
                 break
 
