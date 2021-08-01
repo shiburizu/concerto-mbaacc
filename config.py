@@ -37,6 +37,7 @@ Config.set(
 )
 Config.write()
 #CCCaster ini default settings
+caster_config = None
 caster_opt = {
         'alertOnConnect' : '3',
         'alertWavFile' : 'SystemDefault',
@@ -68,15 +69,20 @@ if os.path.exists(PATH + 'cccaster\config.ini'):
             for k,v in caster_opt.items():
                 f.write('\n%s=%s' % (k,v))
             f.close()
+    with open(PATH + 'cccaster\config.ini', 'r') as f:
+            config_string = f.read()
+    caster_config = configparser.ConfigParser()
+    caster_config.read_string('[settings]\n' + config_string)
 else:
-    with open(PATH + 'cccaster\config.ini', 'w') as f:
-        for k,v in caster_opt.items():
-                f.write('\n%s=%s' % (k,v))
-        f.close()
-with open(PATH + 'cccaster\config.ini', 'r') as f:
-    config_string = f.read()
-caster_config = configparser.ConfigParser()
-caster_config.read_string('[settings]\n' + config_string)
+    if os.path.isdir(PATH + 'cccaster'):
+        with open(PATH + 'cccaster\config.ini', 'w') as f:
+            for k,v in caster_opt.items():
+                    f.write('\n%s=%s' % (k,v))
+            f.close()
+        with open(PATH + 'cccaster\config.ini', 'r') as f:
+            config_string = f.read()
+        caster_config = configparser.ConfigParser()
+        caster_config.read_string('[settings]\n' + config_string)
 
 #Concerto ini default settings
 opt = [

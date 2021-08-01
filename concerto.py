@@ -78,7 +78,7 @@ class Concerto(App):
         logging.warning('Concerto: PATH is %s' % s)
 
         if caster_config is None:
-            e.append('cccaster/config.ini not found.')
+            e.append('"cccaster" folder not found.')
             e.append('Please fix the above problems and restart Concerto.')
         if e != []:
             self.sound.muted = True
