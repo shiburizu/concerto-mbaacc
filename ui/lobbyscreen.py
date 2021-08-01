@@ -40,7 +40,7 @@ class LobbyScreen(Screen):
         self.alias = None #lobby alias if any
 
 
-    def create(self, j, first=False, type=""):  # json response object
+    def create(self, j, first=False, type='Private'):  # json response object
         print(j)
         #this does not use self.type because it should only run once per lobby.
         #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
