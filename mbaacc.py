@@ -499,15 +499,25 @@ class Caster():
 
     def find_pid(self):
         if not self.pid:
-            cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
-            task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
+            cmd = f'tasklist /FI "IMAGENAME eq mbaa.exe" /FO LIST | findstr "PID:"'
+
             try:
-                pid = task_data.replace("\"", "").split(",")[1]
+                task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
+            except subprocess.CalledProcessError:
+                return False
+            
+            try:
+                task_data = task_data.replace('PID:', '')
+                task_data = task_data.strip()
+                pid = task_data
             except IndexError:
                 return False
             else:
-                self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
-                return True
+                try:
+                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
+                    return True
+                except ValueError:
+                    return False
         else:
             return True
     
