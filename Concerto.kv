@@ -879,26 +879,29 @@
     auto_dismiss: False 
     background_color: '#343B88'
     GridLayout:
-        padding: [35,35,35,35]
+        padding: [30,30]
+        spacing:[0,0]
         cols: 1
-        BoxLayout:
-            orientation: 'vertical'
+        GridLayout:
+            spacing:[0,25]
+            cols: 1
             Label:
                 id: modal_txt
                 background_color: (0, 0, 0, 0)
                 halign: 'center'
                 valign: 'top'
+                size: self.texture_size
             Button:
                 id: close_btn
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1
-                padding: [35,0]
                 on_press: 
                     self.background_color = (100, 0, 0, 0.9)
                 on_release: 
                     self.background_color = (255, 0, 0, 0.2)
                 pos_hint: {'center_x': 0.5}
+                size_hint_y: 0.32
         BoxLayout:
             orientation:'horizontal'
             Button:
@@ -913,7 +916,7 @@
                 on_release: 
                     self.background_color = (255, 0, 0, 0.2)
                 pos_hint: {'center_x': 0.25}
-                size_hint_y:0.5
+                size_hint_y:0.60
             Button:
                 id: p2_char_guide
                 disabled: True
@@ -926,7 +929,7 @@
                 on_release: 
                     self.background_color = (255, 0, 0, 0.2)
                 pos_hint: {'center_x': 0.75}
-                size_hint_y:0.5                
+                size_hint_y:0.60               
 
 <FrameModal>:
     frame_txt: frame_txt

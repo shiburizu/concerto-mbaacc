@@ -1,16 +1,4 @@
-from mbaacc import MOON
-import time
-import requests
-import threading
-import pyperclip
-import subprocess
 from functools import partial
-from config import *
-from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import Screen
-from ui.modals import *
-from ui.buttons import DummyBtn, PlayerRow
-import presence
 import logging
 import webbrowser
 
@@ -78,33 +66,33 @@ def fill_wiki_button(self,popup):
 def open_char_wiki(self, *args):
     url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
     val = url_wiki 
-    logging.warning("Inside open_char_wiki, current val = " + val)
+    player = " Player "
     try:
         if(self.app.game.stats):
-            logging.warning("Passed the first if" + str(self.app.game.stats) + "|| Argument/PLayer "+ str(args))
             if args.count('p1') >= 1 :
-                logging.warning("INside If args p1 " + str(self.app.game.stats) + "|| Argument/PLayer "+ str(args))
                 char_key = self.app.game.stats['p1char']
                 char = CHARACTER_WIKI.get(char_key)
-                logging.warning("Char key of p1 : " + str(char_key) +"Char of p1 : " + str(char) )
-                moon_key = self.app.game.stats['p1moon']
-                moon  = MOON_WIKI.get(moon_key)
-                logging.warning("Moob key of p1 : " + str(moon_key) +"Moon of p2 : "+ str(moon))                    
-                logging.warning("Passed the memory checks of p1" + str(self.app.game.stats) + "\n || char key : " + str(char_key) + "|| char: " + str(char) + "|| moon_key:" + str(moon_key) + "|| moon: " + str(moon))
+                player = player + "1 " + char
+
             if args.count('p2') >= 1:
-                logging.warning("INside If args p2 " + str(self.app.game.stats) + "|| Argument/PLayer "+ str(args))                    
                 char_key = self.app.game.stats['p2char']
                 char = CHARACTER_WIKI.get(char_key)
-                logging.warning("Char key of p2 : " + str(char_key) +"Char of p2 : "+ str(char))
-                moon_key = self.app.game.stats['p2moon']
-                moon  = MOON_WIKI.get(moon_key)
-                logging.warning("Moon key of p2 : " + str(moon_key) +"Moon of p2 : "+ str(moon))                    
-                logging.warning("Passed the memory checks p2" + str(self.app.game.stats) + "\n || char key : "+ str(char_key) + "|| char: " + str(char) + "|| moon_key:" + str(moon_key) + "|| moon: " + str(moon))
-                
-            logging.warning("Passed the memory checks of both players" + str(self.app.game.stats) + "|| char key : "+ str(char_key) + "|| char: " + str(char) + "|| moon_key:" + str(moon_key) + "|| moon: " + str(moon))
-            
-            val = str(val) + '/' + str(char) +  '/' + str(moon)
-            logging.warning("Everything worked!" + str(self.app.game.stats) + " || URL Link in val:  "+ str(val))
+                player = player + "2 , character: " + char
+
+            val = str(val) + '/' + str(char)
+
+            #If a player is still on character select, having an general guide/overview of the character and all of its moons is more useful
+            # than the specific guide of Crescent Moon that they didn't choose 2/3 of the time.
+            if(self.app.game.stats['state'] != 20):
+                if args.count('p1') >= 1 :
+                    moon_key = self.app.game.stats['p1moon']
+                    moon  = MOON_WIKI.get(moon_key)
+                if args.count('p2') >= 1:
+                    moon_key = self.app.game.stats['p2moon']
+                    moon  = MOON_WIKI.get(moon_key)
+                val = str(val) + '/' + str(moon)
+
+            logging.warning("Player wanted to check the guide of " + player  + " ! || \n" + str(self.app.game.stats) + " \n || URL Link in val:  "+ str(val))
             webbrowser.open(str(val))
         else:
             webbrowser.open(val)
