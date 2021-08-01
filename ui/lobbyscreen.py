@@ -3,7 +3,6 @@ import time
 import requests
 import threading
 import pyperclip
-import subprocess
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
@@ -156,7 +155,7 @@ class LobbyScreen(Screen):
                 self.match_list.add_widget(h)
                 self.widget_index.update({'w':h})
             for i in j['playing']:
-                if (i[2],i[3]) in self.widget_index:
+                if (i[2],i[3]) in self.widget_index or (i[3],i[2]) in self.widget_index:
                     pass
                 else:
                     p = PlayerRow()
