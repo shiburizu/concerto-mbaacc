@@ -78,7 +78,7 @@ class Concerto(App):
         logging.warning('Concerto: PATH is %s' % s)
 
         if caster_config is None:
-            e.append('cccaster/config.ini not found.')
+            e.append('"cccaster" folder not found.')
             e.append('Please fix the above problems and restart Concerto.')
         if e != []:
             self.sound.muted = True
@@ -104,7 +104,7 @@ class Concerto(App):
                 if check != []:
                     self.OnlineScreen.error_message(check)
                 else:
-                    self.LobbyList.join(code=int(params[1]))
+                    self.LobbyList.join(code=params[1])
             elif params[0] == 'connect':
                 self.OnlineScreen.join(ip=params[1])
             elif params[0] == 'watch':

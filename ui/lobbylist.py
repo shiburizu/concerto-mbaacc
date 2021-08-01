@@ -31,7 +31,7 @@ class LobbyList(Screen):
             self.app.sm.current = 'Lobby'
             self.app.LobbyScreen.secret = int(a['secret'])
             self.app.LobbyScreen.create(a, first=True, 
-                type=self.lobby_type.text)
+                type=a['type'])
         else:
             popup = GameModal()
             popup.modal_txt.text = 'Unable to create lobby: %s' % a['msg']
@@ -39,17 +39,9 @@ class LobbyList(Screen):
             popup.close_btn.bind(on_release=partial(popup.dismiss))
             popup.open()
 
-    def join(self, obj=None, code=None, pub=False):
+    def join(self, obj=None, code=None):
         if code is None:
-            if self.lobby_code.text == '':
-                return None
-            else:
-                try:
-                    int(self.lobby_code.text)
-                except ValueError:
-                    return None
-                else:
-                    c = int(self.lobby_code.text)
+            c = self.lobby_code.text.strip()
         else:
             c = code
         p = {
@@ -61,12 +53,8 @@ class LobbyList(Screen):
         if a['status'] == 'OK':
             self.app.sm.current = 'Lobby'
             self.app.LobbyScreen.secret = int(a['secret'])
-            if pub:
-                self.app.LobbyScreen.create(
-                    a, first=True, type="Public")
-            else:
-                self.app.LobbyScreen.create(
-                    a, first=True, type=self.lobby_type.text)
+            self.app.LobbyScreen.create(
+                a, first=True, type=a['type'])
             self.lobby_code.text = ''
         else:
             popup = GameModal()
@@ -87,7 +75,7 @@ class LobbyList(Screen):
                     b = DummyBtn()
                     b.halign = 'left'
                     b.text = "ID %s: %s players" % (i[0], i[1])
-                    b.bind(on_release=partial(self.join, code=i[0],pub=True))
+                    b.bind(on_release=partial(self.join, code=i[0]))
                     self.lobby_view.add_widget(b)
             else:
                 b = DummyBtn()

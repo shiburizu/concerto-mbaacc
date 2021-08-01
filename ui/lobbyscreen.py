@@ -4,7 +4,6 @@ import time
 import requests
 import threading
 import pyperclip
-import subprocess
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
@@ -38,9 +37,10 @@ class LobbyScreen(Screen):
         self.challenge_id = None #id of player being challenged
         self.type = None
         self.get_attempts = 0 #if 2, exit
+        self.alias = None #lobby alias if any
 
 
-    def create(self, j, first=False, type=""):  # json response object
+    def create(self, j, first=False, type='Private'):  # json response object
         print(j)
         #this does not use self.type because it should only run once per lobby.
         #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
@@ -49,7 +49,11 @@ class LobbyScreen(Screen):
         if first:
             self.player_id = j['msg']
             self.code = j['id']
-            self.lobby_code.text = "[%s Lobby Code: %s]" % (type, self.code)
+            if j['alias']:
+                self.alias = j['alias']
+                self.lobby_code.text = "[Lobby Code %s]" % self.alias
+            else:
+                self.lobby_code.text = "[%s Lobby Code %s]" % (type, self.code)
             self.widget_index = {}
             self.player_list.clear_widgets()
             self.match_list.clear_widgets()
@@ -152,7 +156,7 @@ class LobbyScreen(Screen):
                 self.match_list.add_widget(h)
                 self.widget_index.update({'w':h})
             for i in j['playing']:
-                if (i[2],i[3]) in self.widget_index:
+                if (i[2],i[3]) in self.widget_index or (i[3],i[2]) in self.widget_index:
                     pass
                 else:
                     p = PlayerRow()
@@ -220,6 +224,7 @@ class LobbyScreen(Screen):
             w.text = 'FOLLOW'
 
     def auto_refresh(self):
+        net = requests.Session()
         while True:
             if self.lobby_thread_flag != 0:
                 break
@@ -230,7 +235,7 @@ class LobbyScreen(Screen):
                 'secret': self.secret
             }
             try:
-                req = requests.get(url=LOBBYURL, params=p, timeout=5)
+                req = net.get(url=LOBBYURL, params=p, timeout=5)
                 req.raise_for_status()
             except (requests.exceptions.ConnectionError,requests.exceptions.Timeout) as e:
                 logging.warning('LOBBY REFRESH: %s' % e.__class__)
@@ -458,7 +463,10 @@ class LobbyScreen(Screen):
         self.active_pop = None
     
     def invite_link(self,*args):
-        pyperclip.copy('https://invite.meltyblood.club/%s' % self.code)
+        if self.alias:
+            pyperclip.copy('https://invite.meltyblood.club/%s' % self.alias)
+        else:
+            pyperclip.copy('https://invite.meltyblood.club/%s' % self.code)
         threading.Thread(target=self.invite_ui).start()
 
     def invite_ui(self):
