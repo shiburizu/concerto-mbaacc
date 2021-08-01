@@ -85,7 +85,7 @@ error_strings = [
     'Missing relay_list.txt!',
     'Couldn\'t find MBAA.exe!',
     'Timed out!',
-    'Network delay greater than limit:',
+    'Network delay greater than limit',
     'Incompatible cccaster\hook.dll!',
     'Latest version is',
     'Update?'

@@ -41,15 +41,7 @@ class LobbyList(Screen):
 
     def join(self, obj=None, code=None, pub=False):
         if code is None:
-            if self.lobby_code.text == '':
-                return None
-            else:
-                try:
-                    int(self.lobby_code.text)
-                except ValueError:
-                    return None
-                else:
-                    c = int(self.lobby_code.text)
+            c = self.lobby_code.text
         else:
             c = code
         p = {

@@ -133,10 +133,11 @@ class OnlineScreen(Screen):
 
     def confirm(self, obj, r, d, p, n, *args):
         try:
-            self.app.game.confirm_frames(int(r.text),int(d.text))
-            self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
-            n, d.text, r.text)
-            p.dismiss()
+            if self.app.game.playing is False:
+                self.app.game.confirm_frames(int(r.text),int(d.text))
+                self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
+                n, d.text, r.text)
+                p.dismiss()
         except ValueError:
             pass
 
