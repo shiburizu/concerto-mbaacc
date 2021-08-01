@@ -1,3 +1,4 @@
+from json.decoder import JSONDecodeError
 import threading
 from functools import partial
 from kivy.uix.screenmanager import Screen
@@ -55,9 +56,19 @@ class OnlineScreen(Screen):
             req.raise_for_status()
         except requests.exceptions.RequestException:
             err.append('Unable to reach the login server.')
-        resp = req.json()
-        if resp['status'] != 'OK':
+        
+        resp = None
+
+        try:
+            resp = req.json()
+        except JSONDecodeError:
+            err.append('Could not retrieve data from server.')
+            return err
+
+        if resp != None and resp['status'] != 'OK':
             err.append(resp['msg'])
+        elif resp == None:
+            return err
         else:
             self.app.player_name = name #assign name to be used everywhere
         return err
