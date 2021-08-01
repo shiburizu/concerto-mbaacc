@@ -104,7 +104,7 @@ class Concerto(App):
                 if check != []:
                     self.OnlineScreen.error_message(check)
                 else:
-                    self.LobbyList.join(code=int(params[1]))
+                    self.LobbyList.join(code=params[1])
             elif params[0] == 'connect':
                 self.OnlineScreen.join(ip=params[1])
             elif params[0] == 'watch':
