@@ -83,10 +83,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Hosting'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
-        self.app.mode = 'Direct Match'
-
-        popup = fill_wiki_button(self,popup)
-        
+        self.app.mode = 'Direct Match'        
         self.active_pop = popup
         popup.open()
 
@@ -125,9 +122,6 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
-
-        popup = fill_wiki_button(self,popup)
-
         self.app.mode = 'Direct Match'
         self.active_pop = popup
         popup.open()
@@ -162,6 +156,7 @@ class OnlineScreen(Screen):
                 self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
                 n, d.text, r.text)
                 p.dismiss()
+                
                 self.active_pop = fill_wiki_button(self,self.active_pop)
 
         except ValueError:

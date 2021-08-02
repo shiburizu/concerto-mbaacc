@@ -67,34 +67,50 @@ def open_char_wiki(self, *args):
     url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
     val = url_wiki 
     player = " Player "
+    not_active_game_modes = [65535 , 3, 2, 13, 11, 25]
+    #STARTUP / OPENING  / TITLE / LOADING_DEMO / HIGH_SCORES / MAIN
+    #20 is Character Select
+    active_game_modes = [8 , 1 , 5]
+    #LOADING / IN_GAME / RETRY
+
     try:
-        if(self.app.game.stats):
-            if args.count('p1') >= 1 :
-                char_key = self.app.game.stats['p1char']
-                char = CHARACTER_WIKI.get(char_key)
-                player = player + "1 " + char
 
-            if args.count('p2') >= 1:
-                char_key = self.app.game.stats['p2char']
-                char = CHARACTER_WIKI.get(char_key)
-                player = player + "2 , character: " + char
+        char='char'
+        moon='moon'
 
-            val = str(val) + '/' + str(char)
+        if (args.count('p1') >= 1 ):
+            player_char='p1' + char
+            player_moon='p1' + moon
+            player = player + ' 1 '
+        if (args.count('p2') >= 1):
+            player_char='p2' + char
+            player_moon='p2' + moon
+            player = player + ' 2 '
 
-            #If a player is still on character select, having an general guide/overview of the character and all of its moons is more useful
-            # than the specific guide of Crescent Moon that they didn't choose 2/3 of the time.
-            if(self.app.game.stats['state'] != 20):
-                if args.count('p1') >= 1 :
-                    moon_key = self.app.game.stats['p1moon']
-                    moon  = MOON_WIKI.get(moon_key)
-                if args.count('p2') >= 1:
-                    moon_key = self.app.game.stats['p2moon']
-                    moon  = MOON_WIKI.get(moon_key)
-                val = str(val) + '/' + str(moon)
+        if(self.app.game.stats and player_char):
+            state = self.app.game.stats['state']
+            logging.warning("Before if state")
+            if state :
+                logging.warning("before if == 20 and active game modes PLAYER CHAR")
+                if(state == 20 or active_game_modes.count(state) >= 1):
+                    char_key = self.app.game.stats[player_char]
+                    char = CHARACTER_WIKI.get(char_key)
+                    player = str(player) + " || character " + str(char)
 
-            logging.warning("Player wanted to check the guide of " + player  + " ! || \n" + str(self.app.game.stats) + " \n || URL Link in val:  "+ str(val))
-            webbrowser.open(str(val))
-        else:
-            webbrowser.open(val)
+                    if char:
+                        val = str(val) + '/' + str(char) #Adds the character link to the val, so if was openned now it would direct to the Characters general page
+
+                    # IF a players IS on active game mode(Playing, or just Readying/Loading up to play), opening the specific Char/Moon combination is a lot more valuable.
+                    # BUT, IF a player IS NOT on an active game mode(like Character Select), having an general guide/overview of the character and all of its moons is more useful
+                    logging.warning("Before if active game mode PLAYER MOON")    
+                    if(active_game_modes.count(state) >= 1):    
+                        moon_key = self.app.game.stats[player_moon]
+                        moon  = MOON_WIKI.get(moon_key)
+                        if moon:
+                            val = str(val) + '/' + str(moon) #Adds the Moon Link to the val, so if it was openned now it would direct to the specific Character / Moon page.
+
+                    logging.warning("Player wanted to check the guide of " + str(player)  + " ! on a valid game mode || \n Stats: || " + str(self.app.game.stats) + " \n || URL Link in val:  "+ str(val))
+
+        webbrowser.open(str(val))# Opens whatever the current link is.
     except:
-        webbrowser.open(val)
+        webbrowser.open(str(url_wiki))#When any error occurs, just opens the default main page of the wiki
