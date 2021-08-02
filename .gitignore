@@ -1,7 +1,7 @@
 # Offline testing/storage folders
 cccaster/
 media/
-cccaster.v3.0.exe
+cccaster*.exe
 *.zip
 concerto.ini
 Concerto_*.txt
@@ -25,6 +25,7 @@ output/
 DejaVuSansCondensed.ttf
 MBAA.exe
 relay_list.txt
+lobby_list.txt
 Translation Changelog.html
 
 # Concerto EXEs

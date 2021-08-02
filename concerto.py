@@ -54,6 +54,9 @@ class Concerto(App):
         return self.sm
 
     def on_start(self):
+        logging.warning('Concerto: old CWD is %s' % os.getcwd()) 
+        os.chdir(PATH)
+        logging.warning('Concerto: new CWD is %s' % os.getcwd())
         #necessary file sanity checks
         e = []
 
