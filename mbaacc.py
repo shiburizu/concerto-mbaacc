@@ -627,7 +627,7 @@ class Caster():
         self.rs = -1
         self.ds = -1
         if self.aproc != None:
-            subprocess.run('taskkill /f /im cccaster.v3.0.exe', shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run('taskkill /f /im %s' % app_config['settings']['caster_exe'], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.aproc = None
         self.startup = False
         self.offline = False
