@@ -1,7 +1,7 @@
 # Offline testing/storage folders
 cccaster/
 media/
-cccaster.v3.0.exe
+cccaster*.exe
 *.zip
 concerto.ini
 Concerto_*.txt

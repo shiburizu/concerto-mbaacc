@@ -393,6 +393,7 @@ class Caster():
             if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('1')
                 self.flag_offline(sc)
+                break
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
