@@ -83,6 +83,7 @@ error_strings = [
     'Rollback must be less than',
     'Rollback data is corrupted!',
     'Missing relay_list.txt!',
+    'Missing lobby_list.txt!',
     'Couldn\'t find MBAA.exe!',
     'Timed out!',
     'Network delay greater than limit',
@@ -91,8 +92,8 @@ error_strings = [
     'Update?'
 ]
 
-ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
-
+ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
+caster_button = re.compile(r'\[[0-9]\]')
 
 class loghelper():
     dateTimeObj = datetime.now()
@@ -136,10 +137,11 @@ class Caster():
             if r > 0: #if the list of items after "rollback:" > 0...
                 rlst = re.sub("[^0-9]", "", ''.join(conlst[-r:])) # ...find all numbers in the list
                 if len(rlst) > 0:  # ...if there's at least one number, proceed (rollback suggested frames)
-                    p = re.findall('\d+\.\d+', con) #find the ping number and delete it so it doesnt false positive
-                    for i in p:
-                        if i in conlst:
-                            conlst.remove(i)
+                    #sanitize list: remove floats, floats with %, and whole with %s
+                    con = re.sub('\d+\.\d+', '', con)
+                    con = re.sub('\d+\.\d+%','',con)
+                    con = re.sub('\d+%','',con)
+                    conlst = con.split()
                     n = [i for i in re.findall(
                         '[0-9]+', ' '.join(conlst)) if int(i) < 15] #now find all whole numbers
                     if len(n) >= 2: #at least 2 numbers need to be in our filtered list
@@ -154,11 +156,11 @@ class Caster():
         self.app.offline_mode = None
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n -t %s' % (app_config['settings']['caster_exe'],port))
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'],port)) 
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         # Stats
         threading.Thread(target=self.update_stats,daemon=True).start()
@@ -169,7 +171,7 @@ class Caster():
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
                 self.adr = str(ip[0])
-                sc.set_ip() #tell UI we have the IP address
+                sc.set_ip(self.adr) #tell UI we have the IP address
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
@@ -203,8 +205,14 @@ class Caster():
                             break
                         elif name == True and x.replace('*', '') != '':
                             r.insert(0, x)
-                    # find all floats in caster output and use the last one [-1] to make sure we get caster text
-                    p = re.findall('\d+\.\d+', con)
+                    #Regex for Ping
+                    p = re.findall('Ping: \d+\.\d+ ms', con)
+                    ping = p[-1].replace('Ping:','')
+                    ping = ping.replace('ms','')
+                    ping = ping.strip()
+                    #Network Delay
+                    delay = n[-2]
+                    #Mode and rounds
                     m = ""
                     rd = 2
                     if "Versus" in con:
@@ -213,7 +221,9 @@ class Caster():
                     elif "Training" in con:
                         m = "Training"
                         rd = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=rd) #trigger frame delay settings in UI
+                    #Name
+                    opponent_name = ' '.join(r)
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -231,9 +241,9 @@ class Caster():
         self.kill_caster()
         self.app.offline_mode = None
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
+            self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'],ip)) 
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         # Stats
         threading.Thread(target=self.update_stats,daemon=True).start()
@@ -265,7 +275,14 @@ class Caster():
                             break
                         elif name == True and x.replace('*', '') != '':
                             r.append(x)
-                    p = re.findall('\d+\.\d+', con)
+                    #Regex for Ping
+                    p = re.findall('Ping: \d+\.\d+ ms', con)
+                    ping = p[-1].replace('Ping:','')
+                    ping = ping.replace('ms','')
+                    ping = ping.strip()
+                    #Network Delay
+                    delay = n[-2]
+                    #Mode and rounds
                     m = ""
                     rd = 2
                     if "Versus" in con:
@@ -274,7 +291,9 @@ class Caster():
                     elif "Training" in con:
                         m = "Training"
                         rd = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=rd) #send t for Accept network request
+                    #Name
+                    opponent_name = ' '.join(r)
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -306,9 +325,9 @@ class Caster():
     def watch(self, ip, sc, *args):
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
+            self.aproc = PtyProcess.spawn('%s -n -s %s' % (app_config['settings']['caster_exe'],ip))
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         cur_con = ""
         last_con = ""
@@ -354,11 +373,11 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n -b -t %s' % (app_config['settings']['caster_exe'],port)) 
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n -b %s' % (app_config['settings']['caster_exe'],port))
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         logger.write('\n== Broadcast %s ==\n' % mode)
         self.broadcasting = True
@@ -369,7 +388,7 @@ class Caster():
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
                 self.adr = str(ip[0])
-                sc.set_ip()
+                sc.set_ip(self.adr)
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
@@ -380,18 +399,16 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         logger.write('\n== Training ==\n')
         while self.aproc.isalive():
             con = self.aproc.read()
             logger.write('\n%s\n' % con.split())
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')  # 4 is offline
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('1')
                 self.flag_offline(sc)
                 break
@@ -405,17 +422,36 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('2')
+                self.flag_offline(sc)
+                break
+            else:
+                if self.check_msg(con) != []:
+                    sc.error_message(self.check_msg(con))
+                    self.kill_caster()
+                    break
+
+    def cpu(self,sc):
+        self.kill_caster()
+        self.startup = True
+        try:
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
+        except FileNotFoundError:
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            return None
+        self.aproc = proc
+        while self.aproc.isalive():
+            con = self.aproc.read()
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+                self.aproc.write('3')
                 self.flag_offline(sc)
                 break
             else:
@@ -428,16 +464,14 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('4')
                 self.flag_offline(sc)
                 break
@@ -451,16 +485,14 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('5')
                 self.flag_offline(sc)
                 break
@@ -472,8 +504,29 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn('MBAA.exe')
-        self.flag_offline(sc,stats=False)
+        try:
+            self.aproc = PtyProcess.spawn('MBAA.exe')
+            self.flag_offline(sc,stats=False)
+        except FileNotFoundError:
+            sc.error_message(['MBAA.exe not found.'])
+            return None
+
+    def find_button(self,read,term):
+        current_btn = None
+        if term in read:
+            for i in read:
+                if i == term and current_btn != None:
+                    self.aproc.write(current_btn)
+                    time.sleep(0.1)
+                    return True
+                else:
+                    btn = re.findall(caster_button,i)
+                    if len(btn) != 0:
+                        current_btn = btn[0].replace('[','')
+                        current_btn = current_btn.replace(']','') 
+            return False
+        else:
+            return False
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
         while True:
@@ -506,8 +559,13 @@ class Caster():
             except IndexError:
                 return False
             else:
-                self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
-                return True
+                try:
+                    int(pid)
+                except ValueError:
+                    return False
+                else:
+                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
+                    return True
         else:
             return True
     
@@ -591,7 +649,7 @@ class Caster():
         self.rs = -1
         self.ds = -1
         if self.aproc != None:
-            subprocess.run('taskkill /f /im cccaster.v3.0.exe', shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run('taskkill /f /im %s' % app_config['settings']['caster_exe'], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.aproc = None
         self.startup = False
         self.offline = False
