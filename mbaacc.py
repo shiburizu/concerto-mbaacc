@@ -515,8 +515,13 @@ class Caster():
             except IndexError:
                 return False
             else:
-                self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
-                return True
+                try:
+                    int(pid)
+                except ValueError:
+                    return False
+                else:
+                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
+                    return True
         else:
             return True
     
