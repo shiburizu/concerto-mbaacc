@@ -87,7 +87,8 @@ opt = [
         'netplay_port',
         'mute_alerts',
         'mute_bgm',
-        'discord'
+        'discord',
+        'caster_exe'
 ]
 if os.path.exists(PATH + 'concerto.ini'):
     with open(PATH + 'concerto.ini') as f:
@@ -98,7 +99,10 @@ if os.path.exists(PATH + 'concerto.ini'):
     if len(opt) != 0:
         with open(PATH + 'concerto.ini','a') as f:
             for i in opt:
-                f.write('\n%s=0\n' % i)
+                if i == 'caster_exe':
+                    f.write('\n%s=cccaster.v3.0.exe\n' % i)
+                else:
+                    f.write('\n%s=0\n' % i)
             f.close()
 else:
     with open(PATH + 'concerto.ini', 'w') as f:

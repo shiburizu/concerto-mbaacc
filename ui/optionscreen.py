@@ -11,6 +11,7 @@ class OptionScreen(Screen):
     def load(self):
         try:
             self.ids['netplay_port'].text = app_config['settings']['netplay_port']
+            self.ids['caster_exe'].text = app_config['settings']['caster_exe']
             self.ids['mute_alerts'].active = app_config['settings']['mute_alerts'] == '1'
             self.ids['mute_bgm'].active = app_config['settings']['mute_bgm'] == '1'
             self.ids['discord'].active = app_config['settings']['discord'] == '1'
@@ -36,6 +37,8 @@ class OptionScreen(Screen):
                 error_check.append("Online port must be less than 65536.")     
         except ValueError:
             error_check.append("Online port must be a whole number.")
+        if not os.path.isfile(self.ids['caster_exe'].text.strip()):
+            error_check.append("CCCaster file specified not found.")
         try:
             int(self.ids['max_delay'].text)
         except ValueError:
@@ -130,6 +133,8 @@ class OptionScreen(Screen):
                             config_file[n] = "discord=1\n"
                         else:
                             config_file[n] = "discord=0\n"
+                    elif "caster_exe" in i:
+                        config_file[n] = "caster_exe=%s\n" % self.ids['caster_exe'].text
                     n += 1
                 out = open(PATH + 'concerto.ini','w')
                 out.writelines(config_file)

@@ -155,11 +155,11 @@ class Caster():
         self.app.offline_mode = None
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -t %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n -t %s' % (app_config['settings']['caster_exe'],port))
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'],port)) 
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         # Stats
         threading.Thread(target=self.update_stats,daemon=True).start()
@@ -232,9 +232,9 @@ class Caster():
         self.kill_caster()
         self.app.offline_mode = None
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n %s' % ip)
+            self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'],ip)) 
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         # Stats
         threading.Thread(target=self.update_stats,daemon=True).start()
@@ -307,9 +307,9 @@ class Caster():
     def watch(self, ip, sc, *args):
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -s %s' % ip)
+            self.aproc = PtyProcess.spawn('%s -n -s %s' % (app_config['settings']['caster_exe'],ip))
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         cur_con = ""
         last_con = ""
@@ -355,11 +355,11 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b -t %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n -b -t %s' % (app_config['settings']['caster_exe'],port)) 
             else:
-                self.aproc = PtyProcess.spawn('cccaster.v3.0.exe -n -b %s' % port) 
+                self.aproc = PtyProcess.spawn('%s -n -b %s' % (app_config['settings']['caster_exe'],port))
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         logger.write('\n== Broadcast %s ==\n' % mode)
         self.broadcasting = True
@@ -381,9 +381,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         logger.write('\n== Training ==\n')
@@ -403,9 +403,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -424,9 +424,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -445,9 +445,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -466,9 +466,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn('cccaster.v3.0.exe')
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
         except FileNotFoundError:
-            sc.error_message(['cccaster.v3.0.exe not found.'])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
             return None
         self.aproc = proc
         while self.aproc.isalive():
