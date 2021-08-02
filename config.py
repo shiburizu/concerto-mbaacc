@@ -7,9 +7,6 @@ if getattr(sys,'frozen', False): #frozen exe
 else: #not frozen
     PATH = os.path.dirname(os.path.abspath(__file__)) + '\\'
     logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
-logging.warning('Concerto: old CWD is %s' % os.getcwd()) 
-os.chdir(PATH)
-logging.warning('Concerto: new CWD is %s' % os.getcwd())
 import configparser
 from kivy.config import Config
 from kivy.resources import resource_add_path
