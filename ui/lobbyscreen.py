@@ -307,14 +307,14 @@ class LobbyScreen(Screen):
             target=self.app.game.host, args=[self, app_config['settings']['netplay_port']], daemon=True)
         caster.start()
 
-    def set_ip(self):
+    def set_ip(self,ip=None):
         pyperclip.copy('') #erase IP address from clipboard
         p = {
             't': self.challenge_id,
             'p': self.player_id,
             'action': 'challenge',
             'id': self.code,
-            'ip': self.app.game.adr,
+            'ip': ip,
             'secret': self.secret
         }
         print(p)

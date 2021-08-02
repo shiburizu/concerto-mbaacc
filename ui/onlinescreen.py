@@ -100,8 +100,8 @@ class OnlineScreen(Screen):
         self.active_pop = popup
         popup.open()
 
-    def set_ip(self):
-        self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % self.app.game.adr
+    def set_ip(self,ip=None):
+        self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % ip
 
     def join(self, ip=None):
         if ip == None:

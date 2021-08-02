@@ -137,10 +137,11 @@ class Caster():
             if r > 0: #if the list of items after "rollback:" > 0...
                 rlst = re.sub("[^0-9]", "", ''.join(conlst[-r:])) # ...find all numbers in the list
                 if len(rlst) > 0:  # ...if there's at least one number, proceed (rollback suggested frames)
-                    p = re.findall('\d+\.\d+', con) #find the ping number and delete it so it doesnt false positive
-                    for i in p:
-                        if i in conlst:
-                            conlst.remove(i)
+                    #sanitize list: remove floats, floats with %, and whole with %s
+                    con = re.sub('\d+\.\d+', '', con)
+                    con = re.sub('\d+\.\d+%','',con)
+                    con = re.sub('\d+%','',con)
+                    conlst = con.split()
                     n = [i for i in re.findall(
                         '[0-9]+', ' '.join(conlst)) if int(i) < 15] #now find all whole numbers
                     if len(n) >= 2: #at least 2 numbers need to be in our filtered list
@@ -170,7 +171,7 @@ class Caster():
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
                 self.adr = str(ip[0])
-                sc.set_ip() #tell UI we have the IP address
+                sc.set_ip(self.adr) #tell UI we have the IP address
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
@@ -204,8 +205,14 @@ class Caster():
                             break
                         elif name == True and x.replace('*', '') != '':
                             r.insert(0, x)
-                    # find all floats in caster output and use the last one [-1] to make sure we get caster text
-                    p = re.findall('\d+\.\d+', con)
+                    #Regex for Ping
+                    p = re.findall('Ping: \d+\.\d+ ms', con)
+                    ping = p[-1].replace('Ping:','')
+                    ping = ping.replace('ms','')
+                    ping = ping.strip()
+                    #Network Delay
+                    delay = n[-2]
+                    #Mode and rounds
                     m = ""
                     rd = 2
                     if "Versus" in con:
@@ -214,7 +221,9 @@ class Caster():
                     elif "Training" in con:
                         m = "Training"
                         rd = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],mode=m,rounds=rd) #trigger frame delay settings in UI
+                    #Name
+                    opponent_name = ' '.join(r)
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -266,7 +275,14 @@ class Caster():
                             break
                         elif name == True and x.replace('*', '') != '':
                             r.append(x)
-                    p = re.findall('\d+\.\d+', con)
+                    #Regex for Ping
+                    p = re.findall('Ping: \d+\.\d+ ms', con)
+                    ping = p[-1].replace('Ping:','')
+                    ping = ping.replace('ms','')
+                    ping = ping.strip()
+                    #Network Delay
+                    delay = n[-2]
+                    #Mode and rounds
                     m = ""
                     rd = 2
                     if "Versus" in con:
@@ -275,7 +291,9 @@ class Caster():
                     elif "Training" in con:
                         m = "Training"
                         rd = 0
-                    sc.set_frames(' '.join(r), n[-2], p[-1],target=t,mode=m,rounds=rd) #send t for Accept network request
+                    #Name
+                    opponent_name = ' '.join(r)
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -370,7 +388,7 @@ class Caster():
                 r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
             if ip != []:
                 self.adr = str(ip[0])
-                sc.set_ip()
+                sc.set_ip(self.adr)
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
@@ -492,6 +510,7 @@ class Caster():
         except FileNotFoundError:
             sc.error_message(['MBAA.exe not found.'])
             return None
+
     def find_button(self,read,term):
         current_btn = None
         if term in read:
