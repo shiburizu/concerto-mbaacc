@@ -83,6 +83,7 @@ error_strings = [
     'Rollback must be less than',
     'Rollback data is corrupted!',
     'Missing relay_list.txt!',
+    'Missing lobby_list.txt!',
     'Couldn\'t find MBAA.exe!',
     'Timed out!',
     'Network delay greater than limit',
@@ -91,8 +92,8 @@ error_strings = [
     'Update?'
 ]
 
-ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
-
+ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
+caster_button = re.compile(r'\[[0-9]\]')
 
 class loghelper():
     dateTimeObj = datetime.now()
@@ -389,12 +390,9 @@ class Caster():
         while self.aproc.isalive():
             con = self.aproc.read()
             logger.write('\n%s\n' % con.split())
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')  # 4 is offline
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('1')
                 self.flag_offline(sc)
-                break
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
@@ -412,9 +410,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('2')
                 self.flag_offline(sc)
                 break
@@ -435,9 +431,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('4')
                 self.flag_offline(sc)
                 break
@@ -458,9 +452,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if "Offline" in con or "Ofline" in con:
-                self.aproc.write('4')
-                time.sleep(0.1)
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
                 self.aproc.write('5')
                 self.flag_offline(sc)
                 break
@@ -474,6 +466,23 @@ class Caster():
         self.kill_caster()
         self.aproc = PtyProcess.spawn('MBAA.exe')
         self.flag_offline(sc,stats=False)
+    
+    def find_button(self,read,term):
+        current_btn = None
+        if term in read:
+            for i in read:
+                if i == term and current_btn != None:
+                    self.aproc.write(current_btn)
+                    time.sleep(0.1)
+                    return True
+                else:
+                    btn = re.findall(caster_button,i)
+                    if len(btn) != 0:
+                        current_btn = btn[0].replace('[','')
+                        current_btn = current_btn.replace(']','') 
+            return False
+        else:
+            return False
 
     def flag_offline(self,sc,stats=True): #stats tells us whether or not to pull info from the game
         while True:
