@@ -486,9 +486,12 @@ class Caster():
     
     def standalone(self,sc):
         self.kill_caster()
-        self.aproc = PtyProcess.spawn('MBAA.exe')
-        self.flag_offline(sc,stats=False)
-    
+        try:
+            self.aproc = PtyProcess.spawn('MBAA.exe')
+            self.flag_offline(sc,stats=False)
+        except FileNotFoundError:
+            sc.error_message(['MBAA.exe not found.'])
+            return None
     def find_button(self,read,term):
         current_btn = None
         if term in read:
