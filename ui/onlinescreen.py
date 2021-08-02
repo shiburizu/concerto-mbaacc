@@ -56,7 +56,8 @@ class OnlineScreen(Screen):
             req.raise_for_status()
         except requests.exceptions.RequestException:
             err.append('Unable to reach the login server.')
-        
+            return err
+
         resp = None
 
         try:
