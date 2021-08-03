@@ -30,7 +30,7 @@ CHARACTER_WIKI = {
     29 : "Akiha_Tohno_(Seifuku)",
     30 : "Riesbyfe_Stridberg",
     31 : "Roa",
-    32 : "Dust of Osiris", # TODO "Is it neccesary if boss characters are never selectable? Why only Dust and not every other boss then?
+    #32 : "Dust of Osiris", # "Is it neccesary if boss characters are never selectable? Why only Dust and not every other boss then?
     33 : "Shiki_Ryougi",
     34 : "Neco_%26_Mech",
     35 : "Koha_%26_Mech",
@@ -44,11 +44,7 @@ MOON_WIKI = {
 }
 
     
-def fill_wiki_button(self,popup):
-    logging.warning("Here's the content of self and its type" + str(self) + str(type(self)))
-
-    logging.warning("Here's the content of popup and its type" + str(popup) + str(type(popup)))
-    
+def fill_wiki_button(self,popup):    
     popup.p1_char_guide.text = 'P1 Guide'
     popup.p1_char_guide.bind(on_release=partial(
         open_char_wiki, self,"p1"))
@@ -60,57 +56,55 @@ def fill_wiki_button(self,popup):
         open_char_wiki, self,"p2"))
     popup.p2_char_guide.disabled = False
     popup.p2_char_guide.opacity = 1
-    
+
     return popup
     
 def open_char_wiki(self, *args):
     url_wiki = 'https://wiki.gbl.gg/w/Melty_Blood/MBAACC'
-    val = url_wiki 
-    player = " Player "
-    not_active_game_modes = [65535 , 3, 2, 13, 11, 25]
+    url_player_wiki = url_wiki
+
+    #not_active_game_modes = [65535 , 3, 2, 13, 11, 25]
     #STARTUP / OPENING  / TITLE / LOADING_DEMO / HIGH_SCORES / MAIN
-    #20 is Character Select
+
     active_game_modes = [8 , 1 , 5]
     #LOADING / IN_GAME / RETRY
-
+    character_select = 20
     try:
-
         char='char'
         moon='moon'
 
         if (args.count('p1') >= 1 ):
             player_char='p1' + char
             player_moon='p1' + moon
-            player = player + ' 1 '
+            player = " Player  1 "
         if (args.count('p2') >= 1):
             player_char='p2' + char
             player_moon='p2' + moon
-            player = player + ' 2 '
+            player = " Player 2 "
 
-        if(self.app.game.stats and player_char):
-            state = self.app.game.stats['state']
-            logging.warning("Before if state")
-            if state :
-                logging.warning("before if == 20 and active game modes PLAYER CHAR")
-                if(state == 20 or active_game_modes.count(state) >= 1):
-                    char_key = self.app.game.stats[player_char]
-                    char = CHARACTER_WIKI.get(char_key)
-                    player = str(player) + " || character " + str(char)
+        if player:
+            if(self.app.game.stats and player_char):
+                state = self.app.game.stats['state']
+                if state :
+                    if(state == character_select or active_game_modes.count(state) >= 1):
+                        char_key = self.app.game.stats[player_char]
+                        char = CHARACTER_WIKI.get(char_key)
 
-                    if char:
-                        val = str(val) + '/' + str(char) #Adds the character link to the val, so if was openned now it would direct to the Characters general page
-
-                    # IF a players IS on active game mode(Playing, or just Readying/Loading up to play), opening the specific Char/Moon combination is a lot more valuable.
-                    # BUT, IF a player IS NOT on an active game mode(like Character Select), having an general guide/overview of the character and all of its moons is more useful
-                    logging.warning("Before if active game mode PLAYER MOON")    
-                    if(active_game_modes.count(state) >= 1):    
-                        moon_key = self.app.game.stats[player_moon]
-                        moon  = MOON_WIKI.get(moon_key)
-                        if moon:
-                            val = str(val) + '/' + str(moon) #Adds the Moon Link to the val, so if it was openned now it would direct to the specific Character / Moon page.
-
-                    logging.warning("Player wanted to check the guide of " + str(player)  + " ! on a valid game mode || \n Stats: || " + str(self.app.game.stats) + " \n || URL Link in val:  "+ str(val))
-
-        webbrowser.open(str(val))# Opens whatever the current link is.
+                        if char:
+                            link_add = '/' + str(char) #Adds the character link to the url_player_wiki, so if was openned now it would direct to the Characters general page
+                            player = str(player) + " || character " + str(char)
+                            
+                            # IF a players IS on an ''active'' game mode(Playing, Loading up to play, Play Again screen), opening the specific Char/Moon combination is the more valuable alternative.
+                            # BUT, IF a player IS NOT on an active game mode(like Character Select), having an general guide/overview of the character and all of their moons is the more useful alternative.
+                            if(active_game_modes.count(state) >= 1):
+                                moon_key = self.app.game.stats[player_moon]
+                                moon  = MOON_WIKI.get(moon_key)
+                                if moon:
+                                    link_add = str(link_add) + '/' + str(moon) 
+                                    player = str(player) + " || moon " + str(moon)
+                                    
+                            url_player_wiki = str(url_player_wiki) + str(link_add) #
+        webbrowser.open(str(url_player_wiki))# Opens whatever the current link is.
     except:
-        webbrowser.open(str(url_wiki))#When any error occurs, just opens the default main page of the wiki
+        logging.warning("Some error occorred while trying to open the Wiki page of one of the Players Character/Moon combination.")
+        webbrowser.open(str(url_wiki))#When any unexpected error occurs, just opens the default main page of the wiki
