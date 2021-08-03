@@ -29,7 +29,7 @@ pyinstaller concerto.spec
 This will bundle the `Concerto.exe` executable into the `dist/` directory.
 
 #### "winpty-agent.exe" is sourced from [winpty](https://github.com/rprichard/winpty) because we target [pywinpty](https://github.com/spyder-ide/pywinpty) version 0.5.7 for back compatibility to Windows 7 SP1. You may build and run Concerto using the latest version of pywinpty and exclude the .exe however the resulting build will only function on Windows 10.
--
+
 ## Audio/Visual sources
 Art & sound are provided by community members for exclusive use with Concerto.
 ### Visuals
