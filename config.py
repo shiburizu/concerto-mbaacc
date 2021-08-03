@@ -100,7 +100,7 @@ if os.path.exists(PATH + 'concerto.ini'):
         with open(PATH + 'concerto.ini','a') as f:
             for i in opt:
                 if i == 'caster_exe':
-                    f.write('\n%s=cccaster.v3.0.exe\n' % i)
+                    f.write('\ncaster_exe=cccaster.v3.0.exe\n')
                 else:
                     f.write('\n%s=0\n' % i)
             f.close()
@@ -108,7 +108,10 @@ else:
     with open(PATH + 'concerto.ini', 'w') as f:
         f.write('[settings]')
         for i in opt:
-            f.write('\n%s=%s' % (i,'0'))
+            if i == 'caster_exe':
+                f.write('\ncaster_exe=cccaster.v3.0.exe\n')
+            else:
+                f.write('\n%s=0\n' % i)
         f.close()
 with open(PATH + 'concerto.ini','r') as f:
     config_string = f.read()
@@ -117,4 +120,4 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
 VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"
-CURRENT_VERSION = '8-1-2021r2'
+CURRENT_VERSION = '8-3-2021'

@@ -156,11 +156,11 @@ class Caster():
         self.app.offline_mode = None
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('%s -n -t %s' % (app_config['settings']['caster_exe'],port))
+                self.aproc = PtyProcess.spawn('%s -n -t %s' % (app_config['settings']['caster_exe'].strip(),port))
             else:
-                self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'],port)) 
+                self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'].strip(),port)) 
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         # Stats
         threading.Thread(target=self.update_stats,daemon=True).start()
@@ -241,9 +241,9 @@ class Caster():
         self.kill_caster()
         self.app.offline_mode = None
         try:
-            self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'],ip)) 
+            self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'].strip(),ip)) 
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         # Stats
         threading.Thread(target=self.update_stats,daemon=True).start()
@@ -325,9 +325,9 @@ class Caster():
     def watch(self, ip, sc, *args):
         self.kill_caster()
         try:
-            self.aproc = PtyProcess.spawn('%s -n -s %s' % (app_config['settings']['caster_exe'],ip))
+            self.aproc = PtyProcess.spawn('%s -n -s %s' % (app_config['settings']['caster_exe'].strip(),ip))
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         cur_con = ""
         last_con = ""
@@ -373,11 +373,11 @@ class Caster():
         self.kill_caster()
         try:
             if mode == "Training":
-                self.aproc = PtyProcess.spawn('%s -n -b -t %s' % (app_config['settings']['caster_exe'],port)) 
+                self.aproc = PtyProcess.spawn('%s -n -b -t %s' % (app_config['settings']['caster_exe'].strip(),port)) 
             else:
-                self.aproc = PtyProcess.spawn('%s -n -b %s' % (app_config['settings']['caster_exe'],port))
+                self.aproc = PtyProcess.spawn('%s -n -b %s' % (app_config['settings']['caster_exe'].strip(),port))
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         logger.write('\n== Broadcast %s ==\n' % mode)
         self.broadcasting = True
@@ -399,9 +399,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         self.aproc = proc
         logger.write('\n== Training ==\n')
@@ -422,9 +422,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -443,9 +443,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -464,9 +464,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -485,9 +485,9 @@ class Caster():
         self.kill_caster()
         self.startup = True
         try:
-            proc = PtyProcess.spawn(app_config['settings']['caster_exe'])
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
-            sc.error_message(['%s not found.' % app_config['settings']['caster_exe']])
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
             return None
         self.aproc = proc
         while self.aproc.isalive():
@@ -649,7 +649,7 @@ class Caster():
         self.rs = -1
         self.ds = -1
         if self.aproc != None:
-            subprocess.run('taskkill /f /im %s' % app_config['settings']['caster_exe'], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run('taskkill /f /im %s' % app_config['settings']['caster_exe'].strip(), shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.aproc = None
         self.startup = False
         self.offline = False
