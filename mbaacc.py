@@ -151,7 +151,7 @@ class Caster():
                         return n #return list
         return False
 
-    def host(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
+    def host(self, sc, port='0', mode="Versus",t=None): #sc is a Screen for UI triggers
         self.kill_caster()
         self.app.offline_mode = None
         try:
@@ -223,7 +223,7 @@ class Caster():
                         rd = 0
                     #Name
                     opponent_name = ' '.join(r)
-                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd,target=t) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -293,7 +293,7 @@ class Caster():
                         rd = 0
                     #Name
                     opponent_name = ' '.join(r)
-                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd,target=t) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
@@ -551,7 +551,7 @@ class Caster():
         sc.active_pop.dismiss()
 
     def find_pid(self):
-        if not self.pid:
+        if self.pid == None:
             cmd = f"""tasklist /FI "IMAGENAME eq mbaa.exe" /FO CSV /NH"""
             task_data = subprocess.check_output(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL).decode("UTF8","ignore")
             try:
@@ -560,12 +560,11 @@ class Caster():
                 return False
             else:
                 try:
-                    int(pid)
+                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
                 except ValueError:
                     return False
                 else:
-                    self.pid = k32.OpenProcess(PROCESS_VM_READ, 0, int(pid))
-                    return True
+                    return True 
         else:
             return True
     
@@ -639,7 +638,8 @@ class Caster():
             if self.find_pid():
                 if k32.ReadProcessMemory(self.pid, addr, buf, STRLEN, ctypes.byref(s)):
                     return int.from_bytes(buf.raw, "big")
-            return None
+            else:
+                return None
         except:
             logging.warning('READ MEMORY: %s' % sys.exc_info()[0])
             return None

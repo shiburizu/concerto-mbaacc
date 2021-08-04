@@ -270,6 +270,9 @@ class LobbyScreen(Screen):
         self.watch_player = None
         self.player_id = None
         self.code = None
+        self.alias = None
+        self.challenge_id = None
+        self.challenge_name = None
         self.type = None
         self.lobby_updater = None
         self.get_attempts = 0
@@ -304,7 +307,7 @@ class LobbyScreen(Screen):
         self.active_pop = popup
         popup.open()
         caster = threading.Thread(
-            target=self.app.game.host, args=[self, app_config['settings']['netplay_port']], daemon=True)
+            target=self.app.game.host, args=[self,app_config['settings']['netplay_port'],"Versus",id], daemon=True)
         caster.start()
 
     def set_ip(self,ip=None):
@@ -361,7 +364,7 @@ class LobbyScreen(Screen):
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
             p.dismiss()
-            if t: #if accepting, run MBAA check
+            if t != None: #if accepting, run MBAA check
                 threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
         except ValueError:
             pass
@@ -380,8 +383,9 @@ class LobbyScreen(Screen):
                     print(resp)
                     c = requests.get(url=LOBBYURL, params=resp).json()
                     print(c)
-                    self.current_player = t
                     break
+                else:
+                    continue
             else:
                 break
 
