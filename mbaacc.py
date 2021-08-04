@@ -166,15 +166,15 @@ class Caster():
         threading.Thread(target=self.update_stats,daemon=True).start()
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
-            t = self.aproc.read()
+            txt = self.aproc.read()
             ip = re.findall(
-                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', t)
+                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', txt)
             if ip != []:
                 self.adr = str(ip[0])
                 sc.set_ip(self.adr) #tell UI we have the IP address
                 break
-            elif self.check_msg(t) != []:
-                sc.error_message(self.check_msg(t))
+            elif self.check_msg(txt) != []:
+                sc.error_message(self.check_msg(txt))
                 self.kill_caster()
                 return None
         logger.write('IP: %s\n' % self.adr)
