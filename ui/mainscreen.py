@@ -36,15 +36,15 @@ class MainScreen(Screen):
         choice = ChoiceModal()
         self.active_pop = choice
         choice.modal_txt.text = "Checking for update..."
+        choice.btn_1.text = "Close"
+        choice.btn_2.text = "Confirm"
         choice.btn_1.disabled = True
         choice.btn_2.disabled = True
         choice.btn_1.bind(on_release=choice.dismiss)
         choice.open()
         update = self.check_update()
         if update is None:
-            choice.modal_txt.text = "No update found!"
-            choice.remove_widget(choice.btn_2)
-            choice.btn_2.text = "Dismiss"
+            self.error_message(['No update found!'],passive=True)
         else:
             choice.modal_txt.text = "An update is available. Would you like to download? Concerto will restart automatically after completion."
             choice.btn_2.disabled = False
