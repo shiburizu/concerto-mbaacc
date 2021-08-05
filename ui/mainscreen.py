@@ -68,7 +68,6 @@ class MainScreen(Screen):
             latest_release_req = requests.get(release_url,timeout=5)
             latest_release_req.raise_for_status()
         except requests.exceptions.RequestException:
-            self.error_message(["Unable to reach update server."],passive=True)
             return None
         latest_release_data = latest_release_req.json()
         latest_release_tag = latest_release_data['tag_name']
