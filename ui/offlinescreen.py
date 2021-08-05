@@ -24,6 +24,11 @@ class OfflineScreen(Screen):
         caster = threading.Thread(target=self.app.game.local,args=[self],daemon=True)
         caster.start()
 
+    def cpu(self, *args):
+        self.offline_pop("VS CPU")
+        caster = threading.Thread(target=self.app.game.cpu,args=[self],daemon=True)
+        caster.start()
+
     def tournament(self, *args):
         self.offline_pop("Tournament VS")
         caster = threading.Thread(target=self.app.game.tournament,args=[self],daemon=True)

@@ -1,9 +1,11 @@
+from json.decoder import JSONDecodeError
 import threading
 from functools import partial
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
 import config
 import re
+import requests
 
 class OnlineScreen(Screen):
     
@@ -29,10 +31,48 @@ class OnlineScreen(Screen):
         self.broadcast_pop.open()
 
     def lobby(self):
-        if config.caster_config['settings']['displayName'].strip() == '':
-            self.error_message(['Please go to Options and set a display name.'])
+        check = self.online_login()
+        if  check != []:
+            self.error_message(check)
         else:
             self.app.LobbyList.refresh()
+
+    def online_login(self): #version and name validation before going to screen, returns a list of problems if any
+        err = []
+        if config.caster_config['settings']['displayName'].strip() == '':
+            err.append('Please go to Options and set a display name.')
+            return err
+        elif len(config.caster_config['settings']['displayName']) > 16:
+            name = config.caster_config['settings']['displayName'][0:15].strip()
+        else:
+            name = config.caster_config['settings']['displayName'].strip()
+        params = {
+            'action' : 'login',
+            'version' : config.CURRENT_VERSION,
+            'name' : name
+        }
+        try:
+            req = requests.get(url=config.VERSIONURL,params=params,timeout=5)
+            req.raise_for_status()
+        except requests.exceptions.RequestException:
+            err.append('Unable to reach the login server.')
+            return err
+
+        resp = None
+
+        try:
+            resp = req.json()
+        except JSONDecodeError:
+            err.append('Could not retrieve data from server.')
+            return err
+
+        if resp != None and resp['status'] != 'OK':
+            err.append(resp['msg'])
+        elif resp == None:
+            return err
+        else:
+            self.app.player_name = name #assign name to be used everywhere
+        return err
 
     def host(self):
         caster = threading.Thread(
@@ -60,8 +100,8 @@ class OnlineScreen(Screen):
         self.active_pop = popup
         popup.open()
 
-    def set_ip(self):
-        self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % self.app.game.adr
+    def set_ip(self,ip=None):
+        self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % ip
 
     def join(self, ip=None):
         if ip == None:
@@ -105,10 +145,11 @@ class OnlineScreen(Screen):
 
     def confirm(self, obj, r, d, p, n, *args):
         try:
-            self.app.game.confirm_frames(int(r.text),int(d.text))
-            self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
-            n, d.text, r.text)
-            p.dismiss()
+            if self.app.game.playing is False:
+                self.app.game.confirm_frames(int(r.text),int(d.text))
+                self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
+                n, d.text, r.text)
+                p.dismiss()
         except ValueError:
             pass
 
@@ -130,6 +171,8 @@ class OnlineScreen(Screen):
         popup.open()
 
     def error_message(self,e):
+        if self.app.sm.current != 'Online':
+            self.app.sm.current = 'Online'
         self.error = True
         popup = GameModal()
         for i in e:
