@@ -1,4 +1,5 @@
 from kivy.uix.screenmanager import Screen
+from requests.models import HTTPError
 import config
 from ui.modals import GameModal, ProgressModal, ChoiceModal
 import requests
@@ -25,9 +26,10 @@ class MainScreen(Screen):
             popup.modal_txt.text += i + '\n'
         if passive:
             popup.close_btn.bind(on_release=popup.dismiss)
+            popup.close_btn.text = "Dismiss"
         else:
             popup.close_btn.bind(on_release=self.app.stop)
-        popup.close_btn.text = "Exit Concerto"
+            popup.close_btn.text = "Exit Concerto"
         popup.open()
 
     def update(self):
@@ -62,7 +64,12 @@ class MainScreen(Screen):
     def check_update(self):
         #returns None if no update needed
         release_url = 'https://api.github.com/repos/shiburizu/concerto-mbaacc/releases/latest'
-        latest_release_req = requests.get(release_url)
+        try:
+            latest_release_req = requests.get(release_url,timeout=5)
+            latest_release_req.raise_for_status()
+        except requests.exceptions.RequestException:
+            self.error_message(["Unable to reach update server."],passive=True)
+            return None
         latest_release_data = latest_release_req.json()
         latest_release_tag = latest_release_data['tag_name']
         if config.CURRENT_VERSION == latest_release_tag:
