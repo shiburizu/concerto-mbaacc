@@ -116,7 +116,7 @@ class MainScreen(Screen):
                 popup.prog_bar.value = percent
             http_stream.close()
             dl_file.close()
-        except IOError:
+        except (IOError, urllib3.exceptions.HTTPError):
             self.error_message("Failed to download.",passive=True)
             return None
         update_script = open('update.bat', 'w')
