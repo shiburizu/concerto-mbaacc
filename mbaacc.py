@@ -125,7 +125,6 @@ class Caster():
         self.startup = False #True when waiting for MBAA.exe to start in offline
         self.stats = {} #dict of information we can read from memory
         self.pid = None #PID of MBAA.exe
-        self.auto_update()
 
     def validate_read(self, con):
         if "rollback:" in con or "rolback:" in con:
