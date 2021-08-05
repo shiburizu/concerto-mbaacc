@@ -118,6 +118,6 @@ with open(PATH + 'concerto.ini','r') as f:
 app_config = configparser.ConfigParser()
 app_config.read_string(config_string)
 
-LOBBYURL = "https://concerto-mbaacc.herokuapp.com/l"
-VERSIONURL = "https://concerto-mbaacc.herokuapp.com/v"
-CURRENT_VERSION = '8-4-2021'
+LOBBYURL = "https://concerto-mbaacc.shib.live/l"
+VERSIONURL = "https://concerto-mbaacc.shib.live/v"
+CURRENT_VERSION = '0.9'
