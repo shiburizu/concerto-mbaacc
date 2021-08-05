@@ -112,6 +112,9 @@
                 MenuBtn:
                     text: '5. ABOUT'
                     on_release: app.sm.current = 'About'
+                MenuBtn:
+                    text: '6. UPDATE'
+                    on_release: root.update()
         Image:
             source: 'res/arc.png'
         Label:
@@ -940,6 +943,63 @@
                     self.background_color = (255, 0, 0, 0.2)
                 pos_hint: {'center_x': 0.75}
                 size_hint_y:0.60               
+
+<ProgressModal>:
+    modal_txt: modal_txt
+    prog_bar: prog_bar
+    size_hint: None,None
+    size: 400,100
+    auto_dismiss: False 
+    background_color: '#343B88'
+    BoxLayout:
+        padding: 20,20
+        orientation: 'vertical'
+        Label:
+            id: modal_txt
+            background_color: (0, 0, 0, 0)
+            text_size: self.size
+            halign: 'center'
+            valign: 'top'
+        ProgressBar:
+            id: prog_bar
+
+<ChoiceModal>:
+    modal_txt: modal_txt
+    btn_1: btn_1
+    btn_2: btn_2
+    size_hint: None,None
+    size: 400,180
+    auto_dismiss: False 
+    background_color: '#343B88'
+    BoxLayout:
+        padding: 20,20
+        orientation: 'vertical'
+        Label:
+            id: modal_txt
+            background_color: (0, 0, 0, 0)
+            text_size: self.size
+            halign: 'center'
+            valign: 'center'
+        BoxLayout:
+            size_hint_y: 0.35
+            Button:
+                id: btn_1
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                background_color: (255, 0, 0, 0.2)
+                outline_width: 1
+                on_press: self.background_color = (100, 0, 0, 0.9)
+                on_release: 
+                    background_color: (255, 0, 0, 0.2)
+            Button:
+                id: btn_2
+                font_name: 'res/texgyreheros-bolditalic.otf'
+                background_color: (255, 0, 0, 0.2)
+                outline_width: 1
+                on_press: self.background_color = (100, 0, 0, 0.9)
+                on_release: 
+                    background_color: (255, 0, 0, 0.2)
+
+
 
 <FrameModal>:
     frame_txt: frame_txt

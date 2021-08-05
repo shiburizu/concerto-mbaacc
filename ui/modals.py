@@ -9,6 +9,17 @@ class GameModal(ModalView):
     p2_char_guide = ObjectProperty(None)
 
 
+class ProgressModal(ModalView):
+    modal_txt = ObjectProperty(None)
+    prog_bar = ObjectProperty(None)
+
+
+class ChoiceModal(ModalView):
+    modal_txt = ObjectProperty(None)
+    btn_1 = ObjectProperty(None)
+    btn_2 = ObjectProperty(None)
+
+
 class DirectModal(ModalView):
     join_ip = ObjectProperty(None)
     watch_ip = ObjectProperty(None)

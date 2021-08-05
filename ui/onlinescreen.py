@@ -33,7 +33,10 @@ class OnlineScreen(Screen):
 
     def lobby(self):
         check = self.online_login()
-        if  check != []:
+        if "UPDATE" in check:
+            self.app.MainScreen.update()
+            return None
+        elif check != []:
             self.error_message(check)
         else:
             self.app.LobbyList.refresh()

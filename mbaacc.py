@@ -9,6 +9,7 @@ from config import *
 import ctypes
 from ctypes.wintypes import *
 import presence
+import sys
 
 #stats constants
 STRLEN = 1

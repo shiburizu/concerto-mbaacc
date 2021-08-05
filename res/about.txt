@@ -1,5 +1,5 @@
-[size=30][b]Concerto for MBAACC[/b][/size]
-[b]Developed by [u][ref=https://github.com/shiburizu]Shiburizu[/ref][/u][/b]
+[size=24][b]Concerto for MBAACC[/b][/size]
+[b]Developed by [u][ref=https://github.com/shiburizu]Shiburizu[/ref][/u], Atilla Bosma, okk & more.[/b]
 - [u][ref=https://ko-fi.com/shiburizu]Support my work on Ko-Fi[/ref][/u]
 - [u][ref=https://concerto.shib.live]Project website at concerto.shib.live[/ref][/u]
 - [u][ref=https://discord.gg/KeuSaJ5My8]Feedback/reports in #modding at Melty Blood Community Server[/ref][/u]
