@@ -90,7 +90,8 @@ error_strings = [
     'Network delay greater than limit',
     'Incompatible cccaster\hook.dll!',
     'Latest version is',
-    'Update?'
+    'Update?',
+    'Incompatible host version',
 ]
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
