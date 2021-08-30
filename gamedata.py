@@ -11,6 +11,10 @@ class indexes:
     REPLAY_SAVE = 10  # 0x28
     BGM_VOL = 81  # 0x144
     SFX_VOL = 82  # 0x148
+    CHARACTER_FILTER = 88  # 0x160
+    VIEW_FPS = 90  # 0x168
+    SCREEN_FILTER = 93  # 0x174
+    ASPECT_RATIO = 94  # 0x178
 
 
 game_config = None

@@ -713,6 +713,8 @@
                                 max: 5
                                 step: 1
                                 size_hint_x: 0.8
+                    DummyBtn:
+                        text: 'Audio/Video Options'
                     OptionRow:
                         Label:
                             text: 'BGM Volume'
@@ -739,8 +741,30 @@
                                 max: 20
                                 step: 1
                                 size_hint_x: 0.8
-                    DummyBtn:
-                        text: 'For game video options select "Standalone MBAACC" in Offline.'
+                    OptionRow:
+                        Label:
+                            text: 'Character Filter'
+                        BoxLayout:
+                            Spinner:
+                                id: character_filter
+                                values: ['Off','Edge','Full','Linear']
+                    OptionRow:
+                        Label:
+                            text: 'Screen Filter'
+                        CheckBox:
+                            id: screen_filter
+                    OptionRow:
+                        Label:
+                            text: 'Aspect Ratio'
+                        BoxLayout:
+                            Spinner:
+                                id: aspect_ratio
+                                values: ['Normal','Auto','4:3','16:9','16:10','5:4','15:9']
+                    OptionRow:
+                        Label:
+                            text: 'Show FPS Counter'
+                        CheckBox:
+                            id: view_fps
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'
