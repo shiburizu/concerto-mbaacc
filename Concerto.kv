@@ -713,8 +713,34 @@
                                 max: 5
                                 step: 1
                                 size_hint_x: 0.8
+                    OptionRow:
+                        Label:
+                            text: 'BGM Volume'
+                        BoxLayout:
+                            Label:
+                                text: str(int(bgm_vol.value))
+                                size_hint_x: 0.2
+                            Slider:
+                                id: bgm_vol
+                                min: 0
+                                max: 20
+                                step: 1
+                                size_hint_x: 0.8
+                    OptionRow:
+                        Label:
+                            text: 'SFX Volume'
+                        BoxLayout:
+                            Label:
+                                text: str(int(sfx_vol.value))
+                                size_hint_x: 0.2
+                            Slider:
+                                id: sfx_vol
+                                min: 0
+                                max: 20
+                                step: 1
+                                size_hint_x: 0.8
                     DummyBtn:
-                        text: 'For game audio/video options select "Standalone MBAACC" in Offline.'
+                        text: 'For game video options select "Standalone MBAACC" in Offline.'
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'

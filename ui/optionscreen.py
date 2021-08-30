@@ -1,6 +1,9 @@
 from kivy.uix.screenmanager import Screen
+
+from gamedata import *
 from config import *
 from ui.modals import GameModal
+
 
 class OptionScreen(Screen):
 
@@ -26,6 +29,8 @@ class OptionScreen(Screen):
             self.ids['replay_rollback'].active = caster_config['settings']['replayRollbackOn'] == '1'
             self.ids['cpu_priority'].active = caster_config['settings']['highCpuPriority'] == '1'
             self.ids['caster_updates'].active = caster_config['settings']['autoCheckUpdates'] == '1'
+            self.ids['bgm_vol'].value = max(0, 20 - game_config[indexes.BGM_VOL])
+            self.ids['sfx_vol'].value = max(0, 20 - game_config[indexes.SFX_VOL])
             self.app.sm.current = 'Options'
         except KeyError:
             self.app.MainScreen.error_message(['Invalid config files. Please back up your settings, delete cccaster/config.ini and concerto.ini and restart Concerto.'])
@@ -82,8 +87,10 @@ class OptionScreen(Screen):
                     elif "replayRollbackOn" in i:
                         if self.ids['replay_rollback'].active is True:
                             config_file[n] = "replayRollbackOn=1\n"
+                            game_config[indexes.REPLAY_SAVE] = 1
                         else:
                             config_file[n] = "replayRollbackOn=0\n"
+                            game_config[indexes.REPLAY_SAVE] = 0
                     elif "highCpuPriority" in i:
                         if self.ids['cpu_priority'].active is True:
                             config_file[n] = "highCpuPriority=1\n"
@@ -143,7 +150,14 @@ class OptionScreen(Screen):
             with open(PATH + 'concerto.ini', 'r') as f:
                 config_string = f.read()
             app_config.read_string(config_string)
-
+            # Save bg/sfx volume, 21 is off, not 20.
+            game_config[indexes.BGM_VOL] = 20 - int(self.ids['bgm_vol'].value)
+            game_config[indexes.SFX_VOL] = 20 - int(self.ids['sfx_vol'].value)
+            if game_config[indexes.BGM_VOL] == 20:
+                game_config[indexes.BGM_VOL] = 21
+            if game_config[indexes.SFX_VOL] == 20:
+                game_config[indexes.SFX_VOL] = 21
+            save_config()
         else:
             p = GameModal()
             p.modal_txt.text = "Correct the following options:\n"
