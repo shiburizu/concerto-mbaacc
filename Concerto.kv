@@ -77,7 +77,21 @@
         self.background_color = (255, 0, 0, 0.2)
     on_press: 
         self.background_color = (100, 0, 0, 0.9)  
-        
+
+<SpinnerOption>:
+    text_size: self.size
+    font_name: 'res/texgyreheros-bolditalic.otf'
+    background_color: (0, 0, 0, 0.8)
+    halign: 'center'
+    valign: 'middle'
+
+<Spinner>:
+    text_size: self.size
+    font_name: 'res/texgyreheros-bolditalic.otf'
+    background_color: (0, 0, 0, 0)
+    halign: 'center'
+    valign: 'middle'
+
 <MainScreen>:
     name: 'Main'
     AnchorLayout:
