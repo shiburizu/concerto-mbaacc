@@ -81,16 +81,16 @@
 <SpinnerOption>:
     text_size: self.size
     font_name: 'res/texgyreheros-bolditalic.otf'
-    background_color: (0, 0, 0, 0.8)
     halign: 'center'
     valign: 'middle'
+    background_color: '#61060E'
 
 <Spinner>:
     text_size: self.size
     font_name: 'res/texgyreheros-bolditalic.otf'
-    background_color: (0, 0, 0, 0)
     halign: 'center'
     valign: 'middle'
+    background_color: '#343B88'
 
 <MainScreen>:
     name: 'Main'
@@ -701,7 +701,7 @@
                             id: full_names
                     OptionRow:
                         Label:
-                            text: 'Save replays from rollback netplay'
+                            text: 'Auto-save replays'
                         CheckBox:
                             id: replay_rollback
                     OptionRow:
@@ -769,7 +769,7 @@
                             id: screen_filter
                     OptionRow:
                         Label:
-                            text: 'Aspect Ratio'
+                            text: 'Monitor aspect ratio'
                         BoxLayout:
                             Spinner:
                                 id: aspect_ratio
