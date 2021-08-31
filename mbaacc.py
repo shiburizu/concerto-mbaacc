@@ -313,16 +313,17 @@ class Caster():
                 break
 
     def confirm_frames(self,rf,df):
-        self.aproc.write('\x08')
-        self.aproc.write('\x08')
-        self.aproc.write(str(rf))
-        self.aproc.write('\x0D')
-        time.sleep(0.1)
-        self.aproc.write('\x08')
-        self.aproc.write('\x08')
-        self.aproc.write(str(df))
-        self.aproc.write('\x0D')
-        self.playing = True
+        if self.aproc:
+            self.aproc.write('\x08')
+            self.aproc.write('\x08')
+            self.aproc.write(str(rf))
+            self.aproc.write('\x0D')
+            time.sleep(0.1)
+            self.aproc.write('\x08')
+            self.aproc.write('\x08')
+            self.aproc.write(str(df))
+            self.aproc.write('\x0D')
+            self.playing = True
 
     def watch(self, ip, sc, *args):
         self.kill_caster()

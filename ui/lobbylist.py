@@ -1,3 +1,4 @@
+from json.decoder import JSONDecodeError
 import requests
 from functools import partial
 
@@ -49,19 +50,27 @@ class LobbyList(Screen):
             'action': 'join',
             'id': c
         }
-        a = requests.get(url=LOBBYURL, params=p, timeout=5).json()
-        if a['status'] == 'OK':
-            self.app.sm.current = 'Lobby'
-            self.app.LobbyScreen.secret = int(a['secret'])
-            self.app.LobbyScreen.create(
-                a, first=True, type=a['type'])
-            self.lobby_code.text = ''
-        else:
+        try:
+            a = requests.get(url=LOBBYURL, params=p, timeout=5).json()
+        except JSONDecodeError:
             popup = GameModal()
-            popup.modal_txt.text = a['msg']
+            popup.modal_txt.text = 'Bad response from the server. Try again.'
             popup.close_btn.text = 'Dismiss'
             popup.close_btn.bind(on_release=partial(popup.dismiss))
             popup.open()
+        else:
+            if a['status'] == 'OK':
+                self.app.sm.current = 'Lobby'
+                self.app.LobbyScreen.secret = int(a['secret'])
+                self.app.LobbyScreen.create(
+                    a, first=True, type=a['type'])
+                self.lobby_code.text = ''
+            else:
+                popup = GameModal()
+                popup.modal_txt.text = a['msg']
+                popup.close_btn.text = 'Dismiss'
+                popup.close_btn.bind(on_release=partial(popup.dismiss))
+                popup.open()
 
     def refresh(self):
         if self.app.LobbyScreen.lobby_updater != None:
