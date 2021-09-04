@@ -661,12 +661,14 @@ class Caster():
                                         presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
                                     else:
                                         presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
+                        state = self.stats["state"]
                     # Check if in character select once
                     elif self.stats["state"] == 20 and self.stats["state"] != state:
                         if self.app.mode.lower() == 'public lobby':
                             presence.character_select(self.app.mode,lobby_id=self.app.LobbyScreen.code)
                         else:
                             presence.character_select(self.app.mode)
+                        state = self.stats["state"]
                 if app_config['settings']['write_scores'] == '1':
                     mode = self.app.offline_mode
                     if mode.lower() == 'spectating':
@@ -676,8 +678,6 @@ class Caster():
                             increment_score_file(2)
                         p1wins = self.stats["p1wins"]
                         p2wins = self.stats["p2wins"]
-
-                state = self.stats["state"]  # Lifted out of conditional block so we always update
             if once:
                 break
             else:
@@ -729,3 +729,4 @@ class Caster():
                     e.append(i)
                 logger.write('\n%s\n' % e)
         return e
+
