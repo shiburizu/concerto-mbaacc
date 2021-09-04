@@ -96,6 +96,8 @@ error_strings = [
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
 caster_button = re.compile(r'\[[0-9]\]')
+spec_names = re.compile(r'^Spectating versus mode \(\d* delay, \d* rollback\) (.*) \(.*\) vs (.*) \(.*\) \(Tap the spacebar to toggle fast-forward\)$')
+
 
 class loghelper():
     dateTimeObj = datetime.now()
@@ -110,6 +112,34 @@ class loghelper():
 
 
 logger = loghelper()
+
+
+# Write player name to a file.  Called when spectate mode begins.
+def write_name_to_file(player_num: int, name: str):
+    with open(f'p{player_num}name.txt', mode='w') as file:
+        file.write(name)
+        file.close()
+
+
+# Write a score of 0.  Called when spectate mode begins.
+def reset_score_file(player_num: int):
+    with open(f'p{player_num}score.txt', mode='w') as file:
+        file.write('0')
+        file.close()
+
+
+# Read the value in the file and increment it.  It can be manually reset by the user this way.
+def increment_score_file(player_num: int):
+    with open(f'p{player_num}score.txt', mode='r+') as file:
+        try:
+            score = int(f.readline())
+        except ValueError:
+            score = 0
+        score = score+1
+        file.seek(0)
+        file.truncate()
+        file.write(str(score))
+        file.close()
 
 
 class Caster():
@@ -360,6 +390,12 @@ class Caster():
                             break
                     elif x != '*' and x.replace('*', '') != '':
                         r.insert(0, x)
+                if app_config['settings']['write_scores'] == '1':
+                    regex_result = re.match(pattern=spec_names, string=' '.join(r))
+                    write_name_to_file(1, regex_result.group(1))
+                    write_name_to_file(2, regex_result.group(2))
+                    reset_score_file(1)
+                    reset_score_file(2)
                 sc.active_pop.modal_txt.text = ' '.join(r)
                 # replace connecting text with match name in caster
                 break
@@ -574,6 +610,8 @@ class Caster():
     def update_stats(self,once=False):
         # Used to update presence only on state change 
         state = None
+        p1wins = 0
+        p2wins = 0
         while True:
             if self.aproc is None:
                 break
@@ -623,14 +661,23 @@ class Caster():
                                         presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
                                     else:
                                         presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
-                        state = self.stats["state"]
                     # Check if in character select once
                     elif self.stats["state"] == 20 and self.stats["state"] != state:
                         if self.app.mode.lower() == 'public lobby':
                             presence.character_select(self.app.mode,lobby_id=self.app.LobbyScreen.code)
                         else:
                             presence.character_select(self.app.mode)
-                        state = self.stats["state"]
+                if app_config['settings']['write_scores'] == '1':
+                    mode = self.app.offline_mode
+                    if mode.lower() == 'spectating':
+                        if self.stats["p1wins"] > p1wins and self.stats["p1wins"] == self.stats["towin"]:
+                            increment_score_file(1)
+                        if self.stats["p2wins"] > p2wins and self.stats["p2wins"] == self.stats["towin"]:
+                            increment_score_file(2)
+                        p1wins = self.stats["p1wins"]
+                        p2wins = self.stats["p2wins"]
+
+                state = self.stats["state"]  # Lifted out of conditional block so we always update
             if once:
                 break
             else:
@@ -682,4 +729,3 @@ class Caster():
                     e.append(i)
                 logger.write('\n%s\n' % e)
         return e
-        

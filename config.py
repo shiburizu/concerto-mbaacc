@@ -88,6 +88,7 @@ opt = [
         'mute_alerts',
         'mute_bgm',
         'discord',
+        'write_scores',
         'caster_exe'
 ]
 if os.path.exists(PATH + 'concerto.ini'):

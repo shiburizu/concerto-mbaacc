@@ -18,6 +18,7 @@ class OptionScreen(Screen):
             self.ids['mute_alerts'].active = app_config['settings']['mute_alerts'] == '1'
             self.ids['mute_bgm'].active = app_config['settings']['mute_bgm'] == '1'
             self.ids['discord'].active = app_config['settings']['discord'] == '1'
+            self.ids['write_scores'].active = app_config['settings']['write_scores'] == '1'
             self.ids['display_name'].text = caster_config['settings']['displayName']
             self.ids['display_name'].disabled = self.ids['lobbyAnchor'].children != []
             self.ids['max_delay'].text = caster_config['settings']['maxRealDelay']
@@ -146,6 +147,11 @@ class OptionScreen(Screen):
                             config_file[n] = "discord=0\n"
                     elif "caster_exe" in i:
                         config_file[n] = "caster_exe=%s\n" % self.ids['caster_exe'].text
+                    elif "write_scores" in i:
+                        if self.ids['write_scores'].active is True:
+                            config_file[n] = "write_scores=1\n"
+                        else:
+                            config_file[n] = "write_scores=0\n"
                     n += 1
                 out = open(PATH + 'concerto.ini','w')
                 out.writelines(config_file)
