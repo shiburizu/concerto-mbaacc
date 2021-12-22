@@ -545,7 +545,7 @@
                 size_hint: (0.6183, 1)
                 cols: 1
                 padding: (0,50)
-                spacing: [0,10]
+                spacing: [0,5]
                 MenuBtn:
                     text: '1. LOCAL VS'
                     on_release: 
@@ -567,7 +567,11 @@
                     on_release: 
                         root.replays()
                 MenuBtn:
-                    text: '6. STANDALONE MBAACC'
+                    text: '6. TRIALS'
+                    on_release: 
+                        root.trials()
+                MenuBtn:
+                    text: '7. STANDALONE MBAACC'
                     on_release: 
                         root.standalone()
                 MenuBtn:
@@ -660,6 +664,13 @@
                         TextInput:
                             id: caster_exe
                             multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Concerto BGM Track'
+                        BoxLayout:
+                            Spinner:
+                                id: bgm_track
+                                values: ["Soubrette's Walkway","Fuzzy"]
                     DummyBtn:
                         text: 'CCCaster Options'
                     OptionRow:

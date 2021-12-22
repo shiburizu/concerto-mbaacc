@@ -463,6 +463,27 @@ class Caster():
                     self.kill_caster()
                     break
 
+    def trials(self,sc):
+        self.kill_caster()
+        self.startup = True
+        try:
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
+        except FileNotFoundError:
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
+            return None
+        self.aproc = proc
+        while self.aproc.isalive():
+            con = self.aproc.read()
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+                self.aproc.write('6')
+                self.flag_offline(sc)
+                break
+            else:
+                if self.check_msg(con) != []:
+                    sc.error_message(self.check_msg(con))
+                    self.kill_caster()
+                    break
+
     def tournament(self,sc):
         self.kill_caster()
         self.startup = True

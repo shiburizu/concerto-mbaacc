@@ -88,7 +88,8 @@ opt = [
         'mute_alerts',
         'mute_bgm',
         'discord',
-        'caster_exe'
+        'caster_exe',
+        'bgm_track'
 ]
 if os.path.exists(PATH + 'concerto.ini'):
     with open(PATH + 'concerto.ini') as f:
@@ -100,7 +101,9 @@ if os.path.exists(PATH + 'concerto.ini'):
         with open(PATH + 'concerto.ini','a') as f:
             for i in opt:
                 if i == 'caster_exe':
-                    f.write('\ncaster_exe=cccaster.v3.0.exe\n')
+                    f.write('\ncaster_exe=cccaster.v3.1.exe\n')
+                elif i == 'bgm_track':
+                    f.write('\nbgm_track=walkway\n')
                 else:
                     f.write('\n%s=0\n' % i)
             f.close()
@@ -109,7 +112,9 @@ else:
         f.write('[settings]')
         for i in opt:
             if i == 'caster_exe':
-                f.write('\ncaster_exe=cccaster.v3.0.exe\n')
+                f.write('\ncaster_exe=cccaster.v3.1.exe\n')
+            elif i == 'bgm_track':
+                f.write('\nbgm_track=walkway\n')
             else:
                 f.write('\n%s=0\n' % i)
         f.close()

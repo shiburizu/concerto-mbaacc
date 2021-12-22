@@ -18,6 +18,11 @@ class OfflineScreen(Screen):
         self.offline_pop("Replay Theater")
         caster = threading.Thread(target=self.app.game.replays,args=[self],daemon=True)
         caster.start()
+    
+    def trials(self, *args):
+        self.offline_pop("Trials")
+        caster = threading.Thread(target=self.app.game.trials,args=[self],daemon=True)
+        caster.start()
 
     def local(self, *args):
         self.offline_pop("Local VS")

@@ -32,6 +32,10 @@ class OptionScreen(Screen):
             self.ids['bgm_vol'].value = max(0, 20 - game_config[indexes.BGM_VOL])
             self.ids['sfx_vol'].value = max(0, 20 - game_config[indexes.SFX_VOL])
             self.ids['aspect_ratio'].text = self.ids['aspect_ratio'].values[game_config[indexes.ASPECT_RATIO]]
+            if app_config['settings']['bgm_track'] == "walkway":
+                self.ids['bgm_track'].text = "Soubrette's Walkway"
+            elif app_config['settings']['bgm_track'] == "fuzzy":
+                self.ids['bgm_track'].text = "Fuzzy"
             self.ids['character_filter'].text = self.ids['character_filter'].values[game_config[indexes.CHARACTER_FILTER]]
             self.ids['screen_filter'].active = game_config[indexes.SCREEN_FILTER] == 1
             self.ids['view_fps'].active = game_config[indexes.VIEW_FPS] == 1
@@ -41,6 +45,7 @@ class OptionScreen(Screen):
 
     def save(self):
         error_check = []
+        change_sound = False
         try:
             if int(self.ids['netplay_port'].text) > 65536:
                 error_check.append("Online port must be less than 65536.")     
@@ -139,6 +144,15 @@ class OptionScreen(Screen):
                             self.app.sound.muted = False
                             if self.app.sound.bgm.state == 'stop':
                                     self.app.sound.cut_bgm() 
+                    elif "bgm_track" in i:
+                        if self.ids['bgm_track'].text == "Soubrette's Walkway":
+                            config_file[n] = "bgm_track=walkway\n"
+                            choice = "walkway"
+                        elif self.ids['bgm_track'].text == "Fuzzy":
+                            config_file[n] = "bgm_track=fuzzy\n"
+                            choice = "fuzzy"
+                        if app_config["settings"]["bgm_track"] != choice:
+                            change_sound = True
                     elif "discord" in i:
                         if self.ids['discord'].active is True:
                             config_file[n] = "discord=1\n"
@@ -154,6 +168,9 @@ class OptionScreen(Screen):
             with open(PATH + 'concerto.ini', 'r') as f:
                 config_string = f.read()
             app_config.read_string(config_string)
+            # Reload BGM if it changed
+            if change_sound == True:
+                self.app.sound.switch()
             # Save bg/sfx volume, 21 is off, not 20.
             game_config[indexes.BGM_VOL] = 20 - int(self.ids['bgm_vol'].value)
             game_config[indexes.SFX_VOL] = 20 - int(self.ids['sfx_vol'].value)
