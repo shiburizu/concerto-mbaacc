@@ -153,6 +153,88 @@ class Caster():
                         return n #return list
         return False
 
+    def matchmaking(self,sc):
+        self.kill_caster()
+        self.app.offline_mode = None
+        try:
+            self.aproc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
+        except FileNotFoundError:
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
+            return None
+        while self.aproc.isalive():
+            con = self.aproc.read()
+            logger.write('\n%s\n' % con.split())
+            if self.find_button(con.split(),'Server'):
+                self.aproc.write('2')
+                break
+            else:
+                if self.check_msg(con) != []:
+                    sc.error_message(self.check_msg(con))
+                    break
+        # Stats
+        threading.Thread(target=self.update_stats,daemon=True).start()
+        cur_con = ""
+        last_con = ""
+        con = ""
+        logger.write('\n== Matchmaking ==\n')
+        while self.aproc.isalive():
+            cur_con = ansi_escape.sub('', str(self.aproc.read()))
+            con += last_con + cur_con
+            logger.write('\n=================================\n')
+            logger.write(str(con.split()))
+            if self.playing == False and self.rs == -1 and self.ds == -1:
+                n = self.validate_read(con)
+                if n != False:
+                    logger.write('\n=================================\n')
+                    logger.write(str(con.split()))
+                    if int(n[-2]) - int(n[-1]) < 0:
+                        self.ds = 0
+                    else:
+                        self.ds = int(n[-2]) - int(n[-1])
+                    self.rs = int(n[-1])
+                    r = []
+                    name = False 
+                    for x in con.split():
+                        if x == "to" and name == False:
+                            name= True
+                        elif x == '*' and name == True:
+                            break
+                        elif name == True and x.replace('*', '') != '':
+                            r.append(x)
+                    #Regex for Ping
+                    p = re.findall('Ping: \d+\.\d+ ms', con)
+                    ping = p[-1].replace('Ping:','')
+                    ping = ping.replace('ms','')
+                    ping = ping.strip()
+                    #Network Delay
+                    delay = n[-2]
+                    #Mode and rounds
+                    m = ""
+                    rd = 2
+                    if "Versus" in con:
+                        m = "Versus"
+                        rd = n[-3]
+                    elif "Training" in con:
+                        m = "Training"
+                        rd = 0
+                    #Name
+                    opponent_name = ' '.join(r)
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
+                    break
+                else:
+                    if self.check_msg(con) != []:
+                        sc.error_message(self.check_msg(con))
+                        break
+                    elif 'Spectating versus mode' in con:
+                        sc.error_message(['Host is already in a game!'])
+                        
+                        break
+                    elif last_con != cur_con:
+                        last_con = cur_con
+                        continue
+            else:
+                break
+
     def host(self, sc, port='0', mode="Versus",t=None): #sc is a Screen for UI triggers
         self.kill_caster()
         self.app.offline_mode = None
@@ -177,7 +259,6 @@ class Caster():
                 break
             elif self.check_msg(txt) != []:
                 sc.error_message(self.check_msg(txt))
-                self.kill_caster()
                 return None
         logger.write('IP: %s\n' % self.adr)
         cur_con = "" #current Caster read
@@ -230,7 +311,6 @@ class Caster():
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        self.kill_caster()
                         self.aproc = None
                         break
                     elif last_con != cur_con:
@@ -300,11 +380,9 @@ class Caster():
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        self.kill_caster()
                         break
                     elif 'Spectating versus mode' in con:
                         sc.error_message(['Host is already in a game!'])
-                        self.kill_caster()
                         break
                     elif last_con != cur_con:
                         last_con = cur_con
@@ -366,7 +444,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
                 elif last_con != cur_con:
                     last_con = cur_con
@@ -395,7 +472,6 @@ class Caster():
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
-                self.kill_caster()
                 return None
 
     def training(self,sc):
@@ -418,7 +494,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def local(self,sc):
@@ -439,7 +514,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def cpu(self,sc):
@@ -460,7 +534,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def trials(self,sc):
@@ -481,7 +554,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def tournament(self,sc):
@@ -502,7 +574,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def replays(self,sc):
@@ -523,7 +594,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
     
     def standalone(self,sc):
@@ -697,10 +767,10 @@ class Caster():
         for i in error_strings:
             if i in s:
                 if i == 'Latest version is' or i == 'Update?': #update prompt
-                    e.append('A CCCaster update is available. Visit concerto.shib.live to download.')
-                    return e
+                    e.append("A new version of CCCaster is available. Please update by opening CCCaster.exe manually or downloading manually from concerto.shib.live.")
                 else:
                     e.append(i)
                 logger.write('\n%s\n' % e)
+        if e != []:
+            self.kill_caster()
         return e
-        

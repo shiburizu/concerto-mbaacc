@@ -83,7 +83,9 @@
     font_name: 'res/texgyreheros-bolditalic.otf'
     halign: 'center'
     valign: 'middle'
-    background_color: '#61060E'
+    background_color: '#210205'
+    height: 30
+    background_normal: ''
 
 <Spinner>:
     text_size: self.size
@@ -121,8 +123,7 @@
                     on_release: app.sm.current = 'Resources'
                 MenuBtn:
                     text: '4. OPTIONS'
-                    on_release: 
-                        app.OptionScreen.load()
+                    on_release: app.OptionScreen.load()
                 MenuBtn:
                     text: '5. ABOUT'
                     on_release: app.sm.current = 'About'
@@ -407,11 +408,15 @@
                     on_release:
                         root.direct()
                 MenuBtn:
-                    text: '2. LOBBY'
+                    text: '2. MATCHMAKING'
+                    on_release:
+                        root.matchmaking()
+                MenuBtn:
+                    text: '3. LOBBY'
                     on_release: 
                         root.lobby()
                 MenuBtn:
-                    text: '3. BROADCAST'
+                    text: '4. BROADCAST'
                     on_release:
                         root.broadcast()
                 MenuBtn:
@@ -700,6 +705,13 @@
                             id: held_start
                             multiline: False
                             input_filter: 'float'
+                    OptionRow:
+                        Label:
+                            text: 'Matchmaking Region'
+                        BoxLayout:
+                            Spinner:
+                                id: matchmaking_region
+                                values: [ "NA West", "NA East", "SA", "EU", "Middle East", "Asia", "OCE" ]
                     OptionRow:
                         Label:
                             text: 'Play sound on connect'

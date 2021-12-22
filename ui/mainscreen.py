@@ -51,16 +51,6 @@ class MainScreen(Screen):
             choice.btn_1.disabled = False
             choice.btn_2.bind(on_release=partial(self.start_updater,update = update))
             
-
-    def start_updater(self,obj,update,*args):
-        if self.active_pop:
-            self.active_pop.dismiss()
-            self.active_pop = None
-        popup = ProgressModal()
-        popup.prog_bar.max = 100
-        popup.open()
-        threading.Thread(target=self.download_update,args=[update,popup],daemon=True).start()
-        
     def check_update(self):
         #returns None if no update needed
         release_url = 'https://api.github.com/repos/shiburizu/concerto-mbaacc/releases/latest'

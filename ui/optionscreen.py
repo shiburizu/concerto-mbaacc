@@ -23,6 +23,7 @@ class OptionScreen(Screen):
             self.ids['max_delay'].text = caster_config['settings']['maxRealDelay']
             self.ids['default_rollback'].text = caster_config['settings']['defaultRollback']
             self.ids['held_start'].text = caster_config['settings']['heldStartDuration']
+            self.ids['matchmaking_region'].text = caster_config['settings']['matchmakingRegion']
             self.ids['versus_count'].value = int(caster_config['settings']['versusWinCount'])
             self.ids['alert_connect'].active = caster_config['settings']['alertOnConnect'] == '2' or caster_config['settings']['alertOnConnect'] == '3'
             self.ids['full_names'].active = caster_config['settings']['fullCharacterName'] == '1'
@@ -81,6 +82,8 @@ class OptionScreen(Screen):
                         config_file[n] = "defaultRollback=%s\n" % self.ids['default_rollback'].text
                     elif "heldStartDuration" in i:
                         config_file[n] = "heldStartDuration=%s\n" % self.ids['held_start'].text
+                    elif "matchmakingRegion" in i:
+                        config_file[n] = "matchmakingRegion=%s\n" % self.ids['matchmaking_region'].text
                     elif "versusWinCount" in i:
                         config_file[n] = "versusWinCount=%s\n" % self.ids['versus_count'].value
                     elif "alertOnConnect" in i:
@@ -93,12 +96,12 @@ class OptionScreen(Screen):
                             config_file[n] = "fullCharacterName=1\n"
                         else:
                             config_file[n] = "fullCharacterName=0\n"
-                    elif "replayRollbackOn" in i:
+                    elif "autoReplaySave" in i:
                         if self.ids['replay_rollback'].active is True:
-                            config_file[n] = "replayRollbackOn=1\n"
+                            config_file[n] = "autoReplaySave=1\n"
                             game_config[indexes.REPLAY_SAVE] = 1
                         else:
-                            config_file[n] = "replayRollbackOn=0\n"
+                            config_file[n] = "autoReplaySave=0\n"
                             game_config[indexes.REPLAY_SAVE] = 0
                     elif "highCpuPriority" in i:
                         if self.ids['cpu_priority'].active is True:

@@ -54,10 +54,10 @@ This is a list of priorities attached to suspected version labels.
 * Basic How to Play guide
 * About & credits screens
 * CCCaster & Concerto configuration screens
+* Trial Mode
 
 ### Version 1.01
 * Matchmaking
-* Trial Mode
 
 ### Version 1.1 (First Major Update)
 * JPN Localization

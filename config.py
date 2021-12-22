@@ -51,7 +51,9 @@ caster_opt = {
         'maxRealDelay' : '254',
         'replayRollbackOn' : '1',
         'updateChannel' : '1',
-        'versusWinCount' : '2'
+        'versusWinCount' : '2',
+        'autoReplaySave' : '1',
+        'matchmakingRegion': 'NA West'
 }
 if os.path.exists(PATH + 'cccaster\config.ini'):
     clean = []
