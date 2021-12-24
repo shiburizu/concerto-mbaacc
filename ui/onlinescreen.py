@@ -82,7 +82,7 @@ class OnlineScreen(Screen):
         caster.start()
         popup = GameModal()
         popup.modal_txt.text = 'Searching in %s Region...' % config.caster_config['settings']['matchmakingRegion']
-        popup.close_btn.text = 'Stop Searching'
+        popup.close_btn.text = 'Quit'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
         self.app.mode = 'Matchmaking - %s' % config.caster_config['settings']['matchmakingRegion']

@@ -404,15 +404,15 @@
                 padding: (0,50)
                 spacing: [0,10]
                 MenuBtn:
-                    text: '1. DIRECT'
+                    text: '1. DIRECT MATCH'
                     on_release:
                         root.direct()
                 MenuBtn:
-                    text: '2. MATCHMAKING'
+                    text: '2. QUICK MATCH'
                     on_release:
                         root.matchmaking()
                 MenuBtn:
-                    text: '3. LOBBY'
+                    text: '3. LOBBIES'
                     on_release: 
                         root.lobby()
                 MenuBtn:
@@ -505,13 +505,13 @@
                 do_default_tab: False
                 background_color: (0,0,0,0)
                 TabbedPanelItem:
-                    text: 'Controls'
+                    text: 'Introduction'
                     outline_width: 2
                     background_color: '#343B88'
                     RstDocument:
-                        id: controls
+                        id: intro
                         background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/controls.rst')
+                        source: res.resource_find('res/intro.rst')
                 TabbedPanelItem:
                     text: 'Movement'
                     outline_width: 2
@@ -521,6 +521,22 @@
                         background_color: (0,0,0,0.5)
                         source: res.resource_find('res/movement.rst')
                 TabbedPanelItem:
+                    text: 'Offense'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: offense
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/offense.rst')
+                TabbedPanelItem:
+                    text: 'Defense'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: defense
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/defense.rst')
+                TabbedPanelItem:
                     text: 'Moon Styles'
                     outline_width: 2
                     background_color: '#343B88'
@@ -528,6 +544,14 @@
                         id: moons
                         background_color: (0,0,0,0.5)
                         source: res.resource_find('res/moons.rst')
+                TabbedPanelItem:
+                    text: 'Glossary'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: glossary
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/glossary.rst')
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'
@@ -650,7 +674,7 @@
                             input_filter: 'int'
                     OptionRow:
                         Label:
-                            text: 'Mute all alerts'
+                            text: 'Mute Lobby Alerts'
                         CheckBox:
                             id: mute_alerts
                     OptionRow:
@@ -739,7 +763,7 @@
                             id: caster_updates
                     OptionRow:
                         Label:
-                            text: 'Versus mode win count (local/host only)'
+                            text: 'Versus win count (local/online host)'
                         BoxLayout:
                             Label:
                                 text: str(versus_count.value)

@@ -96,6 +96,8 @@ error_strings = [
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
 caster_button = re.compile(r'\[[0-9]\]')
+player_name_host_mm = re.compile(r'')
+player_name_join_mm = re.compile(r'\w* connected')
 
 class loghelper():
     dateTimeObj = datetime.now()
@@ -108,9 +110,7 @@ class loghelper():
         with open(PATH + 'concerto-logs\\' + self.timestampStr, 'a') as log:
             log.write(s)
 
-
 logger = loghelper()
-
 
 class Caster():
 
@@ -156,6 +156,7 @@ class Caster():
     def matchmaking(self,sc):
         self.kill_caster()
         self.app.offline_mode = None
+        dialog = sc.active_pop.modal_txt.text
         try:
             self.aproc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
@@ -176,9 +177,16 @@ class Caster():
         cur_con = ""
         last_con = ""
         con = ""
+        
+        #Matchmaking cannot be launched headless, so we need to clean extra outputs (thankfully these seem to be predictable)
+        junk = ["*", "0;", "19G", "\x1b[", "0;30;8m", "38m", "CCCaster 3.1", "[1] Lobby","[2] Matchmaking","[0] Cancel","[1] Netplay", "[2] Spectate", "[3] Broadcast", "[4] Offline", "[5] Server", "[6] Controls", "[7] Settings", "[8] Update", "[9] Results", "[0] Quit"]
+
         logger.write('\n== Matchmaking ==\n')
-        while self.aproc.isalive():
+        while self.aproc != None and self.aproc.isalive():
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
+            for i in junk:
+                cur_con = cur_con.replace(i,"")
+            print(cur_con.split())
             con += last_con + cur_con
             logger.write('\n=================================\n')
             logger.write(str(con.split()))
@@ -192,15 +200,13 @@ class Caster():
                     else:
                         self.ds = int(n[-2]) - int(n[-1])
                     self.rs = int(n[-1])
-                    r = []
-                    name = False 
-                    for x in con.split():
-                        if x == "to" and name == False:
-                            name= True
-                        elif x == '*' and name == True:
-                            break
-                        elif name == True and x.replace('*', '') != '':
-                            r.append(x)
+                    opponent_name = ""
+                    if "Connected to" in con:
+                        r = re.findall('Connected to\s*([^\n\r]*)',con)
+                    elif "connected" in con:
+                        r = re.findall('([^\n\r]*) connected',con)
+                    if r != []:
+                        opponent_name = r[-1].strip()
                     #Regex for Ping
                     p = re.findall('Ping: \d+\.\d+ ms', con)
                     ping = p[-1].replace('Ping:','')
@@ -218,20 +224,22 @@ class Caster():
                         m = "Training"
                         rd = 0
                     #Name
-                    opponent_name = ' '.join(r)
                     sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
                     break
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
                         break
-                    elif 'Spectating versus mode' in con:
-                        sc.error_message(['Host is already in a game!'])
-                        
-                        break
                     elif last_con != cur_con:
                         last_con = cur_con
-                        continue
+                    if "Hosting at server" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Hosting, waiting for connection...)"
+                    if "Waiting for opponent" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Waiting for opponent...)"
+                    if "Trying connection (UDP" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Trying connection (UDP Tunnel)...)"
+                    if "Trying connection" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Trying connection...)"
             else:
                 break
 

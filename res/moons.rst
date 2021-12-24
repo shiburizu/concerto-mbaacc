@@ -1,6 +1,7 @@
 After selecting a character, three different moon styles can be chosen for them. Not only do these styles changes their moves list and various properties, each style has a series of universal mechanics associated with it, consistent across all characters of the same moon.
 
 Crescent Moon
+#############
 
 In general, plays the way Melty Blood Act Cadenza did. A good mixture of speed, power, and comboability. Has the most control over meter out of the three styles.
 
@@ -31,6 +32,7 @@ In general, plays the way Melty Blood Act Cadenza did. A good mixture of speed, 
 * Ex guard increases pushback, restores some of the guard meter, lowers meter gain for the offender and because of ex guard granting -1 block stun and -1 Hitstop, it can also eat up inputs for the offender since they can only cancel their normals during hitstop.
 
 Half Moon
+#########
 
 * Good comboability, power is generally low but damage can be very high with extended combos. Has the least control over meter out of the three styles. Generally suited to a rushdown style of play.
 
@@ -53,6 +55,7 @@ Half Moon
 * Gains a 6AA followup to 5A which is typically used as a combo extender.
 
 Full Moon
+#########
 
 * Emphasis on power, more damage per hit, but less comboability. Similar to BlazBlue or Guilty Gear.
 
