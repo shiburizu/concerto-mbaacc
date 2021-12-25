@@ -127,4 +127,4 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.shib.live/l"
 VERSIONURL = "https://concerto-mbaacc.shib.live/v"
-CURRENT_VERSION = '1.0'
+CURRENT_VERSION = '1.01'

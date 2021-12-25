@@ -78,8 +78,6 @@ class OnlineScreen(Screen):
         return err
 
     def matchmaking(self):
-        caster = threading.Thread(target=self.app.game.matchmaking, args=[self], daemon=True)
-        caster.start()
         popup = GameModal()
         popup.modal_txt.text = 'Searching in %s Region...' % config.caster_config['settings']['matchmakingRegion']
         popup.close_btn.text = 'Quit'
@@ -88,6 +86,8 @@ class OnlineScreen(Screen):
         self.app.mode = 'Matchmaking - %s' % config.caster_config['settings']['matchmakingRegion']
         self.active_pop = popup
         popup.open()
+        caster = threading.Thread(target=self.app.game.matchmaking, args=[self], daemon=True)
+        caster.start()
 
     def host(self):
         caster = threading.Thread(
