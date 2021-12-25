@@ -186,7 +186,6 @@ class Caster():
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
             for i in junk:
                 cur_con = cur_con.replace(i,"")
-            print(cur_con.split())
             con += last_con + cur_con
             logger.write('\n=================================\n')
             logger.write(str(con.split()))
