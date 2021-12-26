@@ -40,33 +40,31 @@ Art & sound are provided by community members for exclusive use with Concerto.
 * UI direction in cooperation with [okk](https://github.com/okkdev) and [M-AS](https://twitter.com/matthewrobo)
 * Backgrounds sourced from Unsplash
 ### Audio
-* Main BGM (menu_bgm) by [Tempxa](https://twitter.com/TempxaRK9)
-* Resources BGM (resource_bgm) by [softdrinks](https://twitter.com/soffdrinks)
+* "Soubrette's Walkway" by [Tempxa](https://twitter.com/TempxaRK9)
+* "Fuzzy" by [softdrinks](https://twitter.com/soffdrinks)
 
 ## Development roadmap
 This is a list of priorities attached to suspected version labels.
 
 ### Version 1.0 (first stable build)
 * Lobby functions
+* Mark player for spectating when match begins
 * Direct online
 * All offline functions
 * Basic How to Play guide
 * About & credits screens
 * CCCaster & Concerto configuration screens
+* Trial Mode
 
-### Version 1.1 (first major update)
-* In-client game button binding
-* Character introductions in Resources
-* Mark player for spectating when match begins
-
-### Short-term goals
-* Ping display in lobby
-* Character/moon/win count display in lobby
-
-### Long-term goals
+### Version 1.01
 * Matchmaking
-* Support other Caster-based games (DFCI Transmission, EFZ Revival)
+
+### Version 1.1 (First Major Update)
+* JPN Localization
+* Lobby tags, creation options, quick chat
+
+### 2022 Projects
+* EFZ Version
 
 ### Things to explore
 * Frame data in-client
-* Spectator mode (find random anon matches to watch)

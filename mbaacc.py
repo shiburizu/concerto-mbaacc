@@ -96,6 +96,8 @@ error_strings = [
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
 caster_button = re.compile(r'\[[0-9]\]')
+player_name_host_mm = re.compile(r'')
+player_name_join_mm = re.compile(r'\w* connected')
 
 class loghelper():
     dateTimeObj = datetime.now()
@@ -108,9 +110,7 @@ class loghelper():
         with open(PATH + 'concerto-logs\\' + self.timestampStr, 'a') as log:
             log.write(s)
 
-
 logger = loghelper()
-
 
 class Caster():
 
@@ -153,6 +153,95 @@ class Caster():
                         return n #return list
         return False
 
+    def matchmaking(self,sc):
+        self.kill_caster()
+        self.app.offline_mode = None
+        dialog = sc.active_pop.modal_txt.text
+        try:
+            self.aproc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
+        except FileNotFoundError:
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
+            return None
+        while self.aproc.isalive():
+            con = self.aproc.read()
+            logger.write('\n%s\n' % con.split())
+            if self.find_button(con.split(),'Server'):
+                self.aproc.write('2')
+                break
+            else:
+                if self.check_msg(con) != []:
+                    sc.error_message(self.check_msg(con))
+                    break
+        # Stats
+        threading.Thread(target=self.update_stats,daemon=True).start()
+        cur_con = ""
+        last_con = ""
+        con = ""
+        
+        #Matchmaking cannot be launched headless, so we need to clean extra outputs (thankfully these seem to be predictable)
+        junk = ["*", "0;", "19G", "\x1b[", "0;30;8m", "38m", "CCCaster 3.1", "[1] Lobby","[2] Matchmaking","[0] Cancel","[1] Netplay", "[2] Spectate", "[3] Broadcast", "[4] Offline", "[5] Server", "[6] Controls", "[7] Settings", "[8] Update", "[9] Results", "[0] Quit"]
+
+        logger.write('\n== Matchmaking ==\n')
+        while self.aproc != None and self.aproc.isalive():
+            cur_con = ansi_escape.sub('', str(self.aproc.read()))
+            for i in junk:
+                cur_con = cur_con.replace(i,"")
+            con += last_con + cur_con
+            logger.write('\n=================================\n')
+            logger.write(str(con.split()))
+            if self.playing == False and self.rs == -1 and self.ds == -1:
+                n = self.validate_read(con)
+                if n != False:
+                    logger.write('\n=================================\n')
+                    logger.write(str(con.split()))
+                    if int(n[-2]) - int(n[-1]) < 0:
+                        self.ds = 0
+                    else:
+                        self.ds = int(n[-2]) - int(n[-1])
+                    self.rs = int(n[-1])
+                    opponent_name = ""
+                    if "Connected to" in con:
+                        r = re.findall('Connected to\s*([^\n\r]*)',con)
+                    elif "connected" in con:
+                        r = re.findall('([^\n\r]*) connected',con)
+                    if r != []:
+                        opponent_name = r[-1].strip()
+                    #Regex for Ping
+                    p = re.findall('Ping: \d+\.\d+ ms', con)
+                    ping = p[-1].replace('Ping:','')
+                    ping = ping.replace('ms','')
+                    ping = ping.strip()
+                    #Network Delay
+                    delay = n[-2]
+                    #Mode and rounds
+                    m = ""
+                    rd = 2
+                    if "Versus" in con:
+                        m = "Versus"
+                        rd = n[-3]
+                    elif "Training" in con:
+                        m = "Training"
+                        rd = 0
+                    #Name
+                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
+                    break
+                else:
+                    if self.check_msg(con) != []:
+                        sc.error_message(self.check_msg(con))
+                        break
+                    elif last_con != cur_con:
+                        last_con = cur_con
+                    if "Hosting at server" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Hosting, waiting for connection...)"
+                    if "Waiting for opponent" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Waiting for opponent...)"
+                    if "Trying connection (UDP" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Trying connection (UDP Tunnel)...)"
+                    if "Trying connection" in cur_con:
+                        sc.active_pop.modal_txt.text = dialog + "\n(Trying connection...)"
+            else:
+                break
+
     def host(self, sc, port='0', mode="Versus",t=None): #sc is a Screen for UI triggers
         self.kill_caster()
         self.app.offline_mode = None
@@ -177,7 +266,6 @@ class Caster():
                 break
             elif self.check_msg(txt) != []:
                 sc.error_message(self.check_msg(txt))
-                self.kill_caster()
                 return None
         logger.write('IP: %s\n' % self.adr)
         cur_con = "" #current Caster read
@@ -230,7 +318,6 @@ class Caster():
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        self.kill_caster()
                         self.aproc = None
                         break
                     elif last_con != cur_con:
@@ -300,11 +387,9 @@ class Caster():
                 else:
                     if self.check_msg(con) != []:
                         sc.error_message(self.check_msg(con))
-                        self.kill_caster()
                         break
                     elif 'Spectating versus mode' in con:
                         sc.error_message(['Host is already in a game!'])
-                        self.kill_caster()
                         break
                     elif last_con != cur_con:
                         last_con = cur_con
@@ -366,7 +451,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
                 elif last_con != cur_con:
                     last_con = cur_con
@@ -395,7 +479,6 @@ class Caster():
                 break
             elif self.check_msg(t) != []:
                 sc.error_message(self.check_msg(t))
-                self.kill_caster()
                 return None
 
     def training(self,sc):
@@ -418,7 +501,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def local(self,sc):
@@ -439,7 +521,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def cpu(self,sc):
@@ -460,7 +541,26 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
+                    break
+
+    def trials(self,sc):
+        self.kill_caster()
+        self.startup = True
+        try:
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
+        except FileNotFoundError:
+            sc.error_message(['%s not found.' % app_config['settings']['caster_exe'].strip()])
+            return None
+        self.aproc = proc
+        while self.aproc.isalive():
+            con = self.aproc.read()
+            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+                self.aproc.write('6')
+                self.flag_offline(sc)
+                break
+            else:
+                if self.check_msg(con) != []:
+                    sc.error_message(self.check_msg(con))
                     break
 
     def tournament(self,sc):
@@ -481,7 +581,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
 
     def replays(self,sc):
@@ -502,7 +601,6 @@ class Caster():
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
-                    self.kill_caster()
                     break
     
     def standalone(self,sc):
@@ -676,10 +774,10 @@ class Caster():
         for i in error_strings:
             if i in s:
                 if i == 'Latest version is' or i == 'Update?': #update prompt
-                    e.append('A CCCaster update is available. Visit concerto.shib.live to download.')
-                    return e
+                    e.append("A new version of CCCaster is available. Please update by opening CCCaster.exe manually or downloading manually from concerto.shib.live.")
                 else:
                     e.append(i)
                 logger.write('\n%s\n' % e)
+        if e != []:
+            self.kill_caster()
         return e
-        

@@ -23,6 +23,7 @@ class OptionScreen(Screen):
             self.ids['max_delay'].text = caster_config['settings']['maxRealDelay']
             self.ids['default_rollback'].text = caster_config['settings']['defaultRollback']
             self.ids['held_start'].text = caster_config['settings']['heldStartDuration']
+            self.ids['matchmaking_region'].text = caster_config['settings']['matchmakingRegion']
             self.ids['versus_count'].value = int(caster_config['settings']['versusWinCount'])
             self.ids['alert_connect'].active = caster_config['settings']['alertOnConnect'] == '2' or caster_config['settings']['alertOnConnect'] == '3'
             self.ids['full_names'].active = caster_config['settings']['fullCharacterName'] == '1'
@@ -32,6 +33,10 @@ class OptionScreen(Screen):
             self.ids['bgm_vol'].value = max(0, 20 - game_config[indexes.BGM_VOL])
             self.ids['sfx_vol'].value = max(0, 20 - game_config[indexes.SFX_VOL])
             self.ids['aspect_ratio'].text = self.ids['aspect_ratio'].values[game_config[indexes.ASPECT_RATIO]]
+            if app_config['settings']['bgm_track'] == "walkway":
+                self.ids['bgm_track'].text = "Soubrette's Walkway"
+            elif app_config['settings']['bgm_track'] == "fuzzy":
+                self.ids['bgm_track'].text = "Fuzzy"
             self.ids['character_filter'].text = self.ids['character_filter'].values[game_config[indexes.CHARACTER_FILTER]]
             self.ids['screen_filter'].active = game_config[indexes.SCREEN_FILTER] == 1
             self.ids['view_fps'].active = game_config[indexes.VIEW_FPS] == 1
@@ -41,6 +46,7 @@ class OptionScreen(Screen):
 
     def save(self):
         error_check = []
+        change_sound = False
         try:
             if int(self.ids['netplay_port'].text) > 65536:
                 error_check.append("Online port must be less than 65536.")     
@@ -76,6 +82,8 @@ class OptionScreen(Screen):
                         config_file[n] = "defaultRollback=%s\n" % self.ids['default_rollback'].text
                     elif "heldStartDuration" in i:
                         config_file[n] = "heldStartDuration=%s\n" % self.ids['held_start'].text
+                    elif "matchmakingRegion" in i:
+                        config_file[n] = "matchmakingRegion=%s\n" % self.ids['matchmaking_region'].text
                     elif "versusWinCount" in i:
                         config_file[n] = "versusWinCount=%s\n" % self.ids['versus_count'].value
                     elif "alertOnConnect" in i:
@@ -88,12 +96,12 @@ class OptionScreen(Screen):
                             config_file[n] = "fullCharacterName=1\n"
                         else:
                             config_file[n] = "fullCharacterName=0\n"
-                    elif "replayRollbackOn" in i:
+                    elif "autoReplaySave" in i:
                         if self.ids['replay_rollback'].active is True:
-                            config_file[n] = "replayRollbackOn=1\n"
+                            config_file[n] = "autoReplaySave=1\n"
                             game_config[indexes.REPLAY_SAVE] = 1
                         else:
-                            config_file[n] = "replayRollbackOn=0\n"
+                            config_file[n] = "autoReplaySave=0\n"
                             game_config[indexes.REPLAY_SAVE] = 0
                     elif "highCpuPriority" in i:
                         if self.ids['cpu_priority'].active is True:
@@ -139,6 +147,15 @@ class OptionScreen(Screen):
                             self.app.sound.muted = False
                             if self.app.sound.bgm.state == 'stop':
                                     self.app.sound.cut_bgm() 
+                    elif "bgm_track" in i:
+                        if self.ids['bgm_track'].text == "Soubrette's Walkway":
+                            config_file[n] = "bgm_track=walkway\n"
+                            choice = "walkway"
+                        elif self.ids['bgm_track'].text == "Fuzzy":
+                            config_file[n] = "bgm_track=fuzzy\n"
+                            choice = "fuzzy"
+                        if app_config["settings"]["bgm_track"] != choice:
+                            change_sound = True
                     elif "discord" in i:
                         if self.ids['discord'].active is True:
                             config_file[n] = "discord=1\n"
@@ -154,6 +171,9 @@ class OptionScreen(Screen):
             with open(PATH + 'concerto.ini', 'r') as f:
                 config_string = f.read()
             app_config.read_string(config_string)
+            # Reload BGM if it changed
+            if change_sound == True:
+                self.app.sound.switch()
             # Save bg/sfx volume, 21 is off, not 20.
             game_config[indexes.BGM_VOL] = 20 - int(self.ids['bgm_vol'].value)
             game_config[indexes.SFX_VOL] = 20 - int(self.ids['sfx_vol'].value)

@@ -83,7 +83,9 @@
     font_name: 'res/texgyreheros-bolditalic.otf'
     halign: 'center'
     valign: 'middle'
-    background_color: '#61060E'
+    background_color: '#210205'
+    height: 30
+    background_normal: ''
 
 <Spinner>:
     text_size: self.size
@@ -121,8 +123,7 @@
                     on_release: app.sm.current = 'Resources'
                 MenuBtn:
                     text: '4. OPTIONS'
-                    on_release: 
-                        app.OptionScreen.load()
+                    on_release: app.OptionScreen.load()
                 MenuBtn:
                     text: '5. ABOUT'
                     on_release: app.sm.current = 'About'
@@ -403,15 +404,19 @@
                 padding: (0,50)
                 spacing: [0,10]
                 MenuBtn:
-                    text: '1. DIRECT'
+                    text: '1. DIRECT MATCH'
                     on_release:
                         root.direct()
                 MenuBtn:
-                    text: '2. LOBBY'
+                    text: '2. QUICK MATCH'
+                    on_release:
+                        root.matchmaking()
+                MenuBtn:
+                    text: '3. LOBBIES'
                     on_release: 
                         root.lobby()
                 MenuBtn:
-                    text: '3. BROADCAST'
+                    text: '4. BROADCAST'
                     on_release:
                         root.broadcast()
                 MenuBtn:
@@ -500,13 +505,13 @@
                 do_default_tab: False
                 background_color: (0,0,0,0)
                 TabbedPanelItem:
-                    text: 'Controls'
+                    text: 'Introduction'
                     outline_width: 2
                     background_color: '#343B88'
                     RstDocument:
-                        id: controls
+                        id: intro
                         background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/controls.rst')
+                        source: res.resource_find('res/intro.rst')
                 TabbedPanelItem:
                     text: 'Movement'
                     outline_width: 2
@@ -516,6 +521,22 @@
                         background_color: (0,0,0,0.5)
                         source: res.resource_find('res/movement.rst')
                 TabbedPanelItem:
+                    text: 'Offense'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: offense
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/offense.rst')
+                TabbedPanelItem:
+                    text: 'Defense'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: defense
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/defense.rst')
+                TabbedPanelItem:
                     text: 'Moon Styles'
                     outline_width: 2
                     background_color: '#343B88'
@@ -523,6 +544,14 @@
                         id: moons
                         background_color: (0,0,0,0.5)
                         source: res.resource_find('res/moons.rst')
+                TabbedPanelItem:
+                    text: 'Glossary'
+                    outline_width: 2
+                    background_color: '#343B88'
+                    RstDocument:
+                        id: glossary
+                        background_color: (0,0,0,0.5)
+                        source: res.resource_find('res/glossary.rst')
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'
@@ -545,7 +574,7 @@
                 size_hint: (0.6183, 1)
                 cols: 1
                 padding: (0,50)
-                spacing: [0,10]
+                spacing: [0,5]
                 MenuBtn:
                     text: '1. LOCAL VS'
                     on_release: 
@@ -567,7 +596,11 @@
                     on_release: 
                         root.replays()
                 MenuBtn:
-                    text: '6. STANDALONE MBAACC'
+                    text: '6. TRIALS'
+                    on_release: 
+                        root.trials()
+                MenuBtn:
+                    text: '7. STANDALONE MBAACC'
                     on_release: 
                         root.standalone()
                 MenuBtn:
@@ -641,7 +674,7 @@
                             input_filter: 'int'
                     OptionRow:
                         Label:
-                            text: 'Mute all alerts'
+                            text: 'Mute Lobby Alerts'
                         CheckBox:
                             id: mute_alerts
                     OptionRow:
@@ -660,6 +693,13 @@
                         TextInput:
                             id: caster_exe
                             multiline: False
+                    OptionRow:
+                        Label:
+                            text: 'Concerto BGM Track'
+                        BoxLayout:
+                            Spinner:
+                                id: bgm_track
+                                values: ["Soubrette's Walkway","Fuzzy"]
                     DummyBtn:
                         text: 'CCCaster Options'
                     OptionRow:
@@ -691,6 +731,13 @@
                             input_filter: 'float'
                     OptionRow:
                         Label:
+                            text: 'Matchmaking Region'
+                        BoxLayout:
+                            Spinner:
+                                id: matchmaking_region
+                                values: [ "NA West", "NA East", "SA", "EU", "Middle East", "Asia", "OCE" ]
+                    OptionRow:
+                        Label:
                             text: 'Play sound on connect'
                         CheckBox:
                             id: alert_connect
@@ -716,7 +763,7 @@
                             id: caster_updates
                     OptionRow:
                         Label:
-                            text: 'Versus mode win count (local/host only)'
+                            text: 'Versus win count (local/online host)'
                         BoxLayout:
                             Label:
                                 text: str(versus_count.value)
