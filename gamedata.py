@@ -42,7 +42,7 @@ def save_config():
             f.close()
 
 
-if caster_config['settings']['replayRollbackOn'] == '1':
+if caster_config['settings']['autoReplaySave'] == '1':
     game_config[indexes.REPLAY_SAVE] = 1
 else:
     game_config[indexes.REPLAY_SAVE] = 0
