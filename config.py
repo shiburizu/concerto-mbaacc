@@ -63,7 +63,10 @@ if os.path.exists(PATH + 'cccaster\config.ini'):
                 if x in i:
                     clean.append(x)
     for i in clean:
-        del caster_opt[i]
+        try:
+            del caster_opt[i]
+        except KeyError:
+            pass
     if len(caster_opt) != 0:
         with open(PATH + 'cccaster\config.ini','a') as f:
             for k,v in caster_opt.items():
