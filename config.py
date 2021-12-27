@@ -63,7 +63,10 @@ if os.path.exists(PATH + 'cccaster\config.ini'):
                 if x in i:
                     clean.append(x)
     for i in clean:
-        del caster_opt[i]
+        try:
+            del caster_opt[i]
+        except KeyError:
+            pass
     if len(caster_opt) != 0:
         with open(PATH + 'cccaster\config.ini','a') as f:
             for k,v in caster_opt.items():
@@ -127,4 +130,4 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.shib.live/l"
 VERSIONURL = "https://concerto-mbaacc.shib.live/v"
-CURRENT_VERSION = '1.01'
+CURRENT_VERSION = '1.02'
