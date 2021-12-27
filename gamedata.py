@@ -41,9 +41,21 @@ def save_config():
             f.write(game_data_file)
             f.close()
 
-
-if caster_config['settings']['autoReplaySave'] == '1':
-    game_config[indexes.REPLAY_SAVE] = 1
-else:
-    game_config[indexes.REPLAY_SAVE] = 0
+try:
+    if caster_config['settings']['autoReplaySave'] == '1':
+        game_config[indexes.REPLAY_SAVE] = 1
+    else:
+        game_config[indexes.REPLAY_SAVE] = 0
+except KeyError:
+    try:
+        if caster_config['settings']['replayRollbackOn'] == '1':
+            try:
+                caster_config['settings']['autoReplaySave'] = '1'
+            except:
+                pass
+            game_config[indexes.REPLAY_SAVE] = 1
+        else:
+            game_config[indexes.REPLAY_SAVE] = 0
+    except KeyError:
+        pass
 save_config()
