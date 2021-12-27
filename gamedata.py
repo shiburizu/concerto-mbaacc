@@ -56,6 +56,8 @@ except KeyError:
             game_config[indexes.REPLAY_SAVE] = 1
         else:
             game_config[indexes.REPLAY_SAVE] = 0
-    except KeyError:
+    except:
         pass
+except TypeError:
+    pass #probably some other issue preventing caster_config from populating
 save_config()
