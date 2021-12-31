@@ -37,7 +37,7 @@ It is possible to change the character art and background images by placing cert
 * Each background art is the name of its respective screen suffixed with _bg, i.e. main_bg.png
 * The background art used for online lobbies, about, and How to Play screens is called lobby_bg.png
 
-Each image is loaded directly onto the screen. For best results, make sure all images are 600x400px and keep in mind character arts are rendered above all other UI elements.
+Each image is loaded directly onto the screen. For best results, make sure all images are 600x400px and keep in mind character arts are rendered above all other UI elements. See included files for examples.
 
 ## Audio/Visual sources
 Art & sound are provided by community members for exclusive use with Concerto.
@@ -75,3 +75,4 @@ This is a list of priorities attached to suspected version labels.
 
 ### Things to explore
 * Frame data in-client
+* Visual trial builder
