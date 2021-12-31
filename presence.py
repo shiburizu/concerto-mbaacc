@@ -4,7 +4,10 @@ import logging
 from pypresence import Presence
 
 APP_ID = '864412248310284289'
-RPC = Presence(APP_ID)
+try:
+    RPC = Presence(APP_ID)
+except:
+    logging.warning('Concerto: DISCORD: %s' % sys.exc_info()[0])
 
 def connect():
     try:
