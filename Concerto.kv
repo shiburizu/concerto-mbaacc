@@ -2,6 +2,7 @@
 #:import threading threading
 #:import res kivy.resources
 #:import pyperclip pyperclip
+#:import cfg config
 
 <MenuBtn>
     text_size: self.size
@@ -100,7 +101,7 @@
         anchor_x: 'right'
         anchor_y: 'bottom'
         Image:
-            source: 'res/stage.png'
+            source: cfg.find_img('main_bg.png')
         Image:
             source: 'res/gradient.png'
         Image:
@@ -131,7 +132,7 @@
                     text: '6. UPDATE'
                     on_release: root.update()
         Image:
-            source: 'res/arc.png'
+            source: cfg.find_img('main.png')
         Label:
             id: version
             size_hint: (0.97,0.1)
@@ -145,7 +146,7 @@
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: '[ref=x]By Bee Chan[/ref]'
+                text: cfg.img_credit('main.png','[ref=x]By Bee Chan[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -170,7 +171,7 @@
         anchor_x: 'right'
         anchor_y: 'bottom'
         Image:
-            source: 'res/bg.png'
+            source: cfg.find_img('lobby_bg.png')
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -215,7 +216,7 @@
         anchor_x: 'left'
         anchor_y: 'top'
         Image:
-            source: 'res/bg.png'
+            source: cfg.find_img('lobby_bg.png')
         BoxLayout:
             orientation: 'vertical'
             GridLayout:
@@ -285,7 +286,7 @@
         anchor_x: 'left'
         anchor_y: 'top'
         Image:
-            source: 'res/bg.png'
+            source: cfg.find_img('lobby_bg.png')
         Image:
             source: 'res/lowergradient.png'
         BoxLayout:
@@ -391,7 +392,7 @@
         anchor_x: 'right'
         anchor_y: 'bottom'
         Image:
-            source: 'res/bg3.png'
+            source: cfg.find_img('online_bg.png')
         Image:
             source: 'res/gradient.png'
         Image:
@@ -423,11 +424,11 @@
                     text: '0. BACK'
                     on_release: app.sm.current = 'Main'
         Image:
-            source: 'res/sion.png'
+            source: cfg.find_img('online.png')
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: '[ref=x]By abitofBaileys[/ref]'
+                text: cfg.img_credit('online.png','[ref=x]By abitofBaileys[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -444,7 +445,7 @@
         anchor_x: 'right'
         anchor_y: 'bottom'
         Image:
-            source: 'res/bg4.png'
+            source: cfg.find_img('resources_bg.png')
         Image:
             source: 'res/gradient.png'
         Image:
@@ -471,11 +472,11 @@
                     text: '0. BACK'
                     on_release: app.sm.current = 'Main'
         Image:
-            source: 'res/kohaku.png'
+            source: cfg.find_img('resources.png')
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: '[ref=x]By kohakudoori[/ref]'
+                text: cfg.img_credit('resources.png','[ref=x]By kohakudoori[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -492,7 +493,7 @@
         anchor_x: 'left'
         anchor_y: 'top'
         Image:
-            source: 'res/bg.png'
+            source: cfg.find_img('lobby_bg.png')
         BoxLayout:
             orientation: 'vertical'
             MenuBtn:
@@ -563,7 +564,7 @@
         anchor_x: 'right'
         anchor_y: 'bottom'
         Image:
-            source: 'res/bg2.png'
+            source: cfg.find_img('offline_bg.png')
         Image:
             source: 'res/gradient.png'
         Image:
@@ -608,11 +609,11 @@
                     on_release: 
                         app.sm.current = 'Main'
         Image:
-            source: 'res/ries.png'
+            source: cfg.find_img('offline.png')
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: '[ref=x]By Onemi[/ref]'
+                text: cfg.img_credit('offline.png','[ref=x]By Onemi[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -629,7 +630,7 @@
         anchor_x: 'right'
         anchor_y: 'bottom'
         Image:
-            source: 'res/bg.png'
+            source: cfg.find_img('lobby_bg.png')
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
