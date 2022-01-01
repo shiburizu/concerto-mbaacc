@@ -1,12 +1,12 @@
 # <img src="res/concertoicon.png" width="40"> Concerto for MBAACC
 * [**Project website**](https://concerto.shib.live)
-* Development discussion & support at `#modding` in [Melty Blood Community Server discord.](https://discord.gg/KeuSaJ5My8)
+* Development discussion & support at `#cc-modding` in [Melty Blood Community Server discord.](https://discord.gg/KeuSaJ5My8)
 
 ## About
 
 Concerto is a graphical front end for CCCaster. This is a prototyping build used to test basic features for advanced implementation.
 
-To use it, just drop `Concerto.exe` in the same folder as CCCaster. You need to be using the latest version of CCCaster and your caster executable needs to be named `cccaster.v3.0.exe` to work.
+To use it, just drop `Concerto.exe` in the same folder as CCCaster. You need to be using the latest version of CCCaster and your caster executable needs to be named `cccaster.v3.1.exe` to work.
 
 Other players can connect to your online versus host without Concerto as long as they use the same version of CCCaster.
 
@@ -29,6 +29,15 @@ pyinstaller concerto.spec
 This will bundle the `Concerto.exe` executable into the `dist/` directory.
 
 #### "winpty-agent.exe" is sourced from [winpty](https://github.com/rprichard/winpty) because we target [pywinpty](https://github.com/spyder-ide/pywinpty) version 0.5.7 for back compatibility to Windows 7 SP1. You may build and run Concerto using the latest version of pywinpty and exclude the .exe however the resulting build will only function on Windows 10.
+
+## Customizing UI
+It is possible to change the character art and background images by placing certain image file names in your MBAACC game directory.
+
+* Each character art is the name of its respective screen: main.png, offline.png, online.png, resources.png
+* Each background art is the name of its respective screen suffixed with _bg, i.e. main_bg.png
+* The background art used for online lobbies, about, and How to Play screens is called lobby_bg.png
+
+Each image is loaded directly onto the screen. For best results, make sure all images are 600x400px and keep in mind character arts are rendered above all other UI elements. See included files for examples.
 
 ## Audio/Visual sources
 Art & sound are provided by community members for exclusive use with Concerto.
@@ -55,8 +64,6 @@ This is a list of priorities attached to suspected version labels.
 * About & credits screens
 * CCCaster & Concerto configuration screens
 * Trial Mode
-
-### Version 1.01
 * Matchmaking
 
 ### Version 1.1 (First Major Update)
@@ -68,3 +75,4 @@ This is a list of priorities attached to suspected version labels.
 
 ### Things to explore
 * Frame data in-client
+* Visual trial builder
