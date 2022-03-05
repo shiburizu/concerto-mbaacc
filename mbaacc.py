@@ -132,7 +132,7 @@ def reset_score_file(player_num: int):
 def increment_score_file(player_num: int):
     with open(f'p{player_num}score.txt', mode='r+') as file:
         try:
-            score = int(f.readline())
+            score = int(file.readline())
         except ValueError:
             score = 0
         score = score+1
@@ -541,6 +541,11 @@ class Caster():
     def local(self,sc):
         self.kill_caster()
         self.startup = True
+        if app_config['settings']['write_scores'] == '1':
+            write_name_to_file(1, 'LOCAL P1')
+            write_name_to_file(2, 'LOCAL P2')
+            reset_score_file(1)
+            reset_score_file(2)
         try:
             proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
@@ -601,6 +606,11 @@ class Caster():
     def tournament(self,sc):
         self.kill_caster()
         self.startup = True
+        if app_config['settings']['write_scores'] == '1':
+            write_name_to_file(1, 'LOCAL P1')
+            write_name_to_file(2, 'LOCAL P2')
+            reset_score_file(1)
+            reset_score_file(2)
         try:
             proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
@@ -621,6 +631,11 @@ class Caster():
     def replays(self,sc):
         self.kill_caster()
         self.startup = True
+        if app_config['settings']['write_scores'] == '1':
+            write_name_to_file(1, 'REPLAY P1')
+            write_name_to_file(2, 'REPLAY P2')
+            reset_score_file(1)
+            reset_score_file(2)
         try:
             proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
@@ -768,13 +783,16 @@ class Caster():
                         state = self.stats["state"]
                 if app_config['settings']['write_scores'] == '1':
                     mode = self.app.offline_mode
-                    if mode.lower() == 'spectating':
-                        if self.stats["p1wins"] > p1wins and self.stats["p1wins"] == self.stats["towin"]:
-                            increment_score_file(1)
-                        if self.stats["p2wins"] > p2wins and self.stats["p2wins"] == self.stats["towin"]:
-                            increment_score_file(2)
-                        p1wins = self.stats["p1wins"]
-                        p2wins = self.stats["p2wins"]
+                    if mode.lower() == 'spectating' or mode.lower() == 'tournament vs' or mode.lower() == 'local vs' or mode.lower() == 'replay theater':
+                        try:
+                            if self.stats["p1wins"] > p1wins and self.stats["p1wins"] == self.stats["towin"]:
+                                increment_score_file(1)
+                            if self.stats["p2wins"] > p2wins and self.stats["p2wins"] == self.stats["towin"]:
+                                increment_score_file(2)
+                            p1wins = self.stats["p1wins"]
+                            p2wins = self.stats["p2wins"]
+                        except TypeError as e:
+                            pass
             if once:
                 break
             else:
