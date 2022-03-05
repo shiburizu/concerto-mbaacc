@@ -93,6 +93,7 @@ opt = [
         'mute_alerts',
         'mute_bgm',
         'discord',
+        'write_scores',
         'caster_exe',
         'bgm_track'
 ]
