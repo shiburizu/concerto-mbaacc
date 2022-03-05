@@ -77,6 +77,18 @@ class OnlineScreen(Screen):
             self.app.player_name = name #assign name to be used everywhere
         return err
 
+    def matchmaking(self):
+        popup = GameModal()
+        popup.modal_txt.text = 'Searching in %s Region...' % config.caster_config['settings']['matchmakingRegion']
+        popup.close_btn.text = 'Quit'
+        popup.close_btn.bind(on_release=partial(
+            self.dismiss, p=popup))
+        self.app.mode = 'Matchmaking - %s' % config.caster_config['settings']['matchmakingRegion']
+        self.active_pop = popup
+        popup.open()
+        caster = threading.Thread(target=self.app.game.matchmaking, args=[self], daemon=True)
+        caster.start()
+
     def host(self):
         caster = threading.Thread(
             target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)

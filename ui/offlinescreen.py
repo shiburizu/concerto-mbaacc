@@ -10,13 +10,18 @@ class OfflineScreen(Screen):
         self.app = CApp
 
     def training(self, *args):
-        self.offline_pop("Training")
+        self.offline_pop("Training",tip="Tip: Press F4 to bind controls.")
         caster = threading.Thread(target=self.app.game.training,args=[self],daemon=True)
         caster.start()
 
     def replays(self, *args):
         self.offline_pop("Replay Theater")
         caster = threading.Thread(target=self.app.game.replays,args=[self],daemon=True)
+        caster.start()
+    
+    def trials(self, *args):
+        self.offline_pop("Trials",tip="Tip: Press F3 ingame to open Trial options.")
+        caster = threading.Thread(target=self.app.game.trials,args=[self],daemon=True)
         caster.start()
 
     def local(self, *args):
@@ -30,7 +35,7 @@ class OfflineScreen(Screen):
         caster.start()
 
     def tournament(self, *args):
-        self.offline_pop("Tournament VS")
+        self.offline_pop("Tournament VS",tip="Tip: Hold down Start to pause.")
         caster = threading.Thread(target=self.app.game.tournament,args=[self],daemon=True)
         caster.start()
 
@@ -39,9 +44,9 @@ class OfflineScreen(Screen):
         caster = threading.Thread(target=self.app.game.standalone,args=[self],daemon=True)
         caster.start()
 
-    def offline_pop(self, mode):
+    def offline_pop(self, mode, tip=""):
         popup = GameModal()
-        popup.modal_txt.text = 'Starting %s mode...' % mode
+        popup.modal_txt.text = 'Starting %s mode...\n\n%s' % (mode,tip)
         popup.close_btn.text = "Stand by..."
         popup.close_btn.disabled = True
         popup.open()

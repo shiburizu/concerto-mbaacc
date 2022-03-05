@@ -51,7 +51,9 @@ caster_opt = {
         'maxRealDelay' : '254',
         'replayRollbackOn' : '1',
         'updateChannel' : '1',
-        'versusWinCount' : '2'
+        'versusWinCount' : '2',
+        'autoReplaySave' : '1',
+        'matchmakingRegion': 'NA West'
 }
 if os.path.exists(PATH + 'cccaster\config.ini'):
     clean = []
@@ -61,7 +63,10 @@ if os.path.exists(PATH + 'cccaster\config.ini'):
                 if x in i:
                     clean.append(x)
     for i in clean:
-        del caster_opt[i]
+        try:
+            del caster_opt[i]
+        except KeyError:
+            pass
     if len(caster_opt) != 0:
         with open(PATH + 'cccaster\config.ini','a') as f:
             for k,v in caster_opt.items():
@@ -89,7 +94,8 @@ opt = [
         'mute_bgm',
         'discord',
         'write_scores',
-        'caster_exe'
+        'caster_exe',
+        'bgm_track'
 ]
 if os.path.exists(PATH + 'concerto.ini'):
     with open(PATH + 'concerto.ini') as f:
@@ -101,7 +107,9 @@ if os.path.exists(PATH + 'concerto.ini'):
         with open(PATH + 'concerto.ini','a') as f:
             for i in opt:
                 if i == 'caster_exe':
-                    f.write('\ncaster_exe=cccaster.v3.0.exe\n')
+                    f.write('\ncaster_exe=cccaster.v3.1.exe\n')
+                elif i == 'bgm_track':
+                    f.write('\nbgm_track=walkway\n')
                 else:
                     f.write('\n%s=0\n' % i)
             f.close()
@@ -110,7 +118,9 @@ else:
         f.write('[settings]')
         for i in opt:
             if i == 'caster_exe':
-                f.write('\ncaster_exe=cccaster.v3.0.exe\n')
+                f.write('\ncaster_exe=cccaster.v3.1.exe\n')
+            elif i == 'bgm_track':
+                f.write('\nbgm_track=walkway\n')
             else:
                 f.write('\n%s=0\n' % i)
         f.close()
@@ -121,4 +131,16 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.shib.live/l"
 VERSIONURL = "https://concerto-mbaacc.shib.live/v"
-CURRENT_VERSION = '0.9'
+CURRENT_VERSION = '1.03'
+
+def find_img(file):
+    if os.path.exists(file):
+        return PATH + file
+    else:
+        return 'res/%s' % file
+
+def img_credit(file,txt):
+    if os.path.exists(file):
+        return ''
+    else:
+        return txt

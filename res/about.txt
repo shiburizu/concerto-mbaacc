@@ -2,7 +2,7 @@
 [b]Developed by [u][ref=https://github.com/shiburizu]Shiburizu[/ref][/u], Atilla Bosma, okk & more.[/b]
 - [u][ref=https://ko-fi.com/shiburizu]Support my work on Ko-Fi[/ref][/u]
 - [u][ref=https://concerto.shib.live]Project website at concerto.shib.live[/ref][/u]
-- [u][ref=https://discord.gg/KeuSaJ5My8]Feedback/reports in #modding at Melty Blood Community Server[/ref][/u]
+- [u][ref=https://discord.gg/KeuSaJ5My8]Feedback/reports in #cc-modding at Melty Blood Community Server[/ref][/u]
 
 [b]Art credits:[/b]
 - Arcueid by [u][ref=https://twitter.com/Bee_Sempai/status/1345577709104205826?s=20]Bee Chan[/ref][/u]
@@ -11,7 +11,7 @@
 - Kohaku by [u][ref=https://www.pixiv.net/en/artworks/83141238]Kohakudoori[/ref][/u]
 - UI direction in cooperation with [u][ref=https://github.com/matthewrobo]M-AS[/ref][/u] and [u][ref=https://github.com/okkdev]okk[/ref][/u]
 [b]Audio credits:[/b]
-- Main BGM (menu_bgm) by [u][ref=https://twitter.com/TempxaRK9]Tempxa[/ref][/u]
-- Resources BGM (resource_bgm) by [u][ref=https://twitter.com/soffdrinks]softdrinks[/ref][/u]
+- "Soubrette's Walkway" by [u][ref=https://twitter.com/TempxaRK9]Tempxa[/ref][/u]
+- "Fuzzy" by [u][ref=https://twitter.com/soffdrinks]softdrinks[/ref][/u]
 
 [size=12]Concerto is not affiliated with French Bread or Type-Moon. This program is provided free of charge.[/size]
