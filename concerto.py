@@ -34,12 +34,12 @@ class Concerto(App):
         self.MainScreen = mainscreen.MainScreen(CApp=self)
         self.OnlineScreen = onlinescreen.OnlineScreen(CApp=self)
         self.OfflineScreen = offlinescreen.OfflineScreen(CApp=self)
-        self.ResourceScreen = resourcescreen.ResourceScreen()
+        self.ResourceScreen = resourcescreen.ResourceScreen(CApp=self)
         self.OptionScreen = optionscreen.OptionScreen(CApp=self)
         self.LobbyList = lobbylist.LobbyList(CApp=self)
         self.LobbyScreen = lobbyscreen.LobbyScreen(CApp=self)
-        self.HowtoScreen = howtoscreen.HowtoScreen()
-        self.AboutScreen = aboutscreen.AboutScreen()
+        self.HowtoScreen = howtoscreen.HowtoScreen(CApp=self)
+        self.AboutScreen = aboutscreen.AboutScreen(CApp=self)
         self.sm.add_widget(self.MainScreen)
         self.sm.add_widget(self.OnlineScreen)
         self.sm.add_widget(self.OfflineScreen)
@@ -85,7 +85,7 @@ class Concerto(App):
             e.append('Please fix the above problems and restart Concerto.')
         if e != []:
             self.sound.muted = True
-            self.MainScreen.error_message(e)
+            self.MainScreen.error_message(e,fatal=True)
         else:
             #if all is well, start loading in user options
             if app_config['settings']['mute_bgm'] == '1':
@@ -121,54 +121,32 @@ class Concerto(App):
             presence.close()
 
     def lobby_button(self, *args):
-        lst = [
-            self.MainScreen.ids['lobbyAnchor'],
-            self.OnlineScreen.ids['lobbyAnchor'],
-            self.OfflineScreen.ids['lobbyAnchor'],
-            self.ResourceScreen.ids['lobbyAnchor'],
-            self.OptionScreen.ids['lobbyAnchor'],
-            self.HowtoScreen.ids['lobbyAnchor'],
-            self.AboutScreen.ids['lobbyAnchor']
-        ]
-        for i in lst:
-            b = buttons.LobbyBtn()
-            b.text += ' %s' % self.LobbyScreen.code
-            b.bind(on_release=self.switch_to_lobby)
-            i.clear_widgets()
-            i.add_widget(b)
+        for i in self.sm.screens:
+            if 'lobbyAnchor' in i.ids and i != self.LobbyScreen:
+                a = i.ids['lobbyAnchor']
+                b = buttons.LobbyBtn()
+                b.text += ' %s' % self.LobbyScreen.code
+                b.bind(on_release=self.switch_to_lobby)
+                a.clear_widgets()
+                a.add_widget(b)
     
     def remove_lobby_button(self, *args):
-        lst = [
-            self.MainScreen.ids['lobbyAnchor'],
-            self.OnlineScreen.ids['lobbyAnchor'],
-            self.OfflineScreen.ids['lobbyAnchor'],
-            self.ResourceScreen.ids['lobbyAnchor'],
-            self.OptionScreen.ids['lobbyAnchor'],
-            self.HowtoScreen.ids['lobbyAnchor'],
-            self.AboutScreen.ids['lobbyAnchor']
-        ]
-        for i in lst:
-            i.clear_widgets()
+        for i in self.sm.screens:
+            if 'lobbyAnchor' in i.ids  and i != self.LobbyScreen:
+                i.ids['lobbyAnchor'].clear_widgets()
 
     def update_lobby_button(self,text,*args):
-        lst = [
-            self.MainScreen.ids['lobbyAnchor'].children,
-            self.OnlineScreen.ids['lobbyAnchor'].children,
-            self.OfflineScreen.ids['lobbyAnchor'].children,
-            self.ResourceScreen.ids['lobbyAnchor'].children,
-            self.OptionScreen.ids['lobbyAnchor'].children,
-            self.HowtoScreen.ids['lobbyAnchor'].children,
-            self.AboutScreen.ids['lobbyAnchor'].children
-        ]
-        for i in lst:
-            for n in i:
-                n.text = text
-        
-    def switch_to_main(self, *args):
-        self.sm.current = 'Main'
+        for i in self.sm.screens:
+            if 'lobbyAnchor' in i.ids and i != self.LobbyScreen:
+                a = i.ids['lobbyAnchor'].children
+                for n in a:
+                    n.text = text
 
     def switch_to_lobby(self, *args):
         self.sm.current = 'Lobby'
+
+    def switch_to_main(self, *args):
+        self.sm.current = 'Main'
 
     def checkPop(self, *args):
         while True:

@@ -1,5 +1,6 @@
-from kivy.uix.screenmanager import Screen
+from ui.concertoscreen import ConcertoScreen
 
+class ResourceScreen(ConcertoScreen):
 
-class ResourceScreen(Screen):
-    pass
+    def __init__(self,CApp):
+        super().__init__(CApp)

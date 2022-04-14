@@ -1,15 +1,14 @@
-from kivy.uix.screenmanager import Screen
+from ui.concertoscreen import ConcertoScreen
 
 from gamedata import *
 from config import *
 from ui.modals import GameModal
 
 
-class OptionScreen(Screen):
+class OptionScreen(ConcertoScreen):
 
-    def __init__(self, CApp, **kwargs):
-        super(OptionScreen, self).__init__(**kwargs)
-        self.app = CApp
+    def __init__(self, CApp):
+        super().__init__(CApp)
     
     def load(self):
         try:
@@ -43,7 +42,7 @@ class OptionScreen(Screen):
             self.ids['view_fps'].active = game_config[indexes.VIEW_FPS] == 1
             self.app.sm.current = 'Options'
         except KeyError:
-            self.app.MainScreen.error_message(['Invalid config files. Please back up your settings, delete cccaster/config.ini and concerto.ini and restart Concerto.'])
+            self.error_message('Invalid config files. Please back up your settings, delete cccaster/config.ini and concerto.ini and restart Concerto.',fatal=True,switch='Main')
 
     def save(self):
         error_check = []
@@ -199,6 +198,4 @@ class OptionScreen(Screen):
             p.modal_txt.text = "Correct the following options:\n"
             for i in error_check:
                 p.modal_txt.text += '%s\n' % i
-            p.close_btn.text = 'Dismiss'
-            p.close_btn.bind(on_release=p.dismiss)
             p.open()

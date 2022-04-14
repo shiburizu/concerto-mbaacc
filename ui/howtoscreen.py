@@ -1,9 +1,9 @@
-from kivy.uix.screenmanager import Screen
+from ui.concertoscreen import ConcertoScreen
 
-class HowtoScreen(Screen):
+class HowtoScreen(ConcertoScreen):
     
-    def __init__(self,**kwargs):
-        super(HowtoScreen, self).__init__(**kwargs)
+    def __init__(self,CApp):
+        super().__init__(CApp)
         for v in self.ids.values():
             try:
                 v.colors['paragraph'] = 'ffffffff'

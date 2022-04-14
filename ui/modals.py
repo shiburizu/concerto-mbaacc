@@ -1,11 +1,22 @@
 from kivy.uix.modalview import ModalView
 from kivy.properties import ObjectProperty
 
-
 class GameModal(ModalView):
     modal_txt = ObjectProperty(None)
     close_btn = ObjectProperty(None)
 
+    def __init__(self,msg='',btntext='Dismiss',btnaction=None):
+        super().__init__()
+        self.modal_txt.text=msg
+        self.close_btn.text=btntext
+        if btnaction:
+            self.close_btn.bind(on_release=btnaction)
+        else:
+            self.close_btn.bind(on_release=self.dismiss)
+
+    def bind_btn(self,btnaction=None):
+        if btnaction:
+            self.close_btn.bind(on_release=btnaction)
 
 class ProgressModal(ModalView):
     modal_txt = ObjectProperty(None)

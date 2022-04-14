@@ -1,22 +1,17 @@
 from json.decoder import JSONDecodeError
 import threading
 from functools import partial
-from kivy.uix.screenmanager import Screen
+from ui.concertoscreen import ConcertoScreen
 from ui.modals import *
 import config
-import re
 import requests
 
-class OnlineScreen(Screen):
+class OnlineScreen(ConcertoScreen):
     
-
-    def __init__(self, CApp, **kwargs):
-        super(OnlineScreen, self).__init__(**kwargs)
+    def __init__(self, CApp):
+        super().__init__(CApp)
         self.direct_pop = None  # Direct match popup for user settings
-        self.active_pop = None  # active popup on the screen during netplay
         self.broadcast_pop = None
-        self.app = CApp
-        self.error = False
         self.opponent = None
 
     def direct(self):
@@ -33,7 +28,7 @@ class OnlineScreen(Screen):
     def lobby(self):
         check = self.online_login()
         if "UPDATE" in check:
-            self.app.MainScreen.update()
+            self.update()
             return None
         elif check != []:
             self.error_message(check)
@@ -62,7 +57,6 @@ class OnlineScreen(Screen):
             return err
 
         resp = None
-
         try:
             resp = req.json()
         except JSONDecodeError:
@@ -78,85 +72,64 @@ class OnlineScreen(Screen):
         return err
 
     def matchmaking(self):
-        popup = GameModal()
-        popup.modal_txt.text = 'Searching in %s Region...' % config.caster_config['settings']['matchmakingRegion']
-        popup.close_btn.text = 'Quit'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.app.mode = 'Matchmaking - %s' % config.caster_config['settings']['matchmakingRegion']
-        self.active_pop = popup
-        popup.open()
         caster = threading.Thread(target=self.app.game.matchmaking, args=[self], daemon=True)
         caster.start()
+        popup = GameModal('Searching in %s Region...' % config.caster_config['settings']['matchmakingRegion'],'Stop Searching')
+        popup.bind_btn(partial(self.dismiss, p=popup))
+        popup.open()
+        self.active_pop = popup
+        self.app.mode = 'Direct Match'
 
     def host(self):
         caster = threading.Thread(
             target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)
         caster.start()
-        popup = GameModal()
-        popup.modal_txt.text = 'Hosting %s mode...\n' % self.direct_pop.game_type.text
-        popup.close_btn.text = 'Stop Hosting'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.app.mode = 'Direct Match'
-        self.active_pop = popup
+        popup = GameModal('Hosting %s mode...\n' % self.direct_pop.game_type.text,'Stop Hosting')
+        popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
-
+        self.active_pop = popup
+        self.app.mode = 'Direct Match'
+        
     def start_broadcast(self):
         caster = threading.Thread(
             target=self.app.game.broadcast, args=[self,config.app_config['settings']['netplay_port'], self.broadcast_pop.mode_type.text], daemon=True)
         caster.start()
-        popup = GameModal()
-        popup.modal_txt.text = 'Broadcasting %s mode...\n' % self.broadcast_pop.mode_type.text
-        popup.close_btn.text = 'Stop Playing'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
-        self.active_pop = popup
+        popup = GameModal('Broadcasting %s mode...\n' % self.broadcast_pop.mode_type.text,'Stop Playing')
+        popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
+        self.active_pop = popup
+        self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
 
     def set_ip(self,ip=None):
         self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % ip
 
     def join(self, ip=None):
-        if ip == None:
+        if not self.validate_ip(ip):
             ip = self.direct_pop.join_ip.text
-
-        check_ip = re.findall(
-            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', ip)
-        if check_ip == []:
-            self.error_message(['Please supply a valid IP.'])
-            return None
+            if not self.validate_ip(ip):
+                self.error_message('Please supply a valid IP.')
+                return None
         caster = threading.Thread(target=self.app.game.join, args=[ip, self], daemon=True)
         caster.start()
-        popup = GameModal()
-        popup.modal_txt.text = 'Connecting to IP: %s' % ip
-        popup.close_btn.text = 'Stop Playing'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.app.mode = 'Direct Match'
-        self.active_pop = popup
+        popup = GameModal('Connecting to IP: %s' % ip,'Stop Playing')
+        popup.bind_btn(partial(self.dismiss,p=popup))
         popup.open()
+        self.active_pop = popup
+        self.app.mode = 'Direct Match'
 
     def watch(self, ip=None):
-        if ip == None:
+        if not self.validate_ip(ip):
             ip = self.direct_pop.watch_ip.text
-
-        check_ip = re.findall(
-            r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', ip)
-        if check_ip == []:
-            self.error_message(['Please supply a valid IP.'])
-            return None
-        popup = GameModal()
-        self.active_pop = popup
+            if not self.validate_ip(ip):
+                self.error_message('Please supply a valid IP.')
+                return None
         caster = threading.Thread(target=self.app.game.watch, args=[ip, self], daemon=True)
         caster.start()
-        popup.modal_txt.text = 'Watching IP: %s' % ip
-        popup.close_btn.text = 'Stop watching'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
+        popup = GameModal(msg='Watching IP: %s' % ip,btntext='Stop watching')
+        popup.bind_btn(partial(self.dismiss,p=popup))
         popup.open()
+        self.active_pop = popup
+        self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
 
     def confirm(self, obj, r, d, p, n, *args):
         try:
@@ -185,29 +158,10 @@ class OnlineScreen(Screen):
             self.dismiss, p=popup))
         popup.open()
 
-    def error_message(self,e):
-        if self.app.sm.current != 'Online':
-            self.app.sm.current = 'Online'
-        self.error = True
-        popup = GameModal()
-        for i in e:
-            popup.modal_txt.text += i + '\n'
-        popup.close_btn.bind(on_release=partial(self.dismiss_error,p = popup))
-        popup.close_btn.text = "Close"
-        if self.active_pop:
-            self.active_pop.dismiss()
-        self.active_pop = None
-        popup.open()
-
-    def dismiss_error(self,obj,p):
-        p.dismiss()
-        self.error = False
-
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
-    def dismiss(self, obj, p, *args):
+    def dismiss(self, obj, p=None, *args):
         self.app.game.kill_caster()
         self.opponent = None
-        p.dismiss()
-        if self.active_pop != None:
-            self.active_pop.dismiss()
-        self.active_pop = None
+        if p:
+            p.dismiss()
+        self.dismiss_active_pop()

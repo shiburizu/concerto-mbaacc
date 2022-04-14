@@ -1,4 +1,3 @@
-from json.decoder import JSONDecodeError
 import time
 import requests
 import threading
@@ -6,31 +5,28 @@ import pyperclip
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import Screen
+from ui.concertoscreen import ConcertoScreen
 from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
 import presence
 import logging
 
 
-class LobbyScreen(Screen):
-    active_pop = None  # active popup on the screen
-    player_list = ObjectProperty(None)  # layout for players
-    challenge_list = ObjectProperty(None)  # layout for players
-    match_list = ObjectProperty(None)  # layout for players
-    lobby_code = ObjectProperty(None)  # layout for players
+class LobbyScreen(ConcertoScreen):
+    player_list = ObjectProperty(None)  # layout for idle players
+    challenge_list = ObjectProperty(None)  # layout for challenges
+    match_list = ObjectProperty(None)  # ongoing match list
+    lobby_code = ObjectProperty(None)  # top right lobby label
 
-    def __init__(self, CApp, **kwargs):
-        super(LobbyScreen, self).__init__(**kwargs)
-        self.app = CApp
+    def __init__(self, CApp):
+        super().__init__(CApp)
         self.secret = None  # secret required for server messages
         self.lobby_thread_flag = 0 #whether or not the thread is running
-        self.watch_player = None  # id of player to watch for spectating, TODO
+        self.watch_player = None  # id of player to watch for spectating
         self.player_id = None  # our own ID as provided by the JSON
         self.code = None  # lobby code
         self.lobby_updater = None  # thread to manage lobby updates
         self.widget_index = {} #ids of players, widget of lobby
-        self.error = False
         self.challenge_name = None #name of player being challenged
         self.opponent = None # name of player currently being played against
         self.challenge_id = None #id of player being challenged
@@ -166,8 +162,9 @@ class LobbyScreen(Screen):
                     p.ids['WatchBtn'].text = ""
                     self.match_list.add_widget(p)
                     self.widget_index.update({(i[2],i[3]):p})
-                if i[2] == self.watch_player or i[3] == self.watch_player:
-                    self.watch_match(name="%s vs %s" % (i[0], i[1]), ip=i[4])
+                if self.watch_player != None:
+                    if i[2] == self.watch_player or i[3] == self.watch_player:
+                        self.watch_match(name="%s vs %s" % (i[0], i[1]), ip=i[4])
         else:
             n = []
             for k,v in self.widget_index.items():
@@ -279,11 +276,7 @@ class LobbyScreen(Screen):
         self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
         if msg:
-            popup = GameModal()
-            popup.modal_txt.text = msg
-            popup.close_btn.text = 'Close'
-            popup.close_btn.bind(on_release=popup.dismiss)
-            popup.open()
+            GameModal(msg,'Dismiss').open()
         # Set Rich Presence to main menu again
         if self.app.discord is True:
             presence.menu()
@@ -299,13 +292,10 @@ class LobbyScreen(Screen):
                 pass
         self.challenge_name = name
         self.challenge_id = id
-        popup = GameModal()
-        popup.modal_txt.text = 'Challenging %s' % self.challenge_name
-        popup.close_btn.text = 'Stop Playing'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.active_pop = popup
+        popup = GameModal('Challenging %s' % self.challenge_name,'Stop Playing')
+        popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
+        self.active_pop = popup
         caster = threading.Thread(
             target=self.app.game.host, args=[self,app_config['settings']['netplay_port'],"Versus",id], daemon=True)
         caster.start()
@@ -320,11 +310,8 @@ class LobbyScreen(Screen):
             'ip': ip,
             'secret': self.secret
         }
-        print(p)
         c = requests.get(url=LOBBYURL, params=p).json()
-        print(c)
         
-
     def accept_challenge(self, obj, name, id, ip, *args):
         self.watch_player = None
         for k,v in self.widget_index.items():
@@ -337,13 +324,10 @@ class LobbyScreen(Screen):
                                   ip, self, id], daemon=True)
         caster.start()
         threading.Thread(target=self.send_pre_accept,args=[self.player_id,id]).start()
-        popup = GameModal()
-        popup.modal_txt.text = 'Connecting to %s' % name
-        popup.close_btn.text = 'Stop Playing'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        self.active_pop = popup
+        popup = GameModal('Connecting to %s' % name,'Stop Playing')
+        popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
+        self.active_pop = popup
 
     def send_pre_accept(self,id,target):
         p = {
@@ -353,9 +337,7 @@ class LobbyScreen(Screen):
             'id': self.code,
             'secret': self.secret
         }
-        print(p)
         c = requests.get(url=LOBBYURL, params=p).json()
-        print(c)
 
     def confirm(self, obj, r, d, p, n, t=None, *args):
         try:
@@ -397,17 +379,14 @@ class LobbyScreen(Screen):
                     v.ids['WatchBtn'].text = "FOLLOW"
             except KeyError:
                 pass
-        popup = GameModal()
         caster = threading.Thread(
             target=self.app.game.watch, args=[ip,self], daemon=True)
-        self.active_pop = popup
-        popup.modal_txt.text = 'Watching %s' % name
-        popup.close_btn.text = 'Stop watching'
-        popup.close_btn.bind(on_release=partial(
-            self.dismiss, p=popup))
-        popup.open()
-        self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         caster.start()
+        popup = GameModal('Watching %s' % name,'Stop watching')
+        popup.bind_btn(partial(self.dismiss, p=popup))
+        popup.open()
+        self.active_pop = popup
+        self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
 
     def set_frames(self, name, delay, ping, target=None, mode="Versus", rounds=2):
         popup = FrameModal()
@@ -425,22 +404,6 @@ class LobbyScreen(Screen):
             self.dismiss, p=popup))
         popup.open()
 
-    def error_message(self,e):
-        self.error = True
-        popup = GameModal()
-        for i in e:
-            popup.modal_txt.text += i + '\n'
-        popup.close_btn.bind(on_release=partial(self.dismiss_error,p = popup))
-        popup.close_btn.text = "Close"
-        if self.active_pop != None:
-            self.active_pop.dismiss()
-        self.active_pop = None
-        popup.open()
-    
-    def dismiss_error(self,obj,p):
-        p.dismiss()
-        self.error = False
-
     # TODO prevent players from dismissing caster until MBAA is open to avoid locking issues
     def dismiss(self, obj, p, *args):
         self.app.game.kill_caster()
@@ -455,9 +418,7 @@ class LobbyScreen(Screen):
         }
         requests.get(url=LOBBYURL, params=r)
         p.dismiss()
-        if self.active_pop != None:
-            self.active_pop.dismiss()
-        self.active_pop = None
+        self.dismiss_active_pop()
 
     def invite_link(self,*args):
         if self.alias:
