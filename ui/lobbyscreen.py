@@ -1,3 +1,4 @@
+from mbaacc import MOON
 from json.decoder import JSONDecodeError
 import time
 import requests
@@ -11,7 +12,7 @@ from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
 import presence
 import logging
-
+from ui.playerwiki import *
 
 class LobbyScreen(Screen):
     active_pop = None  # active popup on the screen
@@ -363,6 +364,9 @@ class LobbyScreen(Screen):
             self.opponent = n
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
+
+            self.active_pop = fill_wiki_button(self,self.active_pop)
+
             p.dismiss()
             if t != None: #if accepting, run MBAA check
                 threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
@@ -405,6 +409,9 @@ class LobbyScreen(Screen):
         popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+
+        popup = fill_wiki_button(self,popup)
+                    
         popup.open()
         self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         caster.start()
@@ -458,7 +465,7 @@ class LobbyScreen(Screen):
         if self.active_pop != None:
             self.active_pop.dismiss()
         self.active_pop = None
-
+    
     def invite_link(self,*args):
         if self.alias:
             pyperclip.copy('https://invite.meltyblood.club/%s' % self.alias)

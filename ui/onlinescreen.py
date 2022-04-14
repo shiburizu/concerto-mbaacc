@@ -3,6 +3,7 @@ import threading
 from functools import partial
 from kivy.uix.screenmanager import Screen
 from ui.modals import *
+from ui.playerwiki import *
 import config
 import re
 import requests
@@ -98,7 +99,7 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Hosting'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
-        self.app.mode = 'Direct Match'
+        self.app.mode = 'Direct Match'        
         self.active_pop = popup
         popup.open()
 
@@ -111,6 +112,9 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop Playing'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        
+        popup = fill_wiki_button(self,popup)
+        
         self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
         self.active_pop = popup
         popup.open()
@@ -155,6 +159,9 @@ class OnlineScreen(Screen):
         popup.close_btn.text = 'Stop watching'
         popup.close_btn.bind(on_release=partial(
             self.dismiss, p=popup))
+        
+        popup = fill_wiki_button(self,popup)
+
         self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
         popup.open()
 
@@ -165,6 +172,9 @@ class OnlineScreen(Screen):
                 self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
                 n, d.text, r.text)
                 p.dismiss()
+                
+                self.active_pop = fill_wiki_button(self,self.active_pop)
+
         except ValueError:
             pass
 

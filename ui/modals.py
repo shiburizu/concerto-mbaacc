@@ -5,6 +5,8 @@ from kivy.properties import ObjectProperty
 class GameModal(ModalView):
     modal_txt = ObjectProperty(None)
     close_btn = ObjectProperty(None)
+    p1_char_guide = ObjectProperty(None)
+    p2_char_guide = ObjectProperty(None)
 
 
 class ProgressModal(ModalView):

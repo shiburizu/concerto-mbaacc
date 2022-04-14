@@ -1,6 +1,10 @@
 from kivy.uix.screenmanager import Screen
 from ui.modals import GameModal
+from functools import partial
 import threading
+import webbrowser
+import logging
+from ui.playerwiki import *
 
 class OfflineScreen(Screen):
     active_pop = None #active popup on the screen
@@ -49,6 +53,7 @@ class OfflineScreen(Screen):
         popup.modal_txt.text = 'Starting %s mode...\n\n%s' % (mode,tip)
         popup.close_btn.text = "Stand by..."
         popup.close_btn.disabled = True
+        popup = fill_wiki_button(self,popup)
         popup.open()
         self.app.offline_mode = mode
         self.active_pop = popup
