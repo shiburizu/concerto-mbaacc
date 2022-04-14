@@ -1002,64 +1002,30 @@
 <GameModal>:
     modal_txt: modal_txt
     close_btn: close_btn
-    p1_char_guide: p1_char_guide
-    p2_char_guide: p2_char_guide
     size_hint: None,None
     size: 400,180
     auto_dismiss: False 
     background_color: '#343B88'
-    GridLayout:
-        padding: [30,30]
-        spacing:[0,0]
-        cols: 1
-        GridLayout:
-            spacing:[0,25]
-            cols: 1
-            Label:
-                id: modal_txt
-                background_color: (0, 0, 0, 0)
-                halign: 'center'
-                valign: 'top'
-                size: self.texture_size
-            Button:
-                id: close_btn
-                font_name: 'res/texgyreheros-bolditalic.otf'
-                background_color: (255, 0, 0, 0.2)
-                outline_width: 1
-                on_press: 
-                    self.background_color = (100, 0, 0, 0.9)
-                on_release: 
-                    self.background_color = (255, 0, 0, 0.2)
-                pos_hint: {'center_x': 0.5}
-                size_hint_y: 0.32
-        BoxLayout:
-            orientation:'horizontal'
-            Button:
-                id: p1_char_guide
-                disabled: True
-                opacity: 0
-                font_name: 'res/texgyreheros-bolditalic.otf'
-                background_color: (255, 0, 0, 0.2)
-                outline_width: 1
-                on_press: 
-                    self.background_color = (100, 0, 0, 0.9)
-                on_release: 
-                    self.background_color = (255, 0, 0, 0.2)
-                pos_hint: {'center_x': 0.25}
-                size_hint_y:0.60
-            Button:
-                id: p2_char_guide
-                disabled: True
-                opacity: 0
-                font_name: 'res/texgyreheros-bolditalic.otf'
-                background_color: (255, 0, 0, 0.2)
-                outline_width: 1
-                on_press: 
-                    self.background_color = (100, 0, 0, 0.9)
-                on_release: 
-                    self.background_color = (255, 0, 0, 0.2)
-                pos_hint: {'center_x': 0.75}
-                size_hint_y:0.60               
+    BoxLayout:
+        padding: 20,20
+        orientation: 'vertical'
+        Label:
+            id: modal_txt
+            background_color: (0, 0, 0, 0)
+            text_size: self.size
+            halign: 'center'
+            valign: 'top'
+        Button:
+            id: close_btn
+            font_name: 'res/texgyreheros-bolditalic.otf'
+            background_color: (255, 0, 0, 0.2)
+            outline_width: 1
+            on_press: 
+                self.background_color = (100, 0, 0, 0.9)
+            on_release: 
+                self.background_color = (255, 0, 0, 0.2)
+            size_hint: (0.5,0.4)
+            pos_hint: {'center_x': 0.5}
 
 <ProgressModal>:
     modal_txt: modal_txt
