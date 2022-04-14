@@ -2,6 +2,11 @@ from ui.concertoscreen import ConcertoScreen
 from ui.modals import GameModal
 import threading
 
+from functools import partial
+import webbrowser
+import logging
+from ui.playerwiki import *
+
 class OfflineScreen(ConcertoScreen):
     
     def __init__(self,CApp):
@@ -45,6 +50,8 @@ class OfflineScreen(ConcertoScreen):
     def offline_pop(self, mode, tip=""):
         popup = GameModal('Starting %s mode...\n\n%s' % (mode,tip),"Stand by...")
         popup.close_btn.disabled = True
+        popup.remove_widget(popup.p1_char_guide)
+        popup.remove_widget(popup.p2_char_guide)
         popup.open()
         self.active_pop = popup
         self.app.offline_mode = mode

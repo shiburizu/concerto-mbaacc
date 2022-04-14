@@ -12,6 +12,10 @@ import presence
 import logging
 
 
+from mbaacc import MOON
+from ui.playerwiki import *
+
+
 class LobbyScreen(ConcertoScreen):
     player_list = ObjectProperty(None)  # layout for idle players
     challenge_list = ObjectProperty(None)  # layout for challenges
@@ -345,6 +349,9 @@ class LobbyScreen(ConcertoScreen):
             self.opponent = n
             self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
             n, d.text, r.text)
+
+            self.active_pop = fill_wiki_button(self,self.active_pop)
+            
             p.dismiss()
             if t != None: #if accepting, run MBAA check
                 threading.Thread(target=self.wait_for_MBAA, args=[t]).start()
@@ -384,6 +391,9 @@ class LobbyScreen(ConcertoScreen):
         caster.start()
         popup = GameModal('Watching %s' % name,'Stop watching')
         popup.bind_btn(partial(self.dismiss, p=popup))
+
+        popup = fill_wiki_button(self,popup)
+
         popup.open()
         self.active_pop = popup
         self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking

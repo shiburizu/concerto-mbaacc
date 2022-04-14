@@ -6,6 +6,8 @@ from ui.modals import *
 import config
 import requests
 
+from ui.playerwiki import *
+
 class OnlineScreen(ConcertoScreen):
     
     def __init__(self, CApp):
@@ -96,6 +98,9 @@ class OnlineScreen(ConcertoScreen):
         caster.start()
         popup = GameModal('Broadcasting %s mode...\n' % self.broadcast_pop.mode_type.text,'Stop Playing')
         popup.bind_btn(partial(self.dismiss, p=popup))
+
+        popup = fill_wiki_button(self,popup)
+
         popup.open()
         self.active_pop = popup
         self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
@@ -127,6 +132,9 @@ class OnlineScreen(ConcertoScreen):
         caster.start()
         popup = GameModal(msg='Watching IP: %s' % ip,btntext='Stop watching')
         popup.bind_btn(partial(self.dismiss,p=popup))
+
+        popup = fill_wiki_button(self,popup)
+        
         popup.open()
         self.active_pop = popup
         self.app.offline_mode = 'Spectating' #needs to be an offline mode for lobby multitasking
@@ -138,6 +146,9 @@ class OnlineScreen(ConcertoScreen):
                 self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
                 n, d.text, r.text)
                 p.dismiss()
+
+                self.active_pop = fill_wiki_button(self,self.active_pop)
+
         except ValueError:
             pass
 
