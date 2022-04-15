@@ -131,7 +131,7 @@ app_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.shib.live/l"
 VERSIONURL = "https://concerto-mbaacc.shib.live/v"
-CURRENT_VERSION = '1.03'
+CURRENT_VERSION = '1.04'
 
 def find_img(file):
     if os.path.exists(file):
