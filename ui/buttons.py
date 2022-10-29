@@ -4,11 +4,19 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.graphics import Color,Rectangle
 
+import ui.lang
+
 class MenuBtn(Button):
     def __init__(self, **kwargs):
+        if ui.lang.current_lang == "JA":
+            #set fallback for non-Roman language
+            self.font_name = 'res/JKG-M_3.ttf'
+        else:
+            self.font_name = 'res/texgyreheros-bolditalic.otf'
         super(MenuBtn, self).__init__(**kwargs)
         Window.bind(mouse_pos=self.on_mouse_pos)
         self.hover = False
+        
 
     def on_mouse_pos(self, *args):
         # Determine whether the control is in root In root control

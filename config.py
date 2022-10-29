@@ -132,7 +132,7 @@ app_config.read_string(config_string)
 LOBBYURL = "https://concerto-mbaacc.shib.live/l"
 VERSIONURL = "https://concerto-mbaacc.shib.live/v"
 CURRENT_VERSION = '1.04'
-
+DEBUG_VERSION = 'lang-beta-1' # set to '' if not in use. This string is printed to logging to track specific test builds.
 def find_img(file):
     if os.path.exists(file):
         return PATH + file

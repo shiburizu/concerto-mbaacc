@@ -10,4 +10,4 @@ class AboutScreen(ConcertoScreen):
             c = f.read()
             self.ids['about'].text = c
         self.ids['about'].bind(on_ref_press=self.open_link)
-        self.ids['version'].text = "Version %s" % config.CURRENT_VERSION
+        self.ids['version'].text = "v%s" % config.CURRENT_VERSION

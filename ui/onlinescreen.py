@@ -40,7 +40,7 @@ class OnlineScreen(ConcertoScreen):
     def online_login(self): #version and name validation before going to screen, returns a list of problems if any
         err = []
         if config.caster_config['settings']['displayName'].strip() == '':
-            err.append('Please go to Options and set a display name.')
+            err.append(self.localize('ERR_LOBBY_NONAME'))
             return err
         elif len(config.caster_config['settings']['displayName']) > 16:
             name = config.caster_config['settings']['displayName'][0:15].strip()
@@ -49,20 +49,21 @@ class OnlineScreen(ConcertoScreen):
         params = {
             'action' : 'login',
             'version' : config.CURRENT_VERSION,
-            'name' : name
+            'name' : name,
+            'lang' : self.app.lang
         }
         try:
             req = requests.get(url=config.VERSIONURL,params=params,timeout=5)
             req.raise_for_status()
         except requests.exceptions.RequestException:
-            err.append('Unable to reach the login server.')
+            err.append(self.localize('ERR_LOGIN_CONN'))
             return err
 
         resp = None
         try:
             resp = req.json()
         except JSONDecodeError:
-            err.append('Could not retrieve data from server.')
+            err.append(self.localize('ERR_BAD_RESPONSE'))
             return err
 
         if resp != None and resp['status'] != 'OK':
@@ -76,7 +77,7 @@ class OnlineScreen(ConcertoScreen):
     def matchmaking(self):
         caster = threading.Thread(target=self.app.game.matchmaking, args=[self], daemon=True)
         caster.start()
-        popup = GameModal('Searching in %s Region...' % config.caster_config['settings']['matchmakingRegion'],'Stop Searching')
+        popup = GameModal(self.localize('ONLINE_MENU_QUICK_SEARCHING') % config.caster_config['settings']['matchmakingRegion'],self.localize('TERM_CANCEL'))
         popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
         self.active_pop = popup
@@ -86,7 +87,7 @@ class OnlineScreen(ConcertoScreen):
         caster = threading.Thread(
             target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)
         caster.start()
-        popup = GameModal('Hosting %s mode...\n' % self.direct_pop.game_type.text,'Stop Hosting')
+        popup = GameModal(self.localize('ONLINE_MENU_HOSTING') % self.direct_pop.game_type.text,self.localize('TERM_QUIT'))
         popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
         self.active_pop = popup
@@ -96,7 +97,7 @@ class OnlineScreen(ConcertoScreen):
         caster = threading.Thread(
             target=self.app.game.broadcast, args=[self,config.app_config['settings']['netplay_port'], self.broadcast_pop.mode_type.text], daemon=True)
         caster.start()
-        popup = GameModal('Broadcasting %s mode...\n' % self.broadcast_pop.mode_type.text,'Stop Playing')
+        popup = GameModal(self.localize('ONLINE_MENU_BROADCASTING') % self.broadcast_pop.mode_type.text,self.localize('TERM_QUIT'))
         popup.bind_btn(partial(self.dismiss, p=popup))
 
         popup = fill_wiki_button(self,popup)
@@ -106,17 +107,17 @@ class OnlineScreen(ConcertoScreen):
         self.app.offline_mode = 'Broadcasting %s' % self.broadcast_pop.mode_type.text
 
     def set_ip(self,ip=None):
-        self.active_pop.modal_txt.text += 'IP: %s\n(copied to clipboard)' % ip
+        self.active_pop.modal_txt.text += 'IP: %s\n%s' % (ip, self.localize('TERM_COPY_CLIPBOARD'))
 
     def join(self, ip=None):
         if not self.validate_ip(ip):
             ip = self.direct_pop.join_ip.text
             if not self.validate_ip(ip):
-                self.error_message('Please supply a valid IP.')
+                self.error_message(self.localize('ERR_INVALID_IP'))
                 return None
         caster = threading.Thread(target=self.app.game.join, args=[ip, self], daemon=True)
         caster.start()
-        popup = GameModal('Connecting to IP: %s' % ip,'Stop Playing')
+        popup = GameModal(self.localize("ONLINE_MENU_CONNECTING") % ip,self.localize('TERM_QUIT'))
         popup.bind_btn(partial(self.dismiss,p=popup))
         popup.open()
         self.active_pop = popup
@@ -126,11 +127,11 @@ class OnlineScreen(ConcertoScreen):
         if not self.validate_ip(ip):
             ip = self.direct_pop.watch_ip.text
             if not self.validate_ip(ip):
-                self.error_message('Please supply a valid IP.')
+                self.error_message(self.localize('ERR_INVALID_IP'))
                 return None
         caster = threading.Thread(target=self.app.game.watch, args=[ip, self], daemon=True)
         caster.start()
-        popup = GameModal(msg='Watching IP: %s' % ip,btntext='Stop watching')
+        popup = GameModal(msg=self.localize('ONLINE_WATCHING_IP') % ip,btntext=self.localize('TERM_QUIT'))
         popup.bind_btn(partial(self.dismiss,p=popup))
 
         popup = fill_wiki_button(self,popup)
@@ -143,7 +144,7 @@ class OnlineScreen(ConcertoScreen):
         try:
             if self.app.game.playing is False:
                 self.app.game.confirm_frames(int(r.text),int(d.text))
-                self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
+                self.active_pop.modal_txt.text += "\n" + self.localize("ONLINE_MENU_CONN_INFO") % (
                 n, d.text, r.text)
                 p.dismiss()
 
@@ -156,10 +157,10 @@ class OnlineScreen(ConcertoScreen):
         popup = FrameModal()
         self.opponent = name
         if rounds != 0:
-            rounds = ", %s rounds per game" % rounds
+            rounds = "," + self.localize('GAME_MODAL_ROUNDS') % rounds
         else:
             rounds = ''
-        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Delay %s, Rollback %s[/size]' % (
+        popup.frame_txt.text = self.localize('GAME_MODAL_INFO') % (
             name, mode, rounds, delay, ping, self.app.game.ds, self.app.game.rs)
         popup.r_input.text = str(self.app.game.rs)
         popup.d_input.text = str(self.app.game.ds)

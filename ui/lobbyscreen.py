@@ -10,11 +10,7 @@ from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
 import presence
 import logging
-
-
-from mbaacc import MOON
 from ui.playerwiki import *
-
 
 class LobbyScreen(ConcertoScreen):
     player_list = ObjectProperty(None)  # layout for idle players
@@ -50,9 +46,9 @@ class LobbyScreen(ConcertoScreen):
             self.code = j['id']
             if j['alias']:
                 self.alias = j['alias']
-                self.lobby_code.text = "[Lobby Code %s]" % self.alias
+                self.lobby_code.text = "[%s %s]" % (self.localize("TERM_LOBBYCODE"),self.alias)
             else:
-                self.lobby_code.text = "[%s Lobby Code %s]" % (type, self.code)
+                self.lobby_code.text = "[%s %s %s]" % (self.localize("TERM_%s" % type.upper()), self.localize("TERM_LOBBYCODE"), self.code)
             self.widget_index = {}
             self.player_list.clear_widgets()
             self.match_list.clear_widgets()
@@ -72,7 +68,7 @@ class LobbyScreen(ConcertoScreen):
         if j['challenges'] != []:
             if 'c' not in self.widget_index:
                 h = DummyBtn()
-                h.text = 'Challenges (click to accept)'
+                h.text = self.localize("LOBBY_MENU_CHALLENGES")
                 self.challenge_list.add_widget(h)
                 self.widget_index.update({'c':h})
             for i in j['challenges']:  # name, id, ip of challenger
@@ -115,7 +111,7 @@ class LobbyScreen(ConcertoScreen):
         if j['idle'] != []:
             if 'i' not in self.widget_index:
                 h = DummyBtn()
-                h.text = 'Idle players (click to challenge)'
+                h.text = self.localize("LOBBY_MENU_IDLE")
                 self.player_list.add_widget(h)
                 self.widget_index.update({'i':h})
             for i in j['idle']:
@@ -129,12 +125,12 @@ class LobbyScreen(ConcertoScreen):
                             p.ids['PlayerBtn'].bind(on_release=partial(
                                 self.send_challenge, name=i[0], id=i[1]))
                             if i[1] == self.watch_player:
-                                p.ids['WatchBtn'].text = 'FOLLOWING'
+                                p.ids['WatchBtn'].text = self.localize("TERM_FOLLOWING").upper()
                             else:
-                                p.ids['WatchBtn'].text = 'FOLLOW'
+                                p.ids['WatchBtn'].text = self.localize("TERM_FOLLOW").upper()
                             p.ids['WatchBtn'].bind(on_release=partial(self.follow_player, i=i[1]))
                         else:
-                            p.ids['PlayerBtn'].text += " (self)"
+                            p.ids['PlayerBtn'].text += " (%s)" % self.localize("TERM_SELF")
                             p.ids['WatchBtn'].disabled = True
                             p.ids['WatchBtn'].text = ""
                         self.player_list.add_widget(p)
@@ -151,7 +147,7 @@ class LobbyScreen(ConcertoScreen):
         if j['playing'] != []:
             if 'w' not in self.widget_index:
                 h = DummyBtn()
-                h.text = 'Now playing (click to watch)'
+                h.text = self.localize("LOBBY_MENU_PLAYING")
                 self.match_list.add_widget(h)
                 self.widget_index.update({'w':h})
             for i in j['playing']:
@@ -204,24 +200,24 @@ class LobbyScreen(ConcertoScreen):
             self.lobby_updater.start()
         else:
             if len(self.challenge_list.children) > 0:
-                self.app.update_lobby_button('LOBBY %s (%s)' % (self.code,len(self.challenge_list.children) - 1))
+                self.app.update_lobby_button('%s %s (%s)' % (self.localize("TERM_LOBBY").upper(),self.code,len(self.challenge_list.children) - 1))
             else:
-                self.app.update_lobby_button('LOBBY %s ' % self.code)
+                self.app.update_lobby_button('%s %s' % (self.localize("TERM_LOBBY").upper(), self.code))
 
     def follow_player(self,obj,i):
         w = self.widget_index.get(i).ids['WatchBtn']
-        if w.text == 'FOLLOW':
+        if w.text == self.localize("TERM_FOLLOW").upper():
             self.watch_player = i
             for k,v in self.widget_index.items(): # clear first
                 try:
                     if v.parent == self.player_list and k != self.player_id:
-                        v.ids['WatchBtn'].text = 'FOLLOW'
+                        v.ids['WatchBtn'].text = self.localize("TERM_FOLLOW").upper()
                 except KeyError:
                     pass
-            w.text = 'FOLLOWING'
+            w.text = self.localize("TERM_FOLLOWING").upper()
         else:
             self.watch_player = None
-            w.text = 'FOLLOW'
+            w.text = self.localize("TERM_FOLLOW").upper()
 
     def auto_refresh(self):
         net = requests.Session()
@@ -280,7 +276,7 @@ class LobbyScreen(ConcertoScreen):
         self.app.remove_lobby_button()
         self.app.LobbyList.refresh()
         if msg:
-            GameModal(msg,'Dismiss').open()
+            GameModal(msg,self.localize("TERM_DISMISS")).open()
         # Set Rich Presence to main menu again
         if self.app.discord is True:
             presence.menu()
@@ -291,12 +287,12 @@ class LobbyScreen(ConcertoScreen):
         for k,v in self.widget_index.items():
             try:
                 if k != self.player_id and v.parent == self.player_list:
-                    v.ids['WatchBtn'].text = "FOLLOW"
+                    v.ids['WatchBtn'].text = self.localize("TERM_FOLLOW").upper()
             except KeyError:
                 pass
         self.challenge_name = name
         self.challenge_id = id
-        popup = GameModal('Challenging %s' % self.challenge_name,'Stop Playing')
+        popup = GameModal(self.localize("LOBBY_MENU_CHALLENGING",self.challenge_name),self.localize("TERM_QUIT"))
         popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
         self.active_pop = popup
@@ -321,14 +317,14 @@ class LobbyScreen(ConcertoScreen):
         for k,v in self.widget_index.items():
             try:
                 if k != self.player_id and v.parent == self.player_list:
-                    v.ids['WatchBtn'].text = "FOLLOW"
+                    v.ids['WatchBtn'].text = self.localize("TERM_FOLLOW").upper()
             except KeyError:
                 pass
         caster = threading.Thread(target=self.app.game.join, args=[
                                   ip, self, id], daemon=True)
         caster.start()
         threading.Thread(target=self.send_pre_accept,args=[self.player_id,id]).start()
-        popup = GameModal('Connecting to %s' % name,'Stop Playing')
+        popup = GameModal(self.localize("LOBBY_MENU_CONNECTING",name),self.localize("TERM_QUIT"))
         popup.bind_btn(partial(self.dismiss, p=popup))
         popup.open()
         self.active_pop = popup
@@ -347,8 +343,8 @@ class LobbyScreen(ConcertoScreen):
         try:
             self.app.game.confirm_frames(int(r.text),int(d.text))
             self.opponent = n
-            self.active_pop.modal_txt.text += "\nConnected to: %s, %s Delay & %s Rollback" % (
-            n, d.text, r.text)
+            self.active_pop.modal_txt.text += "\n %s" % self.localize("LOBBY_MENU_CONN_INFO",(
+            n, d.text, r.text))
 
             self.active_pop = fill_wiki_button(self,self.active_pop)
             
@@ -383,13 +379,13 @@ class LobbyScreen(ConcertoScreen):
         for k,v in self.widget_index.items():
             try:
                 if k != self.player_id and v.parent == self.player_list:
-                    v.ids['WatchBtn'].text = "FOLLOW"
+                    v.ids['WatchBtn'].text = self.localize("TERM_FOLLOW").upper()
             except KeyError:
                 pass
         caster = threading.Thread(
             target=self.app.game.watch, args=[ip,self], daemon=True)
         caster.start()
-        popup = GameModal('Watching %s' % name,'Stop watching')
+        popup = GameModal(self.localize("LOBBY_MENU_WATCHING",name),self.localize("TERM_QUIT"))
         popup.bind_btn(partial(self.dismiss, p=popup))
 
         popup = fill_wiki_button(self,popup)
@@ -401,11 +397,11 @@ class LobbyScreen(ConcertoScreen):
     def set_frames(self, name, delay, ping, target=None, mode="Versus", rounds=2):
         popup = FrameModal()
         if rounds != 0:
-            rounds = ", %s rounds per game" % rounds
+            rounds = ", %s" % self.localize("GAME_MODAL_ROUNDS",rounds)
         else:
             rounds = ''
-        popup.frame_txt.text = '[b]Connected to %s[/b]\n[size=14][u]%s mode%s[/u]\nNetwork delay: %s (%s ms)\nSuggested: Delay %s, Rollback %s[/size]' % (
-            name, mode, rounds, delay, ping, self.app.game.ds, self.app.game.rs)
+        popup.frame_txt.text =  self.localize("GAME_MODAL_INFO",(
+            name, mode, rounds, delay, ping, self.app.game.ds, self.app.game.rs))
         popup.r_input.text = str(self.app.game.rs)
         popup.d_input.text = str(self.app.game.ds)
         popup.start_btn.bind(on_release=partial(
@@ -438,8 +434,8 @@ class LobbyScreen(ConcertoScreen):
         threading.Thread(target=self.invite_ui).start()
 
     def invite_ui(self):
-        if self.lobby_code.text != 'Link copied to clipboard':
+        if self.lobby_code.text != self.localize("LOBBY_MENU_LINK"):
             t = self.lobby_code.text
-            self.lobby_code.text = 'Link copied to clipboard'
+            self.lobby_code.text = self.localize("LOBBY_MENU_LINK")
             time.sleep(2)
             self.lobby_code.text = t

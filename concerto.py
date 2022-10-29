@@ -1,11 +1,13 @@
 import sys
 from config import *  # App config functions
+from gamedata import *
 # System
 import requests
 import time
 import threading
 import subprocess
 import winreg
+import ui.lang
 # Utility scripts
 # Discord Rich Presence
 import presence
@@ -28,6 +30,7 @@ class Concerto(App):
         self.sm = ScreenManager(transition=FadeTransition(duration=0.10))
         self.game = Caster(CApp=self)  # expects Caster object
         self.player_name = 'Concerto Player' #static player name to use for online lobbies
+        self.lang = ui.lang.current_lang
 
     def build(self):
         self.sound = sound.Sound()
@@ -54,6 +57,9 @@ class Concerto(App):
         return self.sm
 
     def on_start(self):
+        logging.info('Concerto: Version %s' % CURRENT_VERSION)
+        if DEBUG_VERSION != "":
+            logging.info('Concerto: Debug Version %s' % DEBUG_VERSION)
         logging.warning('Concerto: old CWD is %s' % os.getcwd()) 
         os.chdir(PATH)
         logging.warning('Concerto: new CWD is %s' % os.getcwd())
@@ -73,18 +79,20 @@ class Concerto(App):
             try:
                 winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, 'concerto')
             except:
-                self.MainScreen.ids['welcome'].text = 'To join lobbies via Discord/invite links run Concerto as admin once.'
+                self.MainScreen.ids['welcome'].text = ui.lang.localize('TIP_CONCERTO_INVITES')
                 logging.warning('Concerto: please start as admin once to add concerto protocol handler')
 
         logging.warning('Concerto: argv is %s' % sys.argv[0])
         s = PATH
         logging.warning('Concerto: PATH is %s' % s)
-
+        #TODO integrity check all CCCaster essential assets
         if caster_config is None:
-            e.append('"cccaster" folder not found.')
-            e.append('Please fix the above problems and restart Concerto.')
+            e.append(ui.lang.localize('ERR_CCCASTER_MISSING'))
+        if game_config is None:
+            e.append(ui.lang.localize('ERR_SYSDATA_MISSING'))
         if e != []:
             self.sound.muted = True
+            e.append(ui.lang.localize('ERR_FIX_ISSUES'))
             self.MainScreen.error_message(e,fatal=True)
         else:
             #if all is well, start loading in user options
@@ -192,8 +200,6 @@ class Concerto(App):
 def run():
     CApp = Concerto()
     CApp.run()
-        
-        
 
 if __name__ == '__main__':
     run()

@@ -8,9 +8,7 @@ from kivy.properties import ObjectProperty
 from ui.concertoscreen import ConcertoScreen
 from kivy.clock import Clock
 
-from ui.modals import GameModal
 from ui.buttons import DummyBtn
-
 
 class LobbyList(ConcertoScreen):
     lobby_type = ObjectProperty(None)  # public or private lobby to create
@@ -33,7 +31,7 @@ class LobbyList(ConcertoScreen):
             self.app.LobbyScreen.create(a, first=True, 
                 type=a['type'])
         else:
-            self.error_message('Unable to create lobby: %s' % a['msg'])
+            self.error_message('%s: %s' % (self.localize("ERR_LOBBY_CREATE"),a['msg']))
 
     def join(self, obj=None, code=None):
         if code is None:
@@ -48,7 +46,7 @@ class LobbyList(ConcertoScreen):
         try:
             a = requests.get(url=LOBBYURL, params=p, timeout=5).json()
         except JSONDecodeError:
-            self.error_message("Bad response from server. Try again.")
+            self.error_message(self.localize("ERR_BAD_RESPONSE"))
         else:
             if a['status'] == 'OK':
                 self.app.sm.current = 'Lobby'
@@ -70,16 +68,16 @@ class LobbyList(ConcertoScreen):
                 for i in a['lobbies']:
                     b = DummyBtn()
                     b.halign = 'left'
-                    b.text = "ID %s: %s players" % (i[0], i[1])
+                    b.text = "ID %s: %s %s" % (i[0], i[1],self.localize("TERM_PLAYERS"))
                     b.bind(on_release=partial(self.join, code=i[0]))
                     self.lobby_view.add_widget(b)
             else:
                 b = DummyBtn()
                 b.halign = 'left'
-                b.text = "No public lobbies found. Why not create one?"
+                b.text = self.localize("ERR_NO_LOBBIES")
                 self.lobby_view.add_widget(b)
             if self.app.sm.current != 'LobbyList':
                 Clock.schedule_once(lambda dt: self.switch_to_list(),0)
         except requests.exceptions.ConnectionError as e:
             Clock.schedule_once(lambda dt: self.switch_to_online(),0)
-            self.error_message('Unable to establish a connection to lobby server.')
+            self.error_message(self.localize("ERR_LOBBY_CONN"))

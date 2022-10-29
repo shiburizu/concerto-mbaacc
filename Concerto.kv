@@ -3,6 +3,7 @@
 #:import res kivy.resources
 #:import pyperclip pyperclip
 #:import cfg config
+#:import lang ui.lang
 
 <MenuBtn>
     text_size: self.size
@@ -13,7 +14,6 @@
     padding_x: 50
     background_normal: 'res/menubtn.png'
     outline_width: 2
-    font_name: 'res/texgyreheros-bolditalic.otf'
     on_press: self.background_color = (255, 0, 0, 1)
     on_release: self.background_color = (1, 1 ,1 ,1)
     
@@ -114,22 +114,22 @@
                 padding: (0,50)
                 spacing: [0,10]
                 MenuBtn:
-                    text: '1. OFFLINE'
+                    text: '1. %s' % lang.localize("MAIN_MENU_OFFLINE")
                     on_release: app.sm.current = 'Offline'
                 MenuBtn:
-                    text: '2. ONLINE'
+                    text: '2. %s' % lang.localize("MAIN_MENU_ONLINE")
                     on_release: app.sm.current = 'Online'
                 MenuBtn:
-                    text: '3. RESOURCES'
+                    text: '3. %s' % lang.localize("MAIN_MENU_RESOURCES")
                     on_release: app.sm.current = 'Resources'
                 MenuBtn:
-                    text: '4. OPTIONS'
+                    text: '4. %s' % lang.localize("MAIN_MENU_OPTIONS")
                     on_release: app.OptionScreen.load()
                 MenuBtn:
-                    text: '5. ABOUT'
+                    text: '5. %s' % lang.localize("MAIN_MENU_ABOUT")
                     on_release: app.sm.current = 'About'
                 MenuBtn:
-                    text: '6. UPDATE'
+                    text: '6. %s' % lang.localize("MAIN_MENU_UPDATE")
                     on_release: root.update()
         Image:
             source: cfg.find_img('main.png')
@@ -146,7 +146,7 @@
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: cfg.img_credit('main.png','[ref=x]By Bee Chan[/ref]')
+                text: cfg.img_credit('main.png','[ref=x]Bee Chan[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -163,7 +163,7 @@
             padding: 0,40
             DummyBtn:
                 id: welcome
-                text: 'Welcome to Concerto for Melty Blood Actress Again Current Code.'
+                text: lang.localize("MAIN_MENU_WELCOME")
 
 <AboutScreen>
     name: 'About'
@@ -177,7 +177,7 @@
             BoxLayout:
                 size_hint_y: 0.1
                 MenuBtn:
-                    text: 'BACK'
+                    text: lang.localize("TERM_BACK").upper()
                     on_release: 
                         app.sm.current = 'Main'
                     size_hint_y: 1
@@ -225,7 +225,7 @@
                 MenuBtn:
                     size_hint_x: 0.348
                     padding_x: 25
-                    text: 'LEAVE'
+                    text: lang.localize("TERM_LEAVE").upper()
                     on_release: 
                         root.exit()
                 DummyBtn:
@@ -274,7 +274,7 @@
         anchor_x: 'center'
         anchor_y: 'top'
         LobbyBtn:
-            text: 'MAIN MENU'
+            text: lang.localize("LOBBY_MENU_MAINMENU")
             on_release: app.sm.current = 'Main'
                         
 <LobbyList>:
@@ -293,7 +293,7 @@
             orientation: 'vertical'
             Label:
                 size_hint_y: 0.1
-                text: 'Public Lobbies'
+                text: lang.localize("LOBBY_LIST_HEADER")
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 outline_width: 1
             RecycleView:
@@ -321,7 +321,7 @@
                         Label:
                             text_size: self.size
                             outline_width: 1
-                            text: 'Lobby ID: '
+                            text: '%s: ' % lang.localize('TERM_LOBBYCODE')
                             halign: 'right'
                             valign: 'middle'
                         TextInput:
@@ -330,7 +330,7 @@
                             foreground_color: (255, 255, 255, 1)
                             background_color: (255, 0, 0, 0.2)
                         Button:
-                            text: 'Join'
+                            text: lang.localize('TERM_JOIN')
                             outline_width: 1
                             background_color: '#343B88'
                             on_release: root.join()
@@ -340,7 +340,7 @@
                         cols: 3
                         Label:
                             text_size: self.size
-                            text: 'Type: '
+                            text: '%s: ' % lang.localize("TERM_TYPE")
                             halign: 'right'
                             valign: 'middle'
                             outline_width: 1
@@ -351,7 +351,7 @@
                             outline_width: 1
                             background_color: '#343B88'
                         Button:
-                            text: 'Create'
+                            text: lang.localize('TERM_CREATE')
                             background_color: '#343B88'
                             outline_width: 1
                             on_release: root.create()
@@ -360,7 +360,7 @@
                     padding: [20,5]
                     spacing: [0,5]
                     Button:
-                        text: 'Refresh List'
+                        text: lang.localize('TERM_REFRESH')
                         outline_width: 1
                         background_color: '#343B88'
                         size_hint_y: None
@@ -373,7 +373,7 @@
                         on_release: 
                             root.refresh()
                     Button:
-                        text: 'Back'
+                        text: lang.localize('TERM_BACK')
                         outline_width: 1
                         background_color: '#343B88'
                         size_hint_y: None
@@ -405,30 +405,30 @@
                 padding: (0,50)
                 spacing: [0,10]
                 MenuBtn:
-                    text: '1. DIRECT MATCH'
+                    text: '1. %s' % lang.localize("ONLINE_MENU_DIRECT")
                     on_release:
                         root.direct()
                 MenuBtn:
-                    text: '2. QUICK MATCH'
+                    text: '2. %s' % lang.localize("ONLINE_MENU_QUICK")
                     on_release:
                         root.matchmaking()
                 MenuBtn:
-                    text: '3. LOBBIES'
+                    text: '3. %s' % lang.localize("ONLINE_MENU_LOBBY")
                     on_release: 
                         root.lobby()
                 MenuBtn:
-                    text: '4. BROADCAST'
+                    text: '4. %s' % lang.localize("ONLINE_MENU_BROADCAST")
                     on_release:
                         root.broadcast()
                 MenuBtn:
-                    text: '0. BACK'
+                    text: '0. %s' % lang.localize("TERM_BACK").upper()
                     on_release: app.sm.current = 'Main'
         Image:
             source: cfg.find_img('online.png')
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: cfg.img_credit('online.png','[ref=x]By abitofBaileys[/ref]')
+                text: cfg.img_credit('online.png','[ref=x]abitofBaileys[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -469,14 +469,14 @@
                     on_release:
                         webbrowser.open('http://mbaacc.melty.games/')
                 MenuBtn:
-                    text: '0. BACK'
+                    text: '0. %s' % lang.localize('TERM_BACK').upper()
                     on_release: app.sm.current = 'Main'
         Image:
             source: cfg.find_img('resources.png')
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: cfg.img_credit('resources.png','[ref=x]By kohakudoori[/ref]')
+                text: cfg.img_credit('resources.png','[ref=x]kohakudoori[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -498,7 +498,7 @@
             orientation: 'vertical'
             MenuBtn:
                 size_hint: (1, 0.1)
-                text: 'BACK'
+                text: lang.localize("TERM_BACK").upper()
                 on_release: 
                     app.sm.current = 'Main'
             TabbedPanel:
@@ -577,35 +577,35 @@
                 padding: (0,50)
                 spacing: [0,5]
                 MenuBtn:
-                    text: '1. LOCAL VS'
+                    text: '1. %s' % lang.localize("OFFLINE_MENU_LOCAL_VS")
                     on_release: 
                         root.local()
                 MenuBtn:
-                    text: '2. TOURNAMENT VS'
+                    text: '2. %s' % lang.localize("OFFLINE_MENU_TOURNAMENT_VS")
                     on_release: 
                         root.tournament()
                 MenuBtn:
-                    text: '3. VERSUS CPU'
+                    text: '3. %s' % lang.localize("OFFLINE_MENU_CPU_VS")
                     on_release: 
                         root.cpu()
                 MenuBtn:
-                    text: '4. TRAINING MODE'
+                    text: '4. %s' % lang.localize("OFFLINE_MENU_TRAINING")
                     on_release: 
                         root.training()
                 MenuBtn:
-                    text: '5. REPLAY THEATER'
+                    text: '5. %s' % lang.localize("OFFLINE_MENU_REPLAYS")
                     on_release: 
                         root.replays()
                 MenuBtn:
-                    text: '6. TRIALS'
+                    text: '6. %s' % lang.localize("OFFLINE_MENU_TRIALS")
                     on_release: 
                         root.trials()
                 MenuBtn:
-                    text: '7. STANDALONE MBAACC'
+                    text: '7. %s' % lang.localize("OFFLINE_MENU_STANDALONE")
                     on_release: 
                         root.standalone()
                 MenuBtn:
-                    text: '0. BACK'
+                    text: '0. %s' % lang.localize("TERM_BACK").upper()
                     on_release: 
                         app.sm.current = 'Main'
         Image:
@@ -613,7 +613,7 @@
         BoxLayout:
             size_hint: (0.2, 0.1)
             Label:
-                text: cfg.img_credit('offline.png','[ref=x]By Onemi[/ref]')
+                text: cfg.img_credit('offline.png','[ref=x]Onemi[/ref]')
                 outline_width: 2
                 markup: True
                 font_name: 'res/texgyreheros-bolditalic.otf'
@@ -636,13 +636,13 @@
             BoxLayout:
                 size_hint: (1, 0.1)
                 MenuBtn:
-                    text: 'BACK'
+                    text: lang.localize("TERM_BACK").upper()
                     size_hint_x: 0.8
                     on_release: 
                         app.sm.current = 'Main'
                     size_hint_y: 1
                 Button:
-                    text: 'SAVE'
+                    text: lang.localize("TERM_SAVE").upper()
                     font_name: 'res/texgyreheros-bolditalic.otf'
                     size_hint_x: 0.2
                     outline_width: 2
@@ -663,113 +663,113 @@
                     size_hint_y: None
                     height: self.minimum_height
                     DummyBtn:
-                        text: 'Tip: Press F4 during Training Mode to bind controls.'
+                        text: lang.localize("TIP_CONTROLS")
                     DummyBtn:
-                        text: 'Concerto Options'
+                        text: lang.localize("OPT_HEADER_CONCERTO")
                     OptionRow:
                         Label:
-                            text: 'Online play port (0 for auto)'
+                            text: lang.localize("OPT_NETPLAY_PORT")
                         TextInput:
                             id: netplay_port
                             multiline: False
                             input_filter: 'int'
                     OptionRow:
                         Label:
-                            text: 'Mute Lobby Alerts'
+                            text: lang.localize("OPT_MUTE_ALERTS")
                         CheckBox:
                             id: mute_alerts
                     OptionRow:
                         Label:
-                            text: 'Mute all music'
+                            text: lang.localize("OPT_MUTE_BGM")
                         CheckBox:
                             id: mute_bgm
                     OptionRow:
                         Label:
-                            text: 'Discord Integration (requires restart)'
+                            text: lang.localize("OPT_DISCORD")
                         CheckBox:
                             id: discord
                     OptionRow:
                         Label:
-                            text: 'Write match info to files'
+                            text: lang.localize("OPT_WRITE_SCORES")
                         CheckBox:
                             id: write_scores
                     OptionRow:
                         Label:
-                            text: 'CCCaster EXE filename'
+                            text: lang.localize("OPT_CASTER_EXE")
                         TextInput:
                             id: caster_exe
                             multiline: False
                     OptionRow:
                         Label:
-                            text: 'Concerto BGM Track'
+                            text: lang.localize("OPT_BGM_TRACK")
                         BoxLayout:
                             Spinner:
                                 id: bgm_track
                                 values: ["Soubrette's Walkway","Fuzzy"]
                     DummyBtn:
-                        text: 'CCCaster Options'
+                        text: lang.localize("OPT_HEADER_CASTER")
                     OptionRow:
                         Label:
-                            text: 'Player Name'
+                            text: lang.localize("OPT_DISPLAY_NAME")
                         TextInput:
                             id: display_name
                             multiline: False
                     OptionRow:
                         Label:
-                            text: 'Max allowed network delay'
+                            text: lang.localize("OPT_MAX_DELAY")
                         TextInput:
                             id: max_delay
                             multiline: False
                             input_filter: 'int'
                     OptionRow:
                         Label:
-                            text: 'Default rollback frames'
+                            text: lang.localize("OPT_DEFAULT_ROLLBACK")
                         TextInput:
                             id: default_rollback
                             multiline: False
                             input_filter: 'int'
                     OptionRow:
                         Label:
-                            text: 'Held start button in VS (seconds)'
+                            text: lang.localize("OPT_HELD_START")
                         TextInput:
                             id: held_start
                             multiline: False
                             input_filter: 'float'
                     OptionRow:
                         Label:
-                            text: 'Matchmaking Region'
+                            text: lang.localize("OPT_MATCHMAKING_REGION")
                         BoxLayout:
                             Spinner:
                                 id: matchmaking_region
                                 values: [ "NA West", "NA East", "SA", "EU", "Middle East", "Asia", "OCE" ]
                     OptionRow:
                         Label:
-                            text: 'Play sound on connect'
+                            text: lang.localize("OPT_ALERT_CONNECT")
                         CheckBox:
                             id: alert_connect
                     OptionRow:
                         Label:
-                            text: 'Show full character names'
+                            text: lang.localize("OPT_FULL_NAMES")
                         CheckBox:
                             id: full_names
                     OptionRow:
                         Label:
-                            text: 'Auto-save replays'
+                            text: lang.localize("OPT_REPLAY_ROLLBACK")
                         CheckBox:
                             id: replay_rollback
                     OptionRow:
                         Label:
-                            text: 'Start game with high CPU priority'
+                            text: lang.localize("OPT_CPU_PRIORITY")
                         CheckBox:
                             id: cpu_priority
                     OptionRow:
                         Label:
-                            text: 'Check for CCCaster updates'
+                            text: lang.localize("OPT_CASTER_UPDATES")
                         CheckBox:
                             id: caster_updates
                     OptionRow:
                         Label:
-                            text: 'Versus win count (local/online host)'
+                            text: lang.localize("OPT_VERSUS_COUNT")
                         BoxLayout:
                             Label:
                                 text: str(versus_count.value)
@@ -781,10 +781,10 @@
                                 step: 1
                                 size_hint_x: 0.8
                     DummyBtn:
-                        text: 'Audio/Video Options'
+                        text: lang.localize("OPT_HEADER_AV")
                     OptionRow:
                         Label:
-                            text: 'BGM Volume'
+                            text: lang.localize("OPT_BGM_VOL")
                         BoxLayout:
                             Label:
                                 text: str(int(bgm_vol.value))
@@ -797,7 +797,7 @@
                                 size_hint_x: 0.8
                     OptionRow:
                         Label:
-                            text: 'SFX Volume'
+                            text: lang.localize("OPT_SFX_VOL")
                         BoxLayout:
                             Label:
                                 text: str(int(sfx_vol.value))
@@ -810,26 +810,26 @@
                                 size_hint_x: 0.8
                     OptionRow:
                         Label:
-                            text: 'Character Filter'
+                            text: lang.localize("OPT_CHARACTER_FILTER")
                         BoxLayout:
                             Spinner:
                                 id: character_filter
                                 values: ['Off','Edge','Full','Linear']
                     OptionRow:
                         Label:
-                            text: 'Screen Filter'
+                            text: lang.localize("OPT_SCREEN_FILTER")
                         CheckBox:
                             id: screen_filter
                     OptionRow:
                         Label:
-                            text: 'Monitor aspect ratio'
+                            text: lang.localize("OPT_ASPECT_RATIO")
                         BoxLayout:
                             Spinner:
                                 id: aspect_ratio
                                 values: ['Normal','Auto','4:3','16:9','16:10','5:4','15:9']
                     OptionRow:
                         Label:
-                            text: 'Show FPS Counter'
+                            text: lang.localize("OPT_ASPECT_RATIO")
                         CheckBox:
                             id: view_fps
     AnchorLayout
@@ -859,12 +859,12 @@
         spacing: [0,8]
         cols: 1
         Label:
-            text: 'Broadcast a local offline session for online spectators.'
+            text: lang.localize("ONLINE_MODAL_BROADCAST")
             size_hint_y: 0.32
         BoxLayout:
             size_hint_y: 0.36
             Label:
-                text: 'Game type: '
+                text: "%s: " % lang.localize("TERM_GAMETYPE")
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 outline_width: 1
                 size_hint_x: 0.3
@@ -877,7 +877,7 @@
                 background_color: (255, 0, 0, 0.2)
                 size_hint_x: 0.5
             Button:
-                text: 'Start'
+                text: lang.localize("TERM_START")
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 outline_width: 1
                 background_color: '#343B88'
@@ -886,7 +886,7 @@
                     root.screen.start_broadcast()
         Button:
             size_hint_y: 0.32
-            text: 'Close'
+            text: lang.localize("TERM_CLOSE")
             font_name: 'res/texgyreheros-bolditalic.otf'
             outline_width: 1
             background_color: (255, 0, 0, 0.2)
@@ -913,12 +913,12 @@
             do_default_tab: False
             background_color: '#343B88'
             TabbedPanelItem:
-                text: 'Host'
+                text: lang.localize("TERM_HOST")
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: '#343B88'
                 BoxLayout:
                     Label:
-                        text: 'Game type: '
+                        text: "%s: " % lang.localize("TERM_GAMETYPE")
                         font_name: 'res/texgyreheros-bolditalic.otf'
                         outline_width: 1
                         size_hint_x: 0.3
@@ -932,7 +932,7 @@
                         background_color: (255, 0, 0, 0.2)
                         size_hint_x: 0.5
                     Button:
-                        text: 'Start'
+                        text: lang.localize("TERM_START")
                         font_name: 'res/texgyreheros-bolditalic.otf'
                         outline_width: 1
                         background_color: '#343B88'
@@ -945,7 +945,7 @@
                 background_color: '#343B88'
                 BoxLayout:
                     Label:
-                        text: 'Connect to IP: '
+                        text: '%s: ' % lang.localize("TERM_CONNECTIP")
                         font_name: 'res/texgyreheros-bolditalic.otf'
                         outline_width: 1
                         size_hint_x: 0.3
@@ -956,7 +956,7 @@
                         foreground_color: (255, 255, 255, 1)
                         background_color: (255, 0, 0, 0.2)
                     Button:
-                        text: 'Join'
+                        text: lang.localize("TERM_START")
                         font_name: 'res/texgyreheros-bolditalic.otf'
                         outline_width: 1
                         background_color: '#343B88'
@@ -964,12 +964,12 @@
                         on_release:
                             root.screen.join()
             TabbedPanelItem:
-                text: 'Watch'
+                text: lang.localize("TERM_WATCH")
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: '#343B88'
                 BoxLayout:
                     Label:
-                        text: 'Connect to IP: '
+                        text: '%s: ' % lang.localize("TERM_CONNECTIP")
                         font_name: 'res/texgyreheros-bolditalic.otf'
                         outline_width: 1
                         size_hint_x: 0.3
@@ -980,7 +980,7 @@
                         foreground_color: (255, 255, 255, 1)
                         background_color: (255, 0, 0, 0.2)
                     Button:
-                        text: 'Watch'
+                        text: lang.localize("TERM_WATCH")
                         font_name: 'res/texgyreheros-bolditalic.otf'
                         outline_width: 1
                         background_color: '#343B88'
@@ -989,7 +989,7 @@
                             root.screen.watch()
         Button:
             size_hint_y: 0.3
-            text: 'Close'
+            text: lang.localize("TERM_CLOSE")
             font_name: 'res/texgyreheros-bolditalic.otf'
             outline_width: 1
             background_color: (255, 0, 0, 0.2)
@@ -1115,8 +1115,6 @@
                 on_release: 
                     background_color: (255, 0, 0, 0.2)
 
-
-
 <FrameModal>:
     frame_txt: frame_txt
     start_btn: start_btn
@@ -1146,7 +1144,7 @@
                 size_hint_x: None
                 width: self.minimum_width
                 Label:
-                    text: 'Delay:'
+                    text: '%s:' % lang.localize('TERM_DELAY')
                     background_color: (0, 0, 0, 0)
                     outline_width: 1
                     size_hint_x: None
@@ -1160,7 +1158,7 @@
                     size_hint_x: None
                     width: 30
                 Label:
-                    text: 'Rollback:'
+                    text: '%s:' % lang.localize('TERM_ROLLBACK')
                     background_color: (0, 0, 0, 0)
                     outline_width: 1
                     size_hint_x: None
@@ -1176,7 +1174,7 @@
         BoxLayout:
             size_hint_y: 0.25
             Button:
-                text: 'Cancel'
+                text: lang.localize('TERM_CANCEL')
                 id: close_btn
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
@@ -1185,7 +1183,7 @@
                 on_release: 
                     background_color: (255, 0, 0, 0.2)
             Button:
-                text: 'Start'
+                text: lang.localize('TERM_START')
                 id: start_btn
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)

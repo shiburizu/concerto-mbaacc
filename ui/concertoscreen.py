@@ -1,6 +1,8 @@
 from kivy.uix.screenmanager import Screen
+from kivy.clock import Clock
 import config
 from ui.modals import GameModal, ProgressModal, ChoiceModal
+import ui.lang
 import requests
 import urllib3
 import os
@@ -25,6 +27,9 @@ class ConcertoScreen(Screen):
                 return True
         return False
 
+    def localize(self,s,v=None):
+        return ui.lang.localize(s,v)
+
     def open_link(self,obj,val):
         webbrowser.open(val)
 
@@ -37,41 +42,54 @@ class ConcertoScreen(Screen):
     def switch_to_lobby(self):
         self.app.sm.current = 'Lobby'
 
-    def dismiss_active_pop(self):
+    def dismiss_active_pop(self,obj=None):
         if self.active_pop:
             self.active_pop.dismiss()
             self.active_pop = None
 
     def error_message(self,e,fatal=False,switch=None):
+        Clock.schedule_once(partial(self.error_message_func,e,fatal,switch))
+
+    def error_message_func(self,e,fatal=False,switch=None,obj=None):
         if switch:
             self.app.sm.current = switch
-        self.dismiss_active_pop()
+        #if isinstance(self.active_pop,GameModal):
+        #    popup = self.active_pop
+        #else:
         popup = GameModal()
+        popup.modal_txt.text = ""
         if isinstance(e,list):
             for i in e:
                 popup.modal_txt.text += i + '\n'
         else:
             popup.modal_txt.text += e
         if fatal:
+            popup.close_btn.disabled = False
             popup.bind_btn(self.app.stop)
-            popup.close_btn.text = "Exit Concerto"
-        popup.open()
+            popup.close_btn.text = self.localize("TERM_EXITPROGRAM")
+        else:
+            popup.close_btn.disabled = False
+            popup.bind_btn(self.dismiss_active_pop)
+            popup.close_btn.text = self.localize("TERM_DISMISS")
+        if popup != self.active_pop:
+            self.dismiss_active_pop()
+            popup.open()
 
     def update(self):
         choice = ChoiceModal()
         self.active_pop = choice
-        choice.modal_txt.text = "Checking for update..."
-        choice.btn_1.text = "Close"
-        choice.btn_2.text = "Confirm"
+        choice.modal_txt.text = self.localize("TERM_CHECKUPDATE")
+        choice.btn_1.text = self.localize("TERM_CLOSE")
+        choice.btn_2.text = self.localize("TERM_CONFIRM")
         choice.btn_1.disabled = True
         choice.btn_2.disabled = True
         choice.btn_1.bind(on_release=choice.dismiss)
         choice.open()
         update = self.check_update()
         if update is None:
-            self.error_message('No update found!')
+            self.error_message(self.localize("TERM_NOUPDATE"))
         else:
-            choice.modal_txt.text = "An update is available. Would you like to download? Concerto will restart automatically after completion."
+            choice.modal_txt.text = self.localize("TERM_UPDATE_EXPLANATION")
             choice.btn_2.disabled = False
             choice.btn_1.disabled = False
             choice.btn_2.bind(on_release=partial(self.start_updater,update = update))
@@ -99,7 +117,7 @@ class ConcertoScreen(Screen):
             return latest_release_data
 
     def download_update(self,update,popup):
-        popup.modal_txt.text = "Starting update download..."
+        popup.modal_txt.text = self.localize("TERM_UPDATE_STARTING")
         latest_concerto_url = None
         for asset in update['assets']:
             asset_url = asset['browser_download_url']
@@ -123,7 +141,7 @@ class ConcertoScreen(Screen):
             except:
                 # The header is improper or missing Content-Length, just download
                 dl_file.write(http_stream.read())
-                popup.modal_txt.text = "Unable to confirm download size. Still downloading..."
+                popup.modal_txt.text = self.localize("TERM_UPDATE_NOSIZE")
                 popup.prog_bar.value = 100
             while total_size:
                 chunk = http_stream.read(chunk_size)
@@ -133,12 +151,12 @@ class ConcertoScreen(Screen):
                     break
                 percent = float(bytes_so_far) / total_size
                 percent = round(percent*100, 2)
-                popup.modal_txt.text = "Downloaded %d of %d bytes (%0.2f%%)" % (bytes_so_far, total_size, percent)
+                popup.modal_txt.text = self.localize("TERM_UPDATE_PROGRESS",(bytes_so_far, total_size, percent))
                 popup.prog_bar.value = percent
             http_stream.close()
             dl_file.close()
         except (IOError, urllib3.exceptions.HTTPError):
-            self.error_message("Failed to download.")
+            self.error_message(self.localize("TERM_UPDATE_FAIL"))
             return None
         update_script = open('update.bat', 'w')
         update_script.writelines([

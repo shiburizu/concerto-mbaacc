@@ -3,6 +3,7 @@ from ui.concertoscreen import ConcertoScreen
 from gamedata import *
 from config import *
 from ui.modals import GameModal
+import ui.lang
 
 
 class OptionScreen(ConcertoScreen):
@@ -42,32 +43,32 @@ class OptionScreen(ConcertoScreen):
             self.ids['view_fps'].active = game_config[indexes.VIEW_FPS] == 1
             self.app.sm.current = 'Options'
         except KeyError:
-            self.error_message('Invalid config files. Please back up your settings, delete cccaster/config.ini and concerto.ini and restart Concerto.',fatal=True,switch='Main')
+            self.error_message(ui.lang.localize("ERR_INVALID_OPT"),fatal=True,switch='Main')
 
     def save(self):
         error_check = []
         change_sound = False
         try:
             if int(self.ids['netplay_port'].text) > 65536:
-                error_check.append("Online port must be less than 65536.")     
+                error_check.append(ui.lang.localize("ERR_INVALID_PORT"))     
         except ValueError:
-            error_check.append("Online port must be a whole number.")
+            error_check.append(ui.lang.localize("ERR_PORT_INT"))
         if not os.path.isfile(self.ids['caster_exe'].text.strip()):
-            error_check.append("CCCaster file specified not found.")
+            error_check.append(ui.lang.localize("ERR_NO_CASTER"))
         try:
             int(self.ids['max_delay'].text)
         except ValueError:
-            error_check.append("Max delay is not a whole number.")
+            error_check.append(ui.lang.localize("ERR_DELAY_INT"))
         try:
             int(self.ids['default_rollback'].text)
         except ValueError:
-            error_check.append("Default rollback frames is not a whole number.")
+            error_check.append(ui.lang.localize("ERR_ROLLBACK_INT"))
         try:
             float(self.ids['held_start'].text)
-        except ValueError:
-            error_check.append("Held start duration is not in seconds.")
+        except ValueError:  
+            error_check.append(ui.lang.localize("ERR_PAUSE_INT"))
         if self.ids['display_name'].text.strip() == '':
-            error_check.append('Display name cannot be empty.')
+            error_check.append(ui.lang.localize("ERR_NO_NAME"))
         if error_check == []:
             with open(PATH + 'cccaster\config.ini', 'r') as f:
                 config_file = f.readlines()
@@ -195,7 +196,7 @@ class OptionScreen(ConcertoScreen):
             save_config()
         else:
             p = GameModal()
-            p.modal_txt.text = "Correct the following options:\n"
+            p.modal_txt.text = ui.lang.localize("ERR_CORRECT_OPTIONS")
             for i in error_check:
                 p.modal_txt.text += '%s\n' % i
             p.open()
