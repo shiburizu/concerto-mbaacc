@@ -3,7 +3,7 @@ from kivy_deps import sdl2, glew
 block_cipher = None
 
 a = Analysis(['concerto.py','mbaacc.py','config.py'],
-            binaries=[('winpty-agent.exe','.')],
+            binaries=[('winpty-agent.exe','winpty')],
             datas=[
                 ('mbaacc.py','.'),
                 ('config.py','.'),
