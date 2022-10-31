@@ -94,7 +94,7 @@ error_strings = [
     'Incompatible host version',
 ]
 
-ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?    ]*[ -\/]*[@-~]')
+ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 caster_button = re.compile(r'\[[0-9]\]')
 
 spec_names = re.compile(r'^Spectating versus mode \(\d* delay, \d* rollback\) (.*) \(.*\) vs (.*) \(.*\) \(Tap the spacebar to toggle fast-forward\)$')
