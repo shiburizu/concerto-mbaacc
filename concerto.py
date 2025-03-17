@@ -8,6 +8,7 @@ import threading
 import subprocess
 import winreg
 import ui.lang
+import urllib.parse
 # Utility scripts
 # Discord Rich Presence
 import presence
@@ -109,7 +110,8 @@ class Concerto(App):
             self.player_name = caster_config['settings']['displayName']
         # Execute launch params
         if len(sys.argv) > 1:
-            params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
+            deeplink = urllib.parse.unquote(sys.argv[1])
+            params = deeplink.replace('concerto://', '').rstrip('/').split('/', 1)
             if params[0] == 'lobby':
                 check = self.OnlineScreen.online_login()
                 if check != []:
