@@ -10,6 +10,12 @@ import ctypes
 from ctypes.wintypes import *
 import presence
 import sys
+import os, os.path
+from functools import partial
+
+from kivy.clock import Clock
+
+from ui.lang import *
 
 #stats constants
 STRLEN = 1
@@ -67,7 +73,7 @@ MOON = {
 #error messages
 error_strings = [
     'Internal error!',
-    'Cannot find host',
+    'Cannot find host', #get host missing
     'Cannot initialize networking!',
     'Network error!',
     'already being used!',
@@ -77,11 +83,11 @@ error_strings = [
     'Port must be less than 65536!',
     'Invalid IP address and/or port!',
     'Failed to start game!',
-    'Failed to communicate with',
+    'Failed to communicate with', #with?
     'Unhandled game mode!',
     'Host sent invalid configuration!',
     'Delay must be less than 255!',
-    'Rollback must be less than',
+    'Rollback must be less than', #need to find out what the error message here is
     'Rollback data is corrupted!',
     'Missing relay_list.txt!',
     'Missing lobby_list.txt!',
@@ -92,14 +98,101 @@ error_strings = [
     'Latest version is',
     'Update?',
     'Incompatible host version',
+    'Disconnected!',
+    'Another client is currently connecting!'
 ]
 
 ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 caster_button = re.compile(r'\[[0-9]\]')
 
-spec_names = re.compile(r'^Spectating versus mode \(\d* delay, \d* rollback\) (.*) \(.*\) vs (.*) \(.*\) \(Tap the spacebar to toggle fast-forward\)$')
-player_name_host_mm = re.compile(r'')
-player_name_join_mm = re.compile(r'\w* connected')
+regex_spec_names = r'Spectating\s+(versus|training)\s+mode\s+\((\d+)\s+delay,\s+(\d+)\s+(?:rolback|rollback)\)\s+(.+)\s+(\(.+\))\s+vs\s+(.+)\s+(\(.+\))\s+\(Tap\s+the\s+spacebar\s+to\s+toggle\s+fast-forward\)'
+regex_network_delay = r'Network\s+delay:\s+(\d+)' #1: network delay
+regex_ping = r'Ping:\s+(\d+.\d+)\s+ms' #1 ping value
+regex_game_mode = r'\s+(Versus)\s+mode,\s+each\s+game\s+is\s+(\d+)\s+rounds|(Training)\s+mode' #1: mode, #2: rounds
+regex_connected_to_player = r'(?:Connected|Conected)\s+to\s+(.+)(?:Versus|Training)' #1: player name (host)
+regex_player_connected = r'(.+)\s+(?:connected|conected)\s+(?:Versus|Training)' #1: player name (guest)
+regex_rollback_frames = r'Enter\s+max\s+frames\s+of\s+(?:rolback|rollback):\s+(\d+)' #1: rollback frames
+
+TUI_JUNK = ["\x08", "*", "0;", "19G", "\x1b[", "0;30;8m", "38m", "CCCaster 3.1", "[1] Lobby","[2] Matchmaking","[0] Cancel","[1] Netplay", "[2] Spectate", "[3] Broadcast", "[4] Offline", "[5] Server", "[6] Controls", "[7] Settings", "[8] Update", "[9] Results", "[0] Quit"]
+
+def clean_output(read,tui=False):
+    dirty_read = re.sub(ansi_escape,'', read)
+    if tui == True:
+        for j in TUI_JUNK:
+            dirty_read = dirty_read.replace(j,'')
+    clean_read = ""
+    for i in dirty_read.split():
+        bit = i.replace('*','').strip()
+        if bit != '':
+            clean_read += bit + " "
+    return clean_read.strip()
+
+def pick_last(pattern,read):
+    res = re.findall(pattern,read)
+    if res != [] and res != None:
+        if isinstance(res[-1],tuple):
+            return [i for i in res[-1] if i != '']
+        else:
+            if isinstance(res[-1],str):
+                return res[-1].strip()
+            else:   
+                return res[-1]
+    else:
+        return []
+
+def get_session_info(read,spectator=False):
+    e = []
+    for i in error_strings:
+        if i in read:
+            if i == 'Latest version is' or i == 'Update?': #update prompt
+                e.append("A new version of CCCaster is available. Please update by opening CCCaster.exe manually or downloading manually from concerto.shib.live.")
+            else:
+                e.append(i)
+            logger.write('\n%s\n' % e)
+    if e != []:
+        return {'role': 'error','errors': e}
+    # insert error message checking HERE so that we can make this all-in-one
+    if spectator == False:
+        session_info = {
+            'role' : 'waiting',
+            'delay' : pick_last(regex_network_delay,read),
+            'ping' : pick_last(regex_ping,read),
+            'mode' : pick_last(regex_game_mode,read),
+            'rollback': pick_last(regex_rollback_frames,read)
+        }
+        host = pick_last(regex_player_connected,read)
+        if host != []:
+            session_info['role'] = 'host'
+            session_info['opponent'] = host
+        else:
+            guest = pick_last(regex_connected_to_player,read)
+            if guest != []:
+                session_info['role'] = 'guest'
+                session_info['opponent'] = guest
+            else:
+                session_info['role'] = 'unknown'
+        for i in list(session_info.keys()):
+            if session_info[i] == []:
+                return { 'role' : 'waiting' } #force empty return if any empty keys
+        print(session_info)
+        return session_info             
+    else:
+        spec_info = pick_last(regex_spec_names,read)
+        if spec_info != [] and spec_info != None:
+            session_info = {
+                'role' : 'spectator',
+                'mode' : spec_info[0],
+                'delay' : spec_info[1],
+                'rollback' : spec_info[2],
+                'player1' : spec_info[3],
+                'char1' : spec_info[4],
+                'player2' : spec_info[5],
+                'char2' : spec_info[6]
+            }
+            print(session_info)
+            return session_info
+        else:
+            return { 'role' : 'waiting' }
 
 class loghelper():
     dateTimeObj = datetime.now()
@@ -109,24 +202,22 @@ class loghelper():
     def write(self, s):
         if not os.path.isdir(PATH + 'concerto-logs'):
             os.mkdir(PATH + 'concerto-logs')
-        with open(PATH + 'concerto-logs\\' + self.timestampStr, 'a') as log:
+        with open(PATH + 'concerto-logs\\' + self.timestampStr, encoding='utf-8', mode='a') as log:
             log.write(s)
 
 logger = loghelper()
 
 # Write player name to a file.  Called when spectate mode begins.
 def write_name_to_file(player_num: int, name: str):
-    with open(f'p{player_num}name.txt', mode='w') as file:
+    with open(f'p{player_num}name.txt', encoding='utf-8', mode='w') as file:
         file.write(name)
         file.close()
 
-
 # Write a score of 0.  Called when spectate mode begins.
 def reset_score_file(player_num: int):
-    with open(f'p{player_num}score.txt', mode='w') as file:
+    with open(f'p{player_num}score.txt', encoding='utf-8', mode='w') as file:
         file.write('0')
         file.close()
-
 
 # Read the value in the file and increment it.  It can be manually reset by the user this way.
 def increment_score_file(player_num: int):
@@ -150,6 +241,7 @@ class Caster():
         self.rs = -1 # Caster's suggested rollback frames. Sent to UI.
         self.ds = -1 # delay suggestion
         self.aproc = None # active caster Thread object to check for isalive()
+        self.tproc = None # caster Thread object created to enter Training mode during host
         self.offline = False #True when an offline mode has been started
         self.broadcasting = False #True when Broadcasting offline has been started
         self.startup = False #True when waiting for MBAA.exe to start in offline
@@ -182,273 +274,227 @@ class Caster():
                         return n #return list
         return False
 
-    def matchmaking(self,sc):
+    def matchmaking(self, sc, wins=0): #sc is a Screen for UI triggers
         self.kill_caster()
-        if app_config['settings']['write_scores'] == '1':
-            write_name_to_file(1, 'NETPLAY P1')
-            write_name_to_file(2, 'NETPLAY P2')
-            reset_score_file(1)
-            reset_score_file(2)
-        dialog = sc.active_pop.modal_txt.text
+        self.app.offline_mode = None
         try:
             self.aproc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
         except FileNotFoundError:
             sc.error_message('%s not found.' % app_config['settings']['caster_exe'].strip())
-            return None
+            return None 
+        time.sleep(0.5) #UI trigger
+        dialog = sc.active_pop.modal_txt.text
+        # Stats
         while self.aproc.isalive():
             con = self.aproc.read()
             logger.write('\n%s\n' % con.split())
-            if self.find_button(con.split(),'Server'):
+            if self.find_button(con.split(),'Server',self.aproc):
                 self.aproc.write('2')
                 break
             else:
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     break
-        # Stats
-        threading.Thread(target=self.update_stats,daemon=True).start()
+        
+        threading.Thread(target=self.update_stats,args=[wins],daemon=True).start()
+
         cur_con = ""
         last_con = ""
         con = ""
-        #Matchmaking cannot be launched headless, so we need to clean extra outputs (thankfully these seem to be predictable)
-        junk = ["*", "0;", "19G", "\x1b[", "0;30;8m", "38m", "CCCaster 3.1", "[1] Lobby","[2] Matchmaking","[0] Cancel","[1] Netplay", "[2] Spectate", "[3] Broadcast", "[4] Offline", "[5] Server", "[6] Controls", "[7] Settings", "[8] Update", "[9] Results", "[0] Quit"]
 
         logger.write('\n== Matchmaking ==\n')
         while self.aproc != None and self.aproc.isalive():
+            
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            for i in junk:
-                cur_con = cur_con.replace(i,"")
-            con += last_con + cur_con
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if self.playing == False and self.rs == -1 and self.ds == -1:
-                n = self.validate_read(con)
-                if n != False:
-                    logger.write('\n=================================\n')
-                    logger.write(str(con.split()))
-                    if int(n[-2]) - int(n[-1]) < 0:
+            cur_con_clean = ""
+            for i in cur_con.split():
+                if i.replace('*','').strip() != '':
+                    cur_con_clean += " " + i #this removes ***** junk from caster output
+            if cur_con_clean not in last_con: #we compare against the last fragment to check for dup output
+                con += last_con + cur_con_clean #con is what we send to validate_read
+            elif last_con in cur_con_clean:
+                con += cur_con_clean
+
+            logger.write('\n=================================\n' + str(con.split()))
+
+            if self.playing == False and self.ds == -1 and self.rs == -1:
+                session_info = get_session_info(clean_output(con))
+                if session_info['role'] == 'error':
+                    sc.error_message(session_info['errors'])
+                    self.kill_caster()
+                    break
+                elif session_info['role'] != 'waiting':
+                    if int(session_info['delay']) - int(session_info['rollback']) < 0:
                         self.ds = 0
                     else:
-                        self.ds = int(n[-2]) - int(n[-1])
-                    self.rs = int(n[-1])
-                    opponent_name = ""
-                    if "Connected to" in con:
-                        r = re.findall('Connected to\s*([^\n\r]*)',con)
-                    elif "connected" in con:
-                        r = re.findall('([^\n\r]*) connected',con)
-                    if r != []:
-                        opponent_name = r[-1].strip()
-                    #Regex for Ping
-                    p = re.findall('Ping: \d+\.\d+ ms', con)
-                    ping = p[-1].replace('Ping:','')
-                    ping = ping.replace('ms','')
-                    ping = ping.strip()
-                    #Network Delay
-                    delay = n[-2]
-                    #Mode and rounds
-                    m = ""
-                    rd = 2
-                    if "Versus" in con:
-                        m = "Versus"
-                        rd = n[-3]
-                    elif "Training" in con:
-                        m = "Training"
-                        rd = 0
-                    #Name
-                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd) #trigger frame delay settings in UI
-                    self.app.offline_mode = None
-                    break
+                        self.ds = int(session_info['delay']) - int(session_info['rollback'])
+                    self.rs = int(session_info['rollback'])
+                    if session_info['mode'][0] == 'Training':
+                        session_info['mode'].append('0')
+
+                    if app_config['settings']['write_scores'] == '1':
+                        write_name_to_file(1, 'NETPLAY P1')
+                        write_name_to_file(2, 'NETPLAY P2')
+                        reset_score_file(1)
+                        reset_score_file(2)
+                    Clock.schedule_once(partial(self.ui_set_frames,sc,session_info['opponent'],session_info['delay'],session_info['ping'],session_info['mode'][0],session_info['mode'][1]))
                 else:
-                    if self.check_msg(con) != []:
-                        sc.error_message(self.check_msg(con))
-                        break
-                    elif last_con != cur_con:
+                    if last_con != cur_con:
                         last_con = cur_con
                     if "Hosting at server" in cur_con:
                         sc.active_pop.modal_txt.text = dialog + "\n(Hosting, waiting for connection...)"
-                    if "Waiting for opponent" in cur_con:
+                    elif "Waiting for opponent" in cur_con:
                         sc.active_pop.modal_txt.text = dialog + "\n(Waiting for opponent...)"
-                    if "Trying connection (UDP" in cur_con:
+                    elif "Trying connection (UDP" in cur_con:
                         sc.active_pop.modal_txt.text = dialog + "\n(Trying connection (UDP Tunnel)...)"
-                    if "Trying connection" in cur_con:
+                    elif "Trying connection" in cur_con:
                         sc.active_pop.modal_txt.text = dialog + "\n(Trying connection...)"
+                    continue
             else:
                 break
 
-    def host(self, sc, port='0', mode="Versus",t=None): #sc is a Screen for UI triggers
+    def host(self, sc, port='0', mode="Versus",t=None, wins=0): #sc is a Screen for UI triggers
         self.kill_caster()
         self.app.offline_mode = None
-        if app_config['settings']['write_scores'] == '1':
-            write_name_to_file(1, 'NETPLAY P1')
-            write_name_to_file(2, 'NETPLAY P2')
-            reset_score_file(1)
-            reset_score_file(2)
         try:
-            if mode == "Training":
-                self.aproc = PtyProcess.spawn('%s -n -t %s' % (app_config['settings']['caster_exe'].strip(),port))
-            else:
-                self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'].strip(),port)) 
+            self.aproc = PtyProcess.spawn('%s -n %s %s' % (app_config['settings']['caster_exe'].strip(),"-t" if mode == "Training" else "",port))
         except FileNotFoundError:
             sc.error_message('%s not found.' % app_config['settings']['caster_exe'].strip())
-            return None
+            return None       
+
         # Stats
-        threading.Thread(target=self.update_stats,daemon=True).start()
+        threading.Thread(target=self.update_stats,args=[wins],daemon=True).start()
+
         logger.write('\n== Host ==\n')
         while self.aproc.isalive(): # find IP and port combo for host
-            txt = self.aproc.read()
-            ip = re.findall(
-                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', txt)
+            read = self.aproc.read()
+            ip = re.findall(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{,5}', read)
             if ip != []:
                 self.adr = str(ip[0])
                 sc.set_ip(self.adr) #tell UI we have the IP address
                 break
-            elif self.check_msg(txt) != []:
-                sc.error_message(self.check_msg(txt))
+            elif self.check_msg(read) != []:
+                sc.error_message(self.check_msg(read))
                 return None
-        logger.write('IP: %s\n' % self.adr)
+        logger.write('Host IP: %s\n' % self.adr)
+
         cur_con = "" #current Caster read
         last_con = "" #last Caster read
         con = "" #cumulative string of all cur_con reads
+
         while self.aproc.isalive():
+
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            con += last_con + cur_con #con is what we send to validate_read
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if self.playing == False and self.rs == -1 and self.ds == -1: #break self.playing is True
-                n = self.validate_read(con)
-                if n != False:
-                    logger.write('\n=================================\n')
-                    logger.write(str(con.split()))
-                    if int(n[-2]) - int(n[-1]) < 0: # last item should be rollback frames, 2nd to last is network delay
+            cur_con_clean = ""
+            for i in cur_con.split():
+                if i.replace('*','').strip() != '':
+                    cur_con_clean += " " + i #this removes ***** junk from caster output
+            if cur_con_clean not in last_con: #we compare against the last fragment to check for dup output
+                con += last_con + cur_con_clean #con is what we send to validate_read
+            elif last_con in cur_con_clean:
+                con += cur_con_clean
+
+            logger.write('\n=================================\n' + str(con.split()))
+
+            if self.playing == False and self.ds == -1 and self.rs == -1:
+                session_info = get_session_info(clean_output(con))
+                if session_info['role'] == 'error':
+                    sc.error_message(session_info['errors'])
+                    self.kill_caster()
+                    break
+                elif session_info['role'] != 'waiting':
+                    if int(session_info['delay']) - int(session_info['rollback']) < 0:
                         self.ds = 0
                     else:
-                        self.ds = int(n[-2]) - int(n[-1])
-                    self.rs = int(n[-1])
-                    r = []
-                    name = False  # try to read names from caster output
-                    for x in reversed(con.split()):
-                        if name == False and (x == "connected" or x == "conected"):
-                            name = True
-                        elif name == True and x == '*':
-                            break
-                        elif name == True and x.replace('*', '') != '':
-                            r.insert(0, x)
-                    #Regex for Ping
-                    p = re.findall('Ping: \d+\.\d+ ms', con)
-                    ping = p[-1].replace('Ping:','')
-                    ping = ping.replace('ms','')
-                    ping = ping.strip()
-                    #Network Delay
-                    delay = n[-2]
-                    #Mode and rounds
-                    m = ""
-                    rd = 2
-                    if "Versus" in con:
-                        m = "Versus"
-                        rd = n[-3]
-                    elif "Training" in con:
-                        m = "Training"
-                        rd = 0
-                    #Name
-                    opponent_name = ' '.join(r)
-                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd,target=t) #trigger frame delay settings in UI
-                    break
+                        self.ds = int(session_info['delay']) - int(session_info['rollback'])
+                    self.rs = int(session_info['rollback'])
+                    if session_info['mode'][0] == 'Training':
+                        session_info['mode'].append('0')
+
+                    if app_config['settings']['write_scores'] == '1':
+                        write_name_to_file(1, 'NETPLAY P1')
+                        write_name_to_file(2, 'NETPLAY P2')
+                        reset_score_file(1)
+                        reset_score_file(2)
+                    Clock.schedule_once(partial(self.ui_set_frames,sc,session_info['opponent'],session_info['delay'],session_info['ping'],session_info['mode'][0],session_info['mode'][1],t))
                 else:
-                    if self.check_msg(con) != []:
-                        sc.error_message(self.check_msg(con))
-                        self.aproc = None
-                        break
-                    elif last_con != cur_con:
+                    if last_con != cur_con:
                         last_con = cur_con
-                        continue
+                    continue
             else:
                 break
 
-    def join(self, ip, sc, t=None, *args): #t is required by the Lobby screen to send an "accept" request later
+    def join(self, ip, sc, t=None, wins=0, *args): #sc is a Screen for UI triggers
         self.kill_caster()
         self.app.offline_mode = None
-        if app_config['settings']['write_scores'] == '1':
-            write_name_to_file(1, 'NETPLAY P1')
-            write_name_to_file(2, 'NETPLAY P2')
-            reset_score_file(1)
-            reset_score_file(2)
         try:
             self.aproc = PtyProcess.spawn('%s -n %s' % (app_config['settings']['caster_exe'].strip(),ip)) 
         except FileNotFoundError:
             sc.error_message('%s not found.' % app_config['settings']['caster_exe'].strip())
-            return None
+            return None  
+
         # Stats
-        threading.Thread(target=self.update_stats,daemon=True).start()
-        cur_con = ""
-        last_con = ""
-        con = ""
-        logger.write('\n== Join %s ==\n' % ip)
+        threading.Thread(target=self.update_stats,args=[wins],daemon=True).start()
+
+        logger.write('\n== Join ==\n')
+
+        cur_con = "" #current Caster read
+        last_con = "" #last Caster read
+        con = "" #cumulative string of all cur_con reads
+
         while self.aproc.isalive():
+
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            con += last_con + cur_con
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if self.playing == False and self.rs == -1 and self.ds == -1:
-                n = self.validate_read(con)
-                if n != False:
-                    logger.write('\n=================================\n')
-                    logger.write(str(con.split()))
-                    if int(n[-2]) - int(n[-1]) < 0:
+            cur_con_clean = ""
+            for i in cur_con.split():
+                if i.replace('*','').strip() != '':
+                    cur_con_clean += " " + i #this removes ***** junk from caster output
+            if cur_con_clean not in last_con: #we compare against the last fragment to check for dup output
+                con += last_con + cur_con_clean #con is what we send to validate_read
+            elif last_con in cur_con_clean:
+                con += cur_con_clean
+
+            logger.write('\n=================================\n' + str(con.split()))
+
+            if self.playing == False and self.ds == -1 and self.rs == -1:
+                session_info = get_session_info(clean_output(con))        
+                if session_info['role'] == 'error':
+                    sc.error_message(session_info['errors'])
+                    self.kill_caster()
+                    break
+                elif session_info['role'] != 'waiting':
+                    if int(session_info['delay']) - int(session_info['rollback']) < 0:
                         self.ds = 0
                     else:
-                        self.ds = int(n[-2]) - int(n[-1])
-                    self.rs = int(n[-1])
-                    r = []
-                    name = False 
-                    for x in con.split():
-                        if x == "to" and name == False:
-                            name= True
-                        elif x == '*' and name == True:
-                            break
-                        elif name == True and x.replace('*', '') != '':
-                            r.append(x)
-                    #Regex for Ping
-                    p = re.findall('Ping: \d+\.\d+ ms', con)
-                    ping = p[-1].replace('Ping:','')
-                    ping = ping.replace('ms','')
-                    ping = ping.strip()
-                    #Network Delay
-                    delay = n[-2]
-                    #Mode and rounds
-                    m = ""
-                    rd = 2
-                    if "Versus" in con:
-                        m = "Versus"
-                        rd = n[-3]
-                    elif "Training" in con:
-                        m = "Training"
-                        rd = 0
-                    #Name
-                    opponent_name = ' '.join(r)
-                    sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd,target=t) #trigger frame delay settings in UI
-                    break
+                        self.ds = int(session_info['delay']) - int(session_info['rollback'])
+                    self.rs = int(session_info['rollback'])
+                    if session_info['mode'][0] == 'Training':
+                        session_info['mode'].append('0')
+
+                    if app_config['settings']['write_scores'] == '1':
+                        write_name_to_file(1, 'NETPLAY P1')
+                        write_name_to_file(2, 'NETPLAY P2')
+                        reset_score_file(1)
+                        reset_score_file(2)
+                    Clock.schedule_once(partial(self.ui_set_frames,sc,session_info['opponent'],session_info['delay'],session_info['ping'],session_info['mode'][0],session_info['mode'][1],t))
                 else:
-                    if self.check_msg(con) != []:
-                        sc.error_message(self.check_msg(con))
-                        break
-                    elif 'Spectating versus mode' in con:
-                        sc.error_message('Host is already in a game!')
-                        break
-                    elif last_con != cur_con:
+                    if "Calculating delay" in clean_output(con):
+                        sc.calculating_delay()
+                    if last_con != cur_con:
                         last_con = cur_con
-                        continue
+                    continue
             else:
                 break
 
-    def confirm_frames(self,rf,df):
+    def ui_set_frames(self,sc,opponent_name,delay,ping,m=None,rd=None,t=None,*args):
+        sc.set_frames(opponent_name,delay,ping,mode=m,rounds=rd,target=t)
+
+    def confirm_frames(self,rf,df,*args):
+        self.kill_host_training()
         if self.aproc:
-            self.aproc.write('\x08')
-            self.aproc.write('\x08')
             self.aproc.write(str(rf))
             self.aproc.write('\x0D')
-            time.sleep(0.1)
-            self.aproc.write('\x08')
-            self.aproc.write('\x08')
+            time.sleep(0.5)
             self.aproc.write(str(df))
             self.aproc.write('\x0D')
             self.playing = True
@@ -460,50 +506,48 @@ class Caster():
         except FileNotFoundError:
             sc.error_message('%s not found.' % app_config['settings']['caster_exe'].strip())
             return None
+
+        threading.Thread(target=self.update_stats,daemon=True).start()
+
+        logger.write('\n== Watch %s ==\n' % ip)
         cur_con = ""
         last_con = ""
         con = ""
-        logger.write('\n== Watch %s ==\n' % ip)
         self.broadcasting = True
-        threading.Thread(target=self.update_stats,daemon=True).start()
+
         while self.aproc.isalive():
+
             cur_con = ansi_escape.sub('', str(self.aproc.read()))
-            con += last_con + cur_con
-            logger.write('\n=================================\n')
-            logger.write(str(con.split()))
-            if "fast-forward)" in con:
+            cur_con_clean = ""
+            for i in cur_con.split():
+                if i.replace('*','').strip() != '':
+                    cur_con_clean += " " + i #this removes ***** junk from caster output
+            if cur_con_clean not in last_con: #we compare against the last fragment to check for dup output
+                con += last_con + cur_con_clean #con is what we send to validate_read
+            elif last_con in cur_con_clean:
+                con += cur_con_clean
+            
+            logger.write('\n=================================\n' + str(con.split()))
+
+            session_info = get_session_info(clean_output(con),spectator=True)
+
+            if session_info['role'] == 'error':
+                sc.error_message(session_info['errors'])
+                self.kill_caster()
+                break
+            elif session_info['role'] == 'spectator':
                 logger.write('\n=================================\n')
                 logger.write(str(con.split()))
-                self.aproc.write('1')  # start spectating, find names after
-                r = []
-                startWrite = False
-                for x in reversed(con.split()):
-                    if startWrite is False and "fast-forward" not in x:
-                        pass
-                    elif "fast-forward)" in x:
-                        startWrite = True
-                        r.insert(0, x)
-                    elif x == '*' and len(r) > 0:
-                        if r[0] == "Spectating":
-                            break
-                    elif x != '*' and x.replace('*', '') != '':
-                        r.insert(0, x)
+                self.aproc.write('1')
                 if app_config['settings']['write_scores'] == '1':
-                    regex_result = re.match(pattern=spec_names, string=' '.join(r))
-                    write_name_to_file(1, regex_result.group(1))
-                    write_name_to_file(2, regex_result.group(2))
+                    write_name_to_file(1, session_info['player1'])
+                    write_name_to_file(2, session_info['player2'])
                     reset_score_file(1)
                     reset_score_file(2)
-                sc.active_pop.modal_txt.text = ' '.join(r)
-                # replace connecting text with match name in caster
+                sc.active_pop.modal_txt.text = "Spectating %s mode (%s delay, %s rollback)\n%s %s vs %s %s\n(Tap the spacebar to toggle fast-forward)" % (
+                    session_info['mode'],session_info['delay'],session_info['rollback'],session_info['player1'],session_info['char1'],
+                    session_info['player2'],session_info['char2'])
                 break
-            else:
-                if self.check_msg(con) != []:
-                    sc.error_message(self.check_msg(con))
-                    break
-                elif last_con != cur_con:
-                    last_con = cur_con
-                    continue
 
     def broadcast(self, sc, port='0', mode="Versus"): #sc is a Screen for UI triggers
         self.kill_caster()
@@ -548,7 +592,7 @@ class Caster():
         while self.aproc.isalive():
             con = self.aproc.read()
             logger.write('\n%s\n' % con.split())
-            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+            if self.find_button(con.split(),'Offline',self.aproc) or self.find_button(con.split(),'Ofline',self.aproc):
                 self.aproc.write('1')
                 self.flag_offline(sc)
                 break
@@ -556,6 +600,26 @@ class Caster():
                 if self.check_msg(con) != []:
                     sc.error_message(self.check_msg(con))
                     break
+
+    def host_training(self,sc,*args):
+        self.startup = True
+        try:
+            proc = PtyProcess.spawn(app_config['settings']['caster_exe'].strip())
+        except FileNotFoundError:
+            sc.error_message('%s not found.' % app_config['settings']['caster_exe'].strip())
+            return None
+        self.tproc = proc
+        logger.write('\n== Host Training ==\n')
+        while self.tproc.isalive():
+            con = self.tproc.read()
+            logger.write('\n%s\n' % con.split())
+            if self.find_button(con.split(),'Offline',self.tproc) or self.find_button(con.split(),'Ofline',self.tproc):
+                self.tproc.write('1')
+                break
+            else:
+                if self.check_msg(con) != []:
+                    sc.error_message(self.check_msg(con))
+                    break 
 
     def local(self,sc):
         self.kill_caster()
@@ -573,7 +637,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+            if self.find_button(con.split(),'Offline',self.aproc) or self.find_button(con.split(),'Ofline',self.aproc):
                 self.aproc.write('2')
                 self.flag_offline(sc)
                 break
@@ -593,7 +657,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+            if self.find_button(con.split(),'Offline',self.aproc) or self.find_button(con.split(),'Ofline',self.aproc):
                 self.aproc.write('3')
                 self.flag_offline(sc)
                 break
@@ -613,7 +677,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+            if self.find_button(con.split(),'Offline',self.aproc) or self.find_button(con.split(),'Ofline',self.aproc):
                 self.aproc.write('6')
                 self.flag_offline(sc)
                 break
@@ -638,7 +702,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+            if self.find_button(con.split(),'Offline',self.aproc) or self.find_button(con.split(),'Ofline',self.aproc):
                 self.aproc.write('4')
                 self.flag_offline(sc)
                 break
@@ -663,7 +727,7 @@ class Caster():
         self.aproc = proc
         while self.aproc.isalive():
             con = self.aproc.read()
-            if self.find_button(con.split(),'Offline') or self.find_button(con.split(),'Ofline'):
+            if self.find_button(con.split(),'Offline',self.aproc) or self.find_button(con.split(),'Ofline',self.aproc):
                 self.aproc.write('5')
                 self.flag_offline(sc)
                 break
@@ -681,12 +745,12 @@ class Caster():
             sc.error_message('MBAA.exe not found.')
             return None
 
-    def find_button(self,read,term):
+    def find_button(self,read,term,proc):
         current_btn = None
         if term in read:
             for i in read:
                 if i == term and current_btn != None:
-                    self.aproc.write(current_btn)
+                    proc.write(current_btn)
                     time.sleep(0.1)
                     return True
                 else:
@@ -738,11 +802,15 @@ class Caster():
         else:
             return True
     
-    def update_stats(self,once=False):
+    def update_stats(self,once=False,wins=0):
         # Used to update presence only on state change 
         state = None
         p1wins = 0
         p2wins = 0
+        p1_set_wins = 0
+        p2_set_wins = 0
+        replay_count = len(os.listdir(os.getcwd() + '\ReplayVS')) #to check for set limit conditions
+        menu_value = None #set to menucount addr when entering retry screen 
         while True:
             if self.aproc is None:
                 break
@@ -757,7 +825,8 @@ class Caster():
                     "p2color": self.read_memory(0x74D928),
                     "p1wins": self.read_memory(0x559550),
                     "p2wins": self.read_memory(0x559580),
-                    "towin": self.read_memory(0x553FDC)
+                    "towin": self.read_memory(0x553FDC),
+                    "menucount" : self.read_memory(0x767440)
                 }
                 if self.app.discord is True:
                 # Check if in game once
@@ -780,7 +849,10 @@ class Caster():
                                     else:
                                         presence.offline_game(self.app.offline_mode, p1_char, self.stats["p1char"], p2_char, self.stats["p2char"],lobby_id=self.app.LobbyScreen.code)
                                 else:
-                                    presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])     
+                                    if self.app.LobbyScreen.global_lobby is True:
+                                        presence.global_lobby_game(self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])     
+                                    else:
+                                        presence.public_lobby_game(self.app.LobbyScreen.code, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])     
                             else:
                                 if self.app.offline_mode != None:
                                     if self.app.offline_mode.lower() == 'training' or self.app.offline_mode.lower() == 'replay theater':
@@ -791,7 +863,10 @@ class Caster():
                                     if self.app.mode.lower() == 'private lobby':
                                         presence.online_game(self.app.mode, self.app.LobbyScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
                                     else:
-                                        presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
+                                        if self.tproc == None:
+                                            presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
+                                        elif not self.tproc.isalive():
+                                            presence.online_game(self.app.mode, self.app.OnlineScreen.opponent, char1_name=p1_char, char1_id=self.stats["p1char"], char2_name=p2_char, char2_id=self.stats["p2char"])
                         state = self.stats["state"]
                     # Check if in character select once
                     elif self.stats["state"] == 20 and self.stats["state"] != state:
@@ -806,16 +881,41 @@ class Caster():
                         try:
                             if self.stats["p1wins"] > p1wins and self.stats["p1wins"] == self.stats["towin"]:
                                 increment_score_file(1)
+                                p1_set_wins += 1
                             if self.stats["p2wins"] > p2wins and self.stats["p2wins"] == self.stats["towin"]:
                                 increment_score_file(2)
+                                p2_set_wins += 1
                             p1wins = self.stats["p1wins"]
                             p2wins = self.stats["p2wins"]
                         except TypeError:
                             pass
+                #this is for set limit reaching, not implemented in UI yet
+                if self.stats['state'] == 5 and wins != 0 and (p1_set_wins >= wins or p2_set_wins >= wins):
+                    #menustate diff is <2 if replay save is on, <1 if off
+                    #we also check if the replay folder item count has incremented just to be sure
+                    if menu_value == None:
+                        menu_value = self.stats['menucount']
+                    else:
+                        diff = self.stats['menucount'] - menu_value
+                        if (diff >= 2 or diff >= -1) and caster_config['settings']['autoReplaySave'] == '1' and len(os.listdir(os.getcwd() + '\ReplayVS')) > replay_count:
+                            #print("Set limit reached, auto replay save found. Killing in 3...")
+                            time.sleep(3)
+                            self.kill_caster()
+                        elif (diff >= 1 or diff >= -1) and caster_config['settings']['autoReplaySave'] == '0':
+                            #print("Set Limit reached, no auto replay save. Killing in 5...")
+                            time.sleep(5)
+                            self.kill_caster()
+                    
+                    #if caster_config['settings']['autoReplaySave'] == '1':
+                    #    if len(os.listdir(os.getcwd() + '\ReplayVS')) > replay_count:
+                    #        
+                    #    else:
+                    #        print("Set limit reached, auto replay save. Waiting...")
+                    #else:
             if once:
                 break
             else:
-                time.sleep(2)
+                time.sleep(0.5)
 
     def read_memory(self,addr):
         try:
@@ -827,6 +927,12 @@ class Caster():
         except:
             logging.warning('READ MEMORY: %s' % sys.exc_info()[0])
             return None
+        
+    def kill_host_training(self):
+        subprocess.run('taskkill /f /im MBAA.exe', shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        #if self.tproc != None:
+        #    del self.tproc
+        self.tproc = None
 
     def kill_caster(self):
         self.adr = None
@@ -846,7 +952,10 @@ class Caster():
             if self.app.LobbyScreen.type != None:
                 if self.app.LobbyScreen.type.lower() == 'public':
                     self.app.mode = 'Public Lobby'
-                    presence.public_lobby(self.app.LobbyScreen.code)
+                    if self.app.LobbyScreen.global_lobby is True:
+                        presence.global_lobby()
+                    else:
+                        presence.public_lobby(self.app.LobbyScreen.code)
                 elif self.app.LobbyScreen.type.lower() == 'private':
                     self.app.mode = 'Private Lobby'
                     presence.private_lobby()
@@ -860,7 +969,7 @@ class Caster():
         for i in error_strings:
             if i in s:
                 if i == 'Latest version is' or i == 'Update?': #update prompt
-                    e.append("A new version of CCCaster is available. Please update by opening CCCaster.exe manually or downloading manually from concerto.shib.live.")
+                    e.append(localize("ERR_UPDATE_CCCASTER"))
                 else:
                     e.append(i)
                 logger.write('\n%s\n' % e)

@@ -8,6 +8,7 @@ import threading
 import subprocess
 import winreg
 import ui.lang
+import urllib.parse
 # Utility scripts
 # Discord Rich Presence
 import presence
@@ -19,7 +20,7 @@ from kivy.app import App
 from kivy.lang import Builder
 Builder.load_file('Concerto.kv')
 # Internal UI objects
-from ui import howtoscreen, lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, aboutscreen, sound, buttons
+from ui import lobbyscreen, lobbylist, offlinescreen, onlinescreen, mainscreen, resourcescreen, optionscreen, aboutscreen, sound, buttons, lang
 
 class Concerto(App):
     def __init__(self, **kwargs):
@@ -41,7 +42,6 @@ class Concerto(App):
         self.OptionScreen = optionscreen.OptionScreen(CApp=self)
         self.LobbyList = lobbylist.LobbyList(CApp=self)
         self.LobbyScreen = lobbyscreen.LobbyScreen(CApp=self)
-        self.HowtoScreen = howtoscreen.HowtoScreen(CApp=self)
         self.AboutScreen = aboutscreen.AboutScreen(CApp=self)
         self.sm.add_widget(self.MainScreen)
         self.sm.add_widget(self.OnlineScreen)
@@ -50,7 +50,6 @@ class Concerto(App):
         self.sm.add_widget(self.OptionScreen)
         self.sm.add_widget(self.LobbyList)
         self.sm.add_widget(self.LobbyScreen)
-        self.sm.add_widget(self.HowtoScreen)
         self.sm.add_widget(self.AboutScreen)
         c = threading.Thread(target=self.checkPop,daemon=True)
         c.start()
@@ -109,7 +108,9 @@ class Concerto(App):
             self.player_name = caster_config['settings']['displayName']
         # Execute launch params
         if len(sys.argv) > 1:
-            params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
+            deeplink = urllib.parse.unquote(sys.argv[1])
+            params = deeplink.replace('concerto://', '').rstrip('/').split('/', 1)
+            #params = sys.argv[1].replace('concerto://', '').rstrip('/').split(':', 1)
             if params[0] == 'lobby':
                 check = self.OnlineScreen.online_login()
                 if check != []:
@@ -133,7 +134,10 @@ class Concerto(App):
             if 'lobbyAnchor' in i.ids and i != self.LobbyScreen:
                 a = i.ids['lobbyAnchor']
                 b = buttons.LobbyBtn()
-                b.text += ' %s' % self.LobbyScreen.code
+                if self.LobbyScreen.global_lobby is True:
+                    b.text = lang.localize('TERM_GLOBAL_LOBBY')
+                else:
+                    b.text = lang.localize('TERM_ROOM') + ' ' + str(self.LobbyScreen.code)
                 b.bind(on_release=self.switch_to_lobby)
                 a.clear_widgets()
                 a.add_widget(b)
@@ -195,7 +199,7 @@ class Concerto(App):
                 else:
                     if self.sound.bgm.state == 'play':
                         self.sound.cut_bgm()              
-            time.sleep(2)
+            time.sleep(1)
                     
 def run():
     CApp = Concerto()

@@ -1,4 +1,4 @@
-pywinpty==0.5.7
+pywinpty
 kivy[base]
 pyinstaller
 pyperclip

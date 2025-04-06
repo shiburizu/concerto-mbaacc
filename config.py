@@ -3,10 +3,10 @@ import sys
 import logging
 if getattr(sys,'frozen', False): #frozen exe
     PATH = os.path.dirname(sys.argv[0]) + '\\'
-    logging.basicConfig(filename= os.path.dirname(sys.argv[0]) + '\concerto.log', level=logging.DEBUG)
+    logging.basicConfig(filename= os.path.dirname(sys.argv[0]) + '\\concerto.log', level=logging.DEBUG)
 else: #not frozen
     PATH = os.path.dirname(os.path.abspath(__file__)) + '\\'
-    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\concerto.log', level=logging.DEBUG)
+    logging.basicConfig(filename= os.path.dirname(os.path.abspath(__file__)) + '\\concerto.log', level=logging.DEBUG)
 import configparser
 from kivy.config import Config
 from kivy.resources import resource_add_path
@@ -55,9 +55,9 @@ caster_opt = {
         'autoReplaySave' : '1',
         'matchmakingRegion': 'NA West'
 }
-if os.path.exists(PATH + 'cccaster\config.ini'):
+if os.path.exists(PATH + 'cccaster\\config.ini'):
     clean = []
-    with open(PATH + 'cccaster\config.ini') as f:
+    with open(PATH + 'cccaster\\config.ini') as f:
         for i in f.readlines():
             for x in caster_opt:
                 if x in i:
@@ -68,21 +68,21 @@ if os.path.exists(PATH + 'cccaster\config.ini'):
         except KeyError:
             pass
     if len(caster_opt) != 0:
-        with open(PATH + 'cccaster\config.ini','a') as f:
+        with open(PATH + 'cccaster\\config.ini','a') as f:
             for k,v in caster_opt.items():
                 f.write('\n%s=%s' % (k,v))
             f.close()
-    with open(PATH + 'cccaster\config.ini', 'r') as f:
+    with open(PATH + 'cccaster\\config.ini', 'r') as f:
             config_string = f.read()
     caster_config = configparser.ConfigParser()
     caster_config.read_string('[settings]\n' + config_string)
 else:
     if os.path.isdir(PATH + 'cccaster'):
-        with open(PATH + 'cccaster\config.ini', 'w') as f:
+        with open(PATH + 'cccaster\\config.ini', 'w') as f:
             for k,v in caster_opt.items():
                     f.write('\n%s=%s' % (k,v))
             f.close()
-        with open(PATH + 'cccaster\config.ini', 'r') as f:
+        with open(PATH + 'cccaster\\config.ini', 'r') as f:
             config_string = f.read()
         caster_config = configparser.ConfigParser()
         caster_config.read_string('[settings]\n' + config_string)
@@ -119,7 +119,7 @@ else:
         for i in opt:
             if i == 'caster_exe':
                 f.write('\ncaster_exe=cccaster.v3.1.exe\n')
-            elif i == 'bgm_track':
+            elif i == 'bgm_track':  
                 f.write('\nbgm_track=walkway\n')
             else:
                 f.write('\n%s=0\n' % i)
@@ -128,6 +128,26 @@ with open(PATH + 'concerto.ini','r') as f:
     config_string = f.read()
 app_config = configparser.ConfigParser()
 app_config.read_string(config_string)
+
+# apparently fresh DVD installations are missing this file.
+system_config = None
+if not os.path.exists(PATH + 'System\\_App.ini'):
+    with open(PATH + 'System\\_App.ini','w') as f:
+        f.write('[System]\n')
+        f.write('PosX= 1\n')
+        f.write('PosY= 1\n')
+        f.write('AspectRatio= 0\n')
+        f.write('NoVsMovie= 1\n')
+        f.write('Windowed= 1\n')
+        f.write('ScreenW= 640\n')
+        f.write('ScreenH= 480\n')
+        f.write('Bpp= 32\n')
+        f.close()
+        
+with open(PATH + 'System\\_App.ini','r') as f:
+    config_string = f.read()
+system_config = configparser.ConfigParser()
+system_config.read_string(config_string)
 
 LOBBYURL = "https://concerto-mbaacc.shib.live/l"
 VERSIONURL = "https://concerto-mbaacc.shib.live/v"
@@ -144,3 +164,24 @@ def img_credit(file,txt):
         return ''
     else:
         return txt
+    
+resolutions = [
+    "640x480",
+    "720x480",
+    "720x576",
+    "800x600",
+    "1024x768",
+    "1152x864",
+    "1280x720",
+    "1280x768",
+    "1280x800",
+    "1280x960",
+    "1280x1024",
+    "1360x768",
+    "1366x768",
+    "1440x1080",
+    "1600x900",
+    "1600x1024",
+    "1680x1050",
+    "1920x1080"
+]

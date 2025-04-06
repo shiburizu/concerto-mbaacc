@@ -37,6 +37,17 @@ class OnlineScreen(ConcertoScreen):
         else:
             self.app.LobbyList.refresh()
 
+    def global_lobby(self):
+        check = self.online_login()
+        if "UPDATE" in check:
+            self.update()
+            return None
+        if check != []:
+            self.error_message(check)
+        else:
+            self.app.LobbyScreen.global_lobby = True
+            self.app.LobbyList.join(code='MBAACC')
+
     def online_login(self): #version and name validation before going to screen, returns a list of problems if any
         err = []
         if config.caster_config['settings']['displayName'].strip() == '':
@@ -77,8 +88,9 @@ class OnlineScreen(ConcertoScreen):
     def matchmaking(self):
         caster = threading.Thread(target=self.app.game.matchmaking, args=[self], daemon=True)
         caster.start()
-        popup = GameModal(self.localize('ONLINE_MENU_QUICK_SEARCHING') % config.caster_config['settings']['matchmakingRegion'],self.localize('TERM_CANCEL'))
-        popup.bind_btn(partial(self.dismiss, p=popup))
+        popup = ChoiceModal(self.localize('ONLINE_MENU_QUICK_SEARCHING') % config.caster_config['settings']['matchmakingRegion'],btn1txt=self.localize('TERM_CANCEL'),btn2txt=self.localize('TERM_TRAINING'))
+        popup.btn_1.bind(on_release=partial(self.dismiss, p=popup))
+        popup.btn_2.bind(on_release=partial(self.app.game.host_training,self))
         popup.open()
         self.active_pop = popup
         self.app.mode = 'Direct Match'
@@ -87,8 +99,9 @@ class OnlineScreen(ConcertoScreen):
         caster = threading.Thread(
             target=self.app.game.host, args=[self,config.app_config['settings']['netplay_port'], self.direct_pop.game_type.text], daemon=True)
         caster.start()
-        popup = GameModal(self.localize('ONLINE_MENU_HOSTING') % self.direct_pop.game_type.text,self.localize('TERM_QUIT'))
-        popup.bind_btn(partial(self.dismiss, p=popup))
+        popup = ChoiceModal(self.localize('ONLINE_MENU_HOSTING') % self.direct_pop.game_type.text,btn1txt=self.localize('TERM_QUIT'),btn2txt=self.localize('TERM_TRAINING'))
+        popup.btn_1.bind(on_release=partial(self.dismiss, p=popup))
+        popup.btn_2.bind(on_release=partial(self.app.game.host_training,self))
         popup.open()
         self.active_pop = popup
         self.app.mode = 'Direct Match'
@@ -108,6 +121,10 @@ class OnlineScreen(ConcertoScreen):
 
     def set_ip(self,ip=None):
         self.active_pop.modal_txt.text += 'IP: %s\n%s' % (ip, self.localize('TERM_COPY_CLIPBOARD'))
+
+    def calculating_delay(self):
+        if self.localize('ONLINE_CALCULATING_DELAY') not in self.active_pop.modal_txt.text:
+            self.active_pop.modal_txt.text += '\n' + self.localize('ONLINE_CALCULATING_DELAY')
 
     def join(self, ip=None):
         if not self.validate_ip(ip):
@@ -143,12 +160,13 @@ class OnlineScreen(ConcertoScreen):
     def confirm(self, obj, r, d, p, n, *args):
         try:
             if self.app.game.playing is False:
-                self.app.game.confirm_frames(int(r.text),int(d.text))
+                threading.Thread(target=self.app.game.confirm_frames,args=[int(r.text),int(d.text)],daemon=True).start()
                 self.active_pop.modal_txt.text += "\n" + self.localize("ONLINE_MENU_CONN_INFO") % (
                 n, d.text, r.text)
                 p.dismiss()
-
-                self.active_pop = fill_wiki_button(self,self.active_pop)
+                if hasattr(self.active_pop,'btn_2'):
+                    self.active_pop.btn_2.disabled = True
+                #self.active_pop = fill_wiki_button(self,self.active_pop)
 
         except ValueError:
             pass

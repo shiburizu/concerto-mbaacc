@@ -45,10 +45,11 @@ class OfflineScreen(ConcertoScreen):
         caster.start()
 
     def offline_pop(self, mode, tip=""):
+        self.app.offline_mode = mode
         popup = GameModal(ui.lang.localize('OFFLINE_MENU_STARTING') % (mode,tip),ui.lang.localize('TERM_STANDBY'))
         popup.close_btn.disabled = True
         popup.remove_widget(popup.p1_char_guide)
         popup.remove_widget(popup.p2_char_guide)
         popup.open()
         self.active_pop = popup
-        self.app.offline_mode = mode
+        

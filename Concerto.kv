@@ -11,7 +11,7 @@
     valign: 'middle'
     size_hint_y: None
     height: 36
-    padding_x: 50
+    padding: [50,0]
     background_normal: 'res/menubtn.png'
     outline_width: 2
     on_press: self.background_color = (255, 0, 0, 1)
@@ -39,7 +39,7 @@
             text_size: self.size
             halign: 'left'
             valign: 'center'
-            padding_x: 50
+            padding: [50,0]
         Button:
             size_hint_x: 0.2
             id: WatchBtn
@@ -51,7 +51,7 @@
             text_size: self.size
             halign: 'right'
             valign: 'center'
-            padding_x: 10
+            padding: [10,0]
 
 <DummyBtn>
     text_size: self.size
@@ -59,7 +59,7 @@
     valign: 'middle'
     size_hint_y: None
     height: 32
-    padding_x: 50
+    padding: [50,0]
     outline_width: 2
     font_name: 'res/texgyreheros-bolditalic.otf'
     background_normal: ''
@@ -223,16 +223,18 @@
                 rows: 1
                 size_hint: (1, 0.1)
                 MenuBtn:
-                    size_hint_x: 0.348
-                    padding_x: 25
+                    size_hint_x: 0.355
+                    padding: [25,0]
                     text: lang.localize("TERM_LEAVE").upper()
                     on_release: 
                         root.exit()
                 DummyBtn:
-                    size_hint_x: 0.58
+                    size_hint_x: 0.045
+                DummyBtn:
+                    size_hint_x: 0.6
                     id: lobby_code
                     text: 'Lobby ID: 1234'
-                    padding_x: 15
+                    padding: [15,0]
                     text_size: self.size
                     halign: 'right'
                     valign: 'middle'
@@ -366,7 +368,7 @@
                         size_hint_y: None
                         height: 32
                         halign: 'right'
-                        padding_x: 10
+                        padding: [10,0]
                         text_size: self.size
                         halign: 'left'
                         valign: 'middle'
@@ -379,7 +381,7 @@
                         size_hint_y: None
                         height: 32
                         halign: 'right'
-                        padding_x: 10
+                        padding: [10,0]
                         text_size: self.size
                         halign: 'left'
                         valign: 'middle'
@@ -415,9 +417,13 @@
                 MenuBtn:
                     text: '3. %s' % lang.localize("ONLINE_MENU_LOBBY")
                     on_release: 
+                        root.global_lobby()
+                MenuBtn:
+                    text: '4. %s' % lang.localize("ONLINE_MENU_ROOM")
+                    on_release: 
                         root.lobby()
                 MenuBtn:
-                    text: '4. %s' % lang.localize("ONLINE_MENU_BROADCAST")
+                    text: '5. %s' % lang.localize("ONLINE_MENU_BROADCAST")
                     on_release:
                         root.broadcast()
                 MenuBtn:
@@ -458,16 +464,17 @@
                 padding: (0,50)
                 spacing: [0,10]
                 MenuBtn:
-                    text: '1. HOW TO PLAY'
-                    on_release: app.sm.current = 'HowTo'
-                MenuBtn:
-                    text: '2. MIZUUMI WIKI'
+                    text: '1. MIZUUMI WIKI'
                     on_release:
                         webbrowser.open('https://wiki.gbl.gg/w/Melty_Blood/MBAACC')
                 MenuBtn:
-                    text: '3. MELTY.GAMES DATABASE'
+                    text: '2. MELTY.GAMES DATABASE'
                     on_release:
                         webbrowser.open('http://mbaacc.melty.games/')
+                MenuBtn:
+                    text: '3. MBAACC HELP PORTAL'
+                    on_release:
+                        webbrowser.open('http://mbaacc.gitbook.io/')
                 MenuBtn:
                     text: '0. %s' % lang.localize('TERM_BACK').upper()
                     on_release: app.sm.current = 'Main'
@@ -482,77 +489,6 @@
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 font_size: 12
                 on_ref_press: webbrowser.open('https://twitter.com/kohakudoori')
-    AnchorLayout
-        id: lobbyAnchor
-        anchor_x: 'center'
-        anchor_y: 'top'
-
-<HowtoScreen>
-    name: 'HowTo'
-    AnchorLayout:
-        anchor_x: 'left'
-        anchor_y: 'top'
-        Image:
-            source: cfg.find_img('lobby_bg.png')
-        BoxLayout:
-            orientation: 'vertical'
-            MenuBtn:
-                size_hint: (1, 0.1)
-                text: lang.localize("TERM_BACK").upper()
-                on_release: 
-                    app.sm.current = 'Main'
-            TabbedPanel:
-                size_hint_y: 0.9
-                do_default_tab: False
-                background_color: (0,0,0,0)
-                TabbedPanelItem:
-                    text: 'Introduction'
-                    outline_width: 2
-                    background_color: '#343B88'
-                    RstDocument:
-                        id: intro
-                        background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/intro.rst')
-                TabbedPanelItem:
-                    text: 'Movement'
-                    outline_width: 2
-                    background_color: '#343B88'
-                    RstDocument:
-                        id: movement
-                        background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/movement.rst')
-                TabbedPanelItem:
-                    text: 'Offense'
-                    outline_width: 2
-                    background_color: '#343B88'
-                    RstDocument:
-                        id: offense
-                        background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/offense.rst')
-                TabbedPanelItem:
-                    text: 'Defense'
-                    outline_width: 2
-                    background_color: '#343B88'
-                    RstDocument:
-                        id: defense
-                        background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/defense.rst')
-                TabbedPanelItem:
-                    text: 'Moon Styles'
-                    outline_width: 2
-                    background_color: '#343B88'
-                    RstDocument:
-                        id: moons
-                        background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/moons.rst')
-                TabbedPanelItem:
-                    text: 'Glossary'
-                    outline_width: 2
-                    background_color: '#343B88'
-                    RstDocument:
-                        id: glossary
-                        background_color: (0,0,0,0.5)
-                        source: res.resource_find('res/glossary.rst')
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'
@@ -664,6 +600,7 @@
                     height: self.minimum_height
                     DummyBtn:
                         text: lang.localize("TIP_CONTROLS")
+                        font_size: 13
                     DummyBtn:
                         text: lang.localize("OPT_HEADER_CONCERTO")
                     OptionRow:
@@ -829,9 +766,21 @@
                                 values: ['Normal','Auto','4:3','16:9','16:10','5:4','15:9']
                     OptionRow:
                         Label:
-                            text: lang.localize("OPT_ASPECT_RATIO")
+                            text: lang.localize("OPT_VIEW_FPS")
                         CheckBox:
                             id: view_fps
+                    OptionRow:
+                        Label:
+                            text: lang.localize("OPT_SCREEN_RESOLUTION")
+                        BoxLayout:
+                            Spinner:
+                                id: screen_resolution
+                                values: cfg.resolutions
+                    OptionRow:
+                        Label:
+                            text: lang.localize("OPT_FULLSCREEN")
+                        CheckBox:
+                            id: fullscreen
     AnchorLayout
         id: lobbyAnchor
         anchor_x: 'center'
@@ -1084,7 +1033,7 @@
     btn_1: btn_1
     btn_2: btn_2
     size_hint: None,None
-    size: 400,180
+    size: 400,200
     auto_dismiss: False 
     background_color: '#343B88'
     BoxLayout:
@@ -1104,16 +1053,14 @@
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1
                 on_press: self.background_color = (100, 0, 0, 0.9)
-                on_release: 
-                    background_color: (255, 0, 0, 0.2)
+                on_release: self.background_color = (255, 0, 0, 0.2)
             Button:
                 id: btn_2
                 font_name: 'res/texgyreheros-bolditalic.otf'
                 background_color: (255, 0, 0, 0.2)
                 outline_width: 1
                 on_press: self.background_color = (100, 0, 0, 0.9)
-                on_release: 
-                    background_color: (255, 0, 0, 0.2)
+                on_release: self.background_color = (255, 0, 0, 0.2)
 
 <FrameModal>:
     frame_txt: frame_txt

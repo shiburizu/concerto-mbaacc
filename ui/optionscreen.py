@@ -41,6 +41,8 @@ class OptionScreen(ConcertoScreen):
             self.ids['character_filter'].text = self.ids['character_filter'].values[game_config[indexes.CHARACTER_FILTER]]
             self.ids['screen_filter'].active = game_config[indexes.SCREEN_FILTER] == 1
             self.ids['view_fps'].active = game_config[indexes.VIEW_FPS] == 1
+            self.ids['screen_resolution'].text = system_config['System']['ScreenW'] + 'x' + system_config['System']['ScreenH']
+            self.ids['fullscreen'].active = True if system_config['System']['Windowed'] == '0' else False
             self.app.sm.current = 'Options'
         except KeyError:
             self.error_message(ui.lang.localize("ERR_INVALID_OPT"),fatal=True,switch='Main')
@@ -70,7 +72,7 @@ class OptionScreen(ConcertoScreen):
         if self.ids['display_name'].text.strip() == '':
             error_check.append(ui.lang.localize("ERR_NO_NAME"))
         if error_check == []:
-            with open(PATH + 'cccaster\config.ini', 'r') as f:
+            with open(PATH + 'cccaster\\config.ini', 'r') as f:
                 config_file = f.readlines()
                 n = 0
                 for i in config_file:
@@ -115,11 +117,11 @@ class OptionScreen(ConcertoScreen):
                         else:
                             config_file[n] = "autoCheckUpdates=0\n"
                     n += 1
-                out = open(PATH + 'cccaster\config.ini','w')
+                out = open(PATH + 'cccaster\\config.ini','w')
                 out.writelines(config_file)
                 out.close()
                 f.close()
-            with open(PATH + 'cccaster\config.ini', 'r') as f:
+            with open(PATH + 'cccaster\\config.ini', 'r') as f:
                 config_string = '[settings]\n' + f.read()
             caster_config.read_string(config_string)
 
@@ -177,6 +179,26 @@ class OptionScreen(ConcertoScreen):
             with open(PATH + 'concerto.ini', 'r') as f:
                 config_string = f.read()
             app_config.read_string(config_string)
+
+            with open(PATH + '\\System\\_App.ini', 'r') as f:
+                config_file = f.readlines()
+                n = 0
+                for i in config_file:
+                    if "ScreenW" in i:
+                        config_file[n] = "ScreenW= %s\n" % self.ids['screen_resolution'].text.split('x')[0]
+                    elif "ScreenH" in i:
+                        config_file[n] = "ScreenH= %s\n" % self.ids['screen_resolution'].text.split('x')[1]
+                    elif "Windowed" in i:
+                        config_file[n] = "Windowed= %s\n" % ('0' if self.ids['fullscreen'].active is True else '1')
+                    n += 1
+                out = open(PATH + '\\System\\_App.ini','w')
+                out.writelines(config_file)
+                out.close()
+                f.close()
+            with open(PATH + '\\System\\_App.ini', 'r') as f:
+                config_string = f.read()
+            system_config.read_string(config_string)
+
             # Reload BGM if it changed
             if change_sound == True:
                 self.app.sound.switch()

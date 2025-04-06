@@ -5,6 +5,7 @@ import pyperclip
 from functools import partial
 from config import *
 from kivy.properties import ObjectProperty
+from kivy.clock import Clock
 from ui.concertoscreen import ConcertoScreen
 from ui.modals import *
 from ui.buttons import DummyBtn, PlayerRow
@@ -34,8 +35,11 @@ class LobbyScreen(ConcertoScreen):
         self.get_attempts = 0 #if 2, exit
         self.alias = None #lobby alias if any
 
+        self.set_limit = 0 # netplay set limit sent to the host
 
-    def create(self, j, first=False, type='Private'):  # json response object
+        self.global_lobby = False # True if started from the global lobby button
+
+    def create(self, j, first=False, type='Private', *args):  # json response object
         print(j)
         #this does not use self.type because it should only run once per lobby.
         #the reason for this is that a player may start a Direct Online match separately and we do not want to erase that status.
@@ -55,7 +59,10 @@ class LobbyScreen(ConcertoScreen):
             self.challenge_list.clear_widgets()
             self.type = type
             if self.app.discord is True:
-                if type.lower() == 'public':
+                if self.global_lobby is True:
+                    self.app.mode = 'Global Lobby'
+                    presence.global_lobby()
+                elif type.lower() == 'public':
                     self.app.mode = 'Public Lobby'
                     presence.public_lobby(self.code)
                 elif type.lower() == 'private':
@@ -64,7 +71,6 @@ class LobbyScreen(ConcertoScreen):
                 self.app.game.update_stats(once=True)
         challenging_ids = []
         
-        # TODO: come up with a solution for players with identical names (this does not affect the server )
         if j['challenges'] != []:
             if 'c' not in self.widget_index:
                 h = DummyBtn()
@@ -199,10 +205,15 @@ class LobbyScreen(ConcertoScreen):
                 target=self.auto_refresh, daemon=True)  # netplay watchdog
             self.lobby_updater.start()
         else:
-            if len(self.challenge_list.children) > 0:
-                self.app.update_lobby_button('%s %s (%s)' % (self.localize("TERM_LOBBY").upper(),self.code,len(self.challenge_list.children) - 1))
+            lobby_btn_text = ""
+            if self.global_lobby is True:
+                lobby_btn_text = self.localize('TERM_GLOBAL_LOBBY')
             else:
-                self.app.update_lobby_button('%s %s' % (self.localize("TERM_LOBBY").upper(), self.code))
+                lobby_btn_text = self.localize("TERM_ROOM").upper() + ' ' + str(self.code)
+            if len(self.challenge_list.children) > 0:
+                self.app.update_lobby_button(lobby_btn_text + " " + str(len(self.challenge_list.children) - 1))
+            else:
+                self.app.update_lobby_button(lobby_btn_text)
 
     def follow_player(self,obj,i):
         w = self.widget_index.get(i).ids['WatchBtn']
@@ -233,7 +244,7 @@ class LobbyScreen(ConcertoScreen):
             try:
                 req = net.get(url=LOBBYURL, params=p, timeout=5)
                 req.raise_for_status()
-            except (requests.exceptions.ConnectionError,requests.exceptions.Timeout) as e:
+            except (requests.exceptions.ConnectionError,requests.exceptions.Timeout,requests.exceptions.HTTPError) as e:
                 logging.warning('LOBBY REFRESH: %s' % e.__class__)
                 if self.get_attempts < 2:
                     self.get_attempts += 1
@@ -245,8 +256,8 @@ class LobbyScreen(ConcertoScreen):
             else:
                 r = req.json()
                 if r['msg'] == 'OK':
-                    self.create(r)
-                    time.sleep(2)
+                    Clock.schedule_once(partial(self.create,r,False,self.type))
+                    time.sleep(0.5)
                 else:
                     self.exit(msg=r['msg'])
                     break
@@ -273,14 +284,26 @@ class LobbyScreen(ConcertoScreen):
         self.type = None
         self.lobby_updater = None
         self.get_attempts = 0
-        self.app.remove_lobby_button()
-        self.app.LobbyList.refresh()
+        self.app.mode = 'Menu'
+        Clock.schedule_once(self.app.remove_lobby_button)
+        if self.global_lobby == True:
+            Clock.schedule_once(self.return_to_online_screen)
+        else:
+            self.app.LobbyList.refresh()
         if msg:
-            GameModal(msg,self.localize("TERM_DISMISS")).open()
+            Clock.schedule_once(partial(self.open_game_modal,msg))
+            #GameModal(msg,self.localize("TERM_DISMISS")).open()
+        self.global_lobby = False
         # Set Rich Presence to main menu again
         if self.app.discord is True:
             presence.menu()
         self.app.game.update_stats(once=True)
+
+    def open_game_modal(self,msg,*args):
+        GameModal(msg,self.localize("TERM_DISMISS")).open()
+
+    def return_to_online_screen(self,*args):
+        self.app.sm.current = 'Online'
 
     def send_challenge(self, obj, name, id, *args):
         self.watch_player = None
@@ -311,6 +334,11 @@ class LobbyScreen(ConcertoScreen):
             'secret': self.secret
         }
         c = requests.get(url=LOBBYURL, params=p).json()
+
+    def calculating_delay(self):
+        if self.localize('ONLINE_CALCULATING_DELAY') not in self.active_pop.modal_txt.text:
+            self.active_pop.modal_txt.text += '\n' + self.localize('ONLINE_CALCULATING_DELAY')
+
         
     def accept_challenge(self, obj, name, id, ip, *args):
         self.watch_player = None

@@ -30,6 +30,16 @@ class ChoiceModal(ModalView):
     btn_1 = ObjectProperty(None)
     btn_2 = ObjectProperty(None)
 
+    def __init__(self,msg='',btn1txt='Option 1',btn1action=None,btn2txt='Option 2',btn2action=None):
+        super().__init__()
+        self.modal_txt.text=msg
+        self.btn_1.text=btn1txt
+        self.btn_2.text=btn2txt
+        if btn1action != None:
+            self.btn_1.bind(on_release=btn1action)
+        if btn2action != None:
+            self.btn_2.bind(on_release=btn2action)
+
 
 class DirectModal(ModalView):
     join_ip = ObjectProperty(None)

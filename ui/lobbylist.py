@@ -59,7 +59,7 @@ class LobbyList(ConcertoScreen):
 
     def refresh(self):
         if self.app.LobbyScreen.lobby_updater != None:
-            Clock.schedule_once(lambda dt: self.switch_to_lobby(),0)
+            Clock.schedule_once(self.switch_to_lobby)
             return None
         try:
             a = requests.get(url=LOBBYURL, params={'action':'list'}).json()
