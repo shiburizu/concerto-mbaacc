@@ -14,9 +14,6 @@ For best usage don't open CCCaster or MBAA.exe on their own while using this pro
 
 HIGHLY EXPERIMENTAL SOFTWARE, ENJOY AND EXPECT BUGS
 
-## Building
-This project requires Python version 3.8
-
 ### Install dependencies
 ```
 pip install -r requirements.txt
@@ -56,23 +53,22 @@ Art & sound are provided by community members for exclusive use with Concerto.
 This is a list of priorities attached to suspected version labels.
 
 ### Version 1.0 (first stable build)
-* Lobby functions
-* Mark player for spectating when match begins
-* Direct online
-* All offline functions
-* Basic How to Play guide
-* About & credits screens
-* CCCaster & Concerto configuration screens
-* Trial Mode
-* Matchmaking
+* ~~Lobby functions~~
+* ~~Mark player for spectating when match begins~~
+* ~~Direct online~~
+* ~~All offline functions~~
+* ~~About & credits screens~~
+* ~~CCCaster & Concerto configuration screens~~
+* ~~Trial Mode~~
+* ~~Matchmaking~~
 
 ### Version 1.1 (First Major Update)
 * JPN Localization
 * Lobby tags, creation options, quick chat
 
 ### 2022 Projects
-* EFZ Version
+* ~~EFZ Version~~
 
 ### Things to explore
-* Frame data in-client
+* Integration with MBAACC Advanced Training.
 * Visual trial builder
